@@ -14,13 +14,13 @@ Open <http://localhost:3000>. The API is at <http://localhost:8888> and its heal
 
 ## Local install
 
-Use Go 1.23.1 or newer, Node.js 20, npm, and PostgreSQL. From a fresh clone:
+Use Go 1.23.1 or newer, Node.js 20.9 or newer, npm, and PostgreSQL. From a fresh clone:
 
 ```sh
 cp backend/.env.example backend/.env
 cp frontend/.env.example frontend/.env
 cd backend && go mod download
-cd ../frontend && npm ci
+cd ../frontend && npm ci --ignore-scripts
 ```
 
 Edit `backend/.env` with your PostgreSQL connection and a random `API_SECRET`. For a local PostgreSQL instance without TLS, leave `DB_SSLMODE=disable`; use `require` when the server supports TLS. The backend reads `.env` when present and also accepts environment variables from the process.
@@ -52,7 +52,7 @@ go build ./...
 go test ./...
 
 cd ../frontend
-npm ci
+npm ci --ignore-scripts
 npm run lint
 npm run typecheck
 npm test
