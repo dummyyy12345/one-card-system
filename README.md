@@ -1,9 +1,86 @@
-# One-Card System 🏫🔒
+# One Card System
 
-A high-performance campus access control system built with Go, handling RFID and facial recognition authentication across distributed university terminals.
+Campus access control application with a Next.js/Redux frontend and a Go/Gin API. PostgreSQL stores users, devices, and student records. Device synchronization and SMTP need real external services when those features are used; the development setup starts without them.
 
-## Why?
+## Quick start with Docker
 
-- Replace legacy physical card systems with scalable digital auth
-- Handle 15,000+ concurrent authentications during peak hours
-- Reduce auth latency from 500ms → 80ms
+Install Docker with Compose, then run from the repository root:
+
+```sh
+docker compose up --build
+```
+
+Open <http://localhost:3000>. The API is at <http://localhost:8888> and its health endpoint is <http://localhost:8888/healthz>. Compose starts PostgreSQL, runs the database migration, and starts both applications. The Compose defaults are **development only**. Set `API_SECRET` and `DB_PASSWORD` to strong values before exposing the stack outside your machine; Compose reads a root `.env` file if present.
+
+## Local install
+
+Use Go 1.23.1 or newer, Node.js 20, npm, and PostgreSQL. From a fresh clone:
+
+```sh
+cp backend/.env.example backend/.env
+cp frontend/.env.example frontend/.env
+cd backend && go mod download
+cd ../frontend && npm ci
+```
+
+Edit `backend/.env` with your PostgreSQL connection and a random `API_SECRET`. For a local PostgreSQL instance without TLS, leave `DB_SSLMODE=disable`; use `require` when the server supports TLS. The backend reads `.env` when present and also accepts environment variables from the process.
+
+## Run locally
+
+Start PostgreSQL first. In one terminal:
+
+```sh
+cd backend
+go run ./migrate
+go run .
+```
+
+In another terminal:
+
+```sh
+cd frontend
+npm run dev
+```
+
+The frontend expects `NEXT_PUBLIC_API_SERVER_URL=http://localhost:8888`. Visit <http://localhost:3000>. The API health route does not require authentication. Student synchronization currently uses placeholder student data in `backend/controllers/registrarcontrollers/utils.go`; connected access devices and SMTP need valid credentials and reachable services.
+
+## Test and checks
+
+```sh
+cd backend
+go build ./...
+go test ./...
+
+cd ../frontend
+npm ci
+npm run lint
+npm run typecheck
+npm test
+npm run build
+```
+
+CI runs these checks on pushes and pull requests, plus `npm audit --audit-level=high` and `govulncheck ./...`. The frontend tests cover device slice state and its fetch thunk, along with student card and image validation.
+
+## Environment variables
+
+Copy the example files; never commit the resulting `.env` files. `backend/.env.example` documents:
+
+| Variable | Purpose |
+| --- | --- |
+| `API_PORT`, `API_SECRET` | API listener port and token signing secret |
+| `DB_DRIVER`, `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_SSLMODE` | Database connection and PostgreSQL TLS mode |
+| `DEVICE_USERNAME`, `DEVICE_PASSWORD` | Credentials for access control devices |
+| `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | Outbound email settings |
+| `PGADMIN_DEFAULT_EMAIL`, `PGADMIN_DEFAULT_PASSWORD` | Optional pgAdmin settings; pgAdmin is not part of Compose |
+| `SERVICE` | Reserved for an external student service integration |
+
+`frontend/.env.example` contains `NEXT_PUBLIC_API_SERVER_URL`, the API URL visible to the browser. It is embedded into the frontend build, so rebuild after changing it.
+
+Credentials were previously committed to this repository. If they were real, rotate them in the database, devices, SMTP service, and any other affected system; removing the files now does not erase git history.
+
+## Architecture
+
+- `backend/controllers` handles HTTP requests; `backend/routes` registers Gin routes and middleware.
+- `backend/models` defines persisted records; `backend/migrate` creates tables; `backend/skeletons` contains repository/use case interfaces and mocks used by tests in `backend/test`.
+- `frontend/app` contains Next.js routes and page components; `frontend/store/slices` holds Redux Toolkit state and async API actions; `frontend/components` contains shared UI.
+- `compose.yaml` builds both applications and starts PostgreSQL for local development.
