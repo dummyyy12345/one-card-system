@@ -3,6 +3,7 @@ WORKDIR /src
 COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
+RUN go test ./...
 RUN CGO_ENABLED=0 go build -o /out/server . && CGO_ENABLED=0 go build -o /out/migrate ./migrate
 
 FROM alpine:3.20
