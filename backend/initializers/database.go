@@ -3,6 +3,7 @@ package initializers
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"gorm.io/driver/mysql"
 	"gorm.io/driver/postgres"
@@ -25,7 +26,11 @@ func ConnectToDB(DbDriver, DbUser, DbPassword, DbPort, DbHost, DbName string) {
 		}
 
 	} else if DbDriver == "postgres" {
-		DBURL := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=require", DbHost, DbPort, DbUser, DbName, DbPassword)
+		sslMode := os.Getenv("DB_SSLMODE")
+		if sslMode == "" {
+			sslMode = "require"
+		}
+		DBURL := fmt.Sprintf("host=%s port=%s user=%s dbname=%s password=%s sslmode=%s", DbHost, DbPort, DbUser, DbName, DbPassword, sslMode)
 		DB, err = gorm.Open(postgres.Open(DBURL), &gorm.Config{})
 		if err != nil {
 			log.Fatalf("Cannot connect to %s database: %v", DbDriver, err)

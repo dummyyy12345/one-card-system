@@ -21,10 +21,10 @@ func LoadEnvVariables() {
 		envPath = defaultPath
 	}
 
-	// Load the .env file
-	err = godotenv.Load(envPath)
-	if err != nil {
-		log.Fatalf("Error loading .env file from %s: %v", envPath, err)
+	// Containers and CI supply environment variables directly. A local .env is optional.
+	if _, err := os.Stat(envPath); err == nil {
+		if err := godotenv.Load(envPath); err != nil {
+			log.Printf("Could not load %s: %v", envPath, err)
+		}
 	}
-	log.Printf(".env file loaded from %s", envPath)
 }
