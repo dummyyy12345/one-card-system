@@ -14,7 +14,7 @@ Open <http://localhost:3000>. The API is at <http://localhost:8888> and its heal
 
 ## Local install
 
-Use Go 1.23.1 or newer, Node.js 20.9 or newer, npm, and PostgreSQL. From a fresh clone:
+Use Go 1.26.10 or newer, Node.js 20.9 or newer, npm, and PostgreSQL. From a fresh clone:
 
 ```sh
 cp backend/.env.example backend/.env
@@ -81,6 +81,7 @@ Credentials were previously committed to this repository. If they were real, rot
 ## Architecture
 
 - `backend/controllers` handles HTTP requests; `backend/routes` registers Gin routes and middleware.
+- The backend writes structured JSON request logs with method, route template, status, and duration; URL identifiers and query values are omitted.
 - `backend/models` defines persisted records; `backend/migrate` creates tables; `backend/skeletons` contains repository/use case interfaces and mocks used by tests in `backend/test`.
 - `frontend/app` contains Next.js routes and page components; `frontend/store/slices` holds Redux Toolkit state and async API actions; `frontend/components` contains shared UI.
 - `compose.yaml` builds both applications and starts PostgreSQL for local development.
