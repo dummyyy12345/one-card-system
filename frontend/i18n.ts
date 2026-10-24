@@ -3,8 +3,9 @@ import { getRequestConfig } from "next-intl/server";
 
 export const locales: string[] = ["en", "am"];
 
-export default getRequestConfig(async ({ locale }: { locale: string }) => {
-  if (!locales.includes(locale as any)) notFound();
+export default getRequestConfig(async ({ requestLocale }) => {
+  const locale = await requestLocale;
+  if (!locale || !locales.includes(locale)) notFound();
   const logininImport = (await import(`./messages/${locale}/common/login.json`))
     .default;
   const navbarImport = (await import(`./messages/${locale}/common/navbar.json`))
@@ -40,6 +41,7 @@ export default getRequestConfig(async ({ locale }: { locale: string }) => {
     await import(`./messages/${locale}/gate/sidebar.json`)
   ).default;
   return {
+    locale,
     messages: {
       ...logininImport,
       ...navbarImport,

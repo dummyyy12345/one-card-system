@@ -26,8 +26,10 @@ import { FaSpinner } from "react-icons/fa";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { useParams } from "next/navigation";
 
-const RoleDetailPage = ({ params }: { params: { roleId: string } }) => {
+const RoleDetailPage = () => {
+  const params = useParams<{ roleId: string }>();
   const t = useTranslations("roles");
   const dispatch = useDispatch();
   const { roles } = useSelector((state: RootState) => state.role);
