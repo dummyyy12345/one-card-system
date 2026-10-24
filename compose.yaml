@@ -1,48 +1,54 @@
 services:
+  postgres:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_USER: ${DB_USER:-onecard}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-onecard_dev_only}
+      POSTGRES_DB: ${DB_NAME:-onecard}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-onecard} -d ${DB_NAME:-onecard}"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   backend:
-    container_name: ocs_backend
-    build: 
-      context: ./backend
-      dockerfile: go.dockerfile
-    ports:
-      - 8888:8888
-    restart: on-failure
-    volumes:
-      - .:/usr/src/app
-    depends_on:
-      - ocs-postgres
-    networks:
-      - ocs
-  ocs-postgres:
-    image: postgres:latest
-    container_name: ocs_db_postgres
+    build: ./backend
     environment:
-      - POSTGRES_USER=${DB_USER}
-      - POSTGRES_PASSWORD=${DB_PASSWORD}
-      - POSTGRES_DB=${DB_NAME}
-      - DATABASE_HOST=${DB_HOST}
+      API_PORT: "8888"
+      API_SECRET: ${API_SECRET:-replace-this-dev-only-secret}
+      DB_DRIVER: postgres
+      DB_HOST: postgres
+      DB_PORT: "5432"
+      DB_USER: ${DB_USER:-onecard}
+      DB_PASSWORD: ${DB_PASSWORD:-onecard_dev_only}
+      DB_NAME: ${DB_NAME:-onecard}
+      DB_SSLMODE: disable
+      DEVICE_USERNAME: ${DEVICE_USERNAME:-}
+      DEVICE_PASSWORD: ${DEVICE_PASSWORD:-}
+      SERVICE: ${SERVICE:-}
+      SMTP_HOST: ${SMTP_HOST:-}
+      SMTP_PORT: ${SMTP_PORT:-}
+      SMTP_USER: ${SMTP_USER:-}
+      SMTP_PASS: ${SMTP_PASS:-}
     ports:
-      - '5432:5432'
-    volumes:
-      - database_postgres:/var/lib/postgresql/data
-    networks:
-      - ocs
-  pgadmin:
-    image: dpage/pgadmin4
-    container_name: pgadmin_container
-    environment:
-      PGADMIN_DEFAULT_EMAIL: ${PGADMIN_DEFAULT_EMAIL}
-      PGADMIN_DEFAULT_PASSWORD: ${PGADMIN_DEFAULT_PASSWORD}
+      - "8888:8888"
     depends_on:
-      - ocs-postgres
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./frontend
+      args:
+        NEXT_PUBLIC_API_SERVER_URL: ${NEXT_PUBLIC_API_SERVER_URL:-http://localhost:8888}
+    environment:
+      NEXT_PUBLIC_API_SERVER_URL: ${NEXT_PUBLIC_API_SERVER_URL:-http://localhost:8888}
     ports:
-      - "5050:80"
-    networks:
-      - ocs
-    restart: unless-stopped
+      - "3000:3000"
+    depends_on:
+      - backend
 
 volumes:
-  database_postgres: {}
-networks:
-  ocs:
-    driver: bridge
+  postgres_data:
