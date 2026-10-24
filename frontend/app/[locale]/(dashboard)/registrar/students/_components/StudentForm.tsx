@@ -67,7 +67,7 @@ export default function StudentForm({ student }: Props) {
       toast.error("Card number is required");
       return;
     }
-    if (cardNumber.length !== 8) {
+    if (!/^\d{8}$/.test(cardNumber)) {
       toast.error("Card number must be 8 digits");
       return;
     }
@@ -358,6 +358,9 @@ export default function StudentForm({ student }: Props) {
                           className="w-full py-6"
                         >
                           Capture Image
+                        </Button>
+                        <Button onClick={saveImage} className="w-full py-6">
+                          Save Image
                         </Button>
                       </>
                     ) : (
