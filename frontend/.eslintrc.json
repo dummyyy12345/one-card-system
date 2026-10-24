@@ -1,3 +1,7 @@
 {
-  "extends": "next/core-web-vitals"
+  "extends": "next/core-web-vitals",
+  "ignorePatterns": [".next", "node_modules", "coverage"],
+  "rules": {
+    "max-lines": ["error", { "max": 500, "skipBlankLines": true, "skipComments": true }]
+  }
 }
