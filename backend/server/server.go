@@ -1,6 +1,9 @@
 package server
 
 import (
+	"log/slog"
+	"os"
+
 	"github.com/SolomonAHailu/one-card-system/middlewares"
 	"github.com/SolomonAHailu/one-card-system/routes"
 	"github.com/gin-gonic/gin"
@@ -11,8 +14,10 @@ type Server struct {
 }
 
 func NewServer() *Server {
+	router := gin.New()
+	router.Use(gin.Recovery(), middlewares.RequestLogger(slog.New(slog.NewJSONHandler(os.Stdout, nil))))
 	return &Server{
-		Router: gin.Default(),
+		Router: router,
 	}
 }
 
