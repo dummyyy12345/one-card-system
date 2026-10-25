@@ -3,6 +3,7 @@ module github.com/SolomonAHailu/one-card-system
 go 1.26.10
 
 require (
+	github.com/DATA-DOG/go-sqlmock v1.5.2
 	github.com/Snawoot/go-http-digest-auth-client v1.1.3
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/gin-gonic/gin v1.10.0

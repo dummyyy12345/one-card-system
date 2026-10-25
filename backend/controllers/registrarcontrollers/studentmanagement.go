@@ -1,6 +1,7 @@
 package registrarcontrollers
 
 import (
+	"errors"
 	"log"
 	"math"
 	"net/http"
@@ -78,6 +79,10 @@ func GetStudentById(c *gin.Context, db *gorm.DB) {
 		Preload("CafeteriaAssigned").
 		Preload("DormitoryAssigned").
 		Preload("RegisteredBy").First(&student, c.Param("id")).Error; err != nil {
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			utils.ResponseWithError(c, http.StatusNotFound, "Student not found", err)
+			return
+		}
 		utils.ResponseWithError(c, http.StatusInternalServerError, "Error fetching student", err)
 		return
 	}
