@@ -7,10 +7,11 @@ Campus access control application with a Next.js/Redux frontend and a Go/Gin API
 Install Docker with Compose, then run from the repository root:
 
 ```sh
+cp .env.example .env
 docker compose up --build
 ```
 
-Open <http://localhost:3000>. The API is at <http://localhost:8888>, its health endpoint is <http://localhost:8888/healthz>, and request counters are at <http://localhost:8888/metrics>. Compose starts PostgreSQL, runs the database migration, and starts both applications. The Compose defaults are **development only**. Set `API_SECRET` and `DB_PASSWORD` to strong values before exposing the stack outside your machine; Compose reads a root `.env` file if present. Restrict access to `/metrics` when deploying the API publicly.
+Open <http://localhost:3000>. The API is at <http://localhost:8888>, its health endpoint is <http://localhost:8888/healthz>, and request counters are at <http://localhost:8888/metrics>. Compose starts PostgreSQL, runs the database migration, and starts both applications. The Compose defaults are **development only**. Replace the `API_SECRET` and `DB_PASSWORD` placeholders before exposing the stack outside your machine. Restrict access to `/metrics` when deploying the API publicly.
 
 ## Local install
 
@@ -64,7 +65,7 @@ CI runs these checks on pushes and pull requests, plus `npm audit --audit-level=
 
 ## Environment variables
 
-Copy the example files; never commit the resulting `.env` files. `backend/.env.example` documents:
+Copy the example files; never commit the resulting `.env` files. The root `.env.example` configures Compose. `backend/.env.example` documents:
 
 | Variable | Purpose |
 | --- | --- |
