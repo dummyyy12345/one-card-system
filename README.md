@@ -10,7 +10,7 @@ Install Docker with Compose, then run from the repository root:
 docker compose up --build
 ```
 
-Open <http://localhost:3000>. The API is at <http://localhost:8888> and its health endpoint is <http://localhost:8888/healthz>. Compose starts PostgreSQL, runs the database migration, and starts both applications. The Compose defaults are **development only**. Set `API_SECRET` and `DB_PASSWORD` to strong values before exposing the stack outside your machine; Compose reads a root `.env` file if present.
+Open <http://localhost:3000>. The API is at <http://localhost:8888>, its health endpoint is <http://localhost:8888/healthz>, and request counters are at <http://localhost:8888/metrics>. Compose starts PostgreSQL, runs the database migration, and starts both applications. The Compose defaults are **development only**. Set `API_SECRET` and `DB_PASSWORD` to strong values before exposing the stack outside your machine; Compose reads a root `.env` file if present. Restrict access to `/metrics` when deploying the API publicly.
 
 ## Local install
 

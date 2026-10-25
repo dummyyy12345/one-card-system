@@ -15,7 +15,9 @@ type Server struct {
 
 func NewServer() *Server {
 	router := gin.New()
-	router.Use(gin.Recovery(), middlewares.RequestLogger(slog.New(slog.NewJSONHandler(os.Stdout, nil))))
+	metrics := middlewares.NewRequestMetrics()
+	router.Use(gin.Recovery(), middlewares.RequestLogger(slog.New(slog.NewJSONHandler(os.Stdout, nil))), metrics.Middleware())
+	router.GET("/metrics", gin.WrapH(metrics.Handler()))
 	return &Server{
 		Router: router,
 	}
