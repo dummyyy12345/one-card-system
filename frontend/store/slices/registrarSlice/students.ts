@@ -8,7 +8,7 @@ export { SexType, StatusType } from "./types";
 export interface DataRecievedWhileFetchStudents {
   currentPage: number;
   totalPages: number;
-  totalUsers: number;
+  totalStudents: number;
   data: StudentRecieved[];
 }
 interface DataSendToFetchStudents {
@@ -136,7 +136,7 @@ const studentSlice = createSlice({
           state.students = action.payload.data;
           state.currentPage = action.payload.currentPage;
           state.totalPages = action.payload.totalPages;
-          state.totalStudents = action.payload.totalUsers;
+          state.totalStudents = action.payload.totalStudents;
           state.isGetStudentLoading = false;
           state.isGetStudentError = null;
         }
@@ -365,8 +365,6 @@ export const handleUpdateStudentPhoto = createAsyncThunk<
   };
 
   try {
-    console.log("DATA SEND TO UPDATE STUDENT", data);
-
     const response = await axios(config);
     if (response.data) {
       toast.success("Student updated successfully");
@@ -398,8 +396,6 @@ export const handleUpdateStudentCard = createAsyncThunk<
   };
 
   try {
-    console.log("DATA SEND TO UPDATE STUDENT", data);
-
     const response = await axios(config);
     if (response.data) {
       toast.success("Student updated successfully");
@@ -418,8 +414,6 @@ export const handleUpdateStudentStatus = createAsyncThunk<
   StudentRecieved,
   DataSendToUpdateStudent
 >("student/updateStudentStatus", async (data) => {
-  console.log("DATA SEND TO CHANGE THE STATUS", data.ID);
-
   const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/registrar/student/status/${data.ID}`;
 
   const config: AxiosRequestConfig = {
