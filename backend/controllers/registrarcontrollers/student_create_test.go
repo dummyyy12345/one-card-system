@@ -12,3 +12,11 @@ func TestCreateStudentRejectsMalformedJSONBeforeDatabaseAccess(t *testing.T) {
 		t.Fatalf("status = %d, want 400: %s", recorder.Code, recorder.Body.String())
 	}
 }
+
+func TestCreateStudentRejectsMissingRequiredFieldsBeforeDatabaseAccess(t *testing.T) {
+	c, recorder := studentUpdateRequest(t, `{}`)
+	CreateStudentManually(c, nil)
+	if recorder.Code != http.StatusBadRequest {
+		t.Fatalf("status = %d, want 400: %s", recorder.Code, recorder.Body.String())
+	}
+}

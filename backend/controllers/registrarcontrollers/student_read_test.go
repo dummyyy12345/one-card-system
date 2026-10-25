@@ -34,12 +34,14 @@ func TestGetStudentsPaginationAndErrors(t *testing.T) {
 		url        string
 		count      int64
 		countErr   error
+		findErr    error
 		wantStatus int
 		wantPage   float64
 	}{
-		{"defaults invalid pagination", "/students?page=bad&limit=-1", 1, nil, http.StatusOK, 1},
-		{"uses requested page", "/students?page=2&limit=1&status=Active", 2, nil, http.StatusOK, 2},
-		{"reports database error", "/students", 0, errors.New("database unavailable"), http.StatusInternalServerError, 0},
+		{"defaults invalid pagination", "/students?page=bad&limit=-1", 1, nil, nil, http.StatusOK, 1},
+		{"uses requested page", "/students?page=2&limit=1&status=Active", 2, nil, nil, http.StatusOK, 2},
+		{"reports count error", "/students", 0, errors.New("database unavailable"), nil, http.StatusInternalServerError, 0},
+		{"reports list error", "/students", 1, nil, errors.New("database unavailable"), http.StatusInternalServerError, 0},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			db, mock := mockedStudentDB(t)
@@ -48,9 +50,12 @@ func TestGetStudentsPaginationAndErrors(t *testing.T) {
 				count.WillReturnError(test.countErr)
 			} else {
 				count.WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(test.count))
-				mock.ExpectQuery(`SELECT \* FROM "students"`).WillReturnRows(
-					sqlmock.NewRows([]string{"id", "student_id", "first_name"}).AddRow(7, "ST7", "Ada"),
-				)
+				list := mock.ExpectQuery(`SELECT \* FROM "students"`)
+				if test.findErr != nil {
+					list.WillReturnError(test.findErr)
+				} else {
+					list.WillReturnRows(sqlmock.NewRows([]string{"id", "student_id", "first_name"}).AddRow(7, "ST7", "Ada"))
+				}
 			}
 			router := gin.New()
 			router.GET("/students", func(c *gin.Context) { GetStudents(c, db) })
@@ -105,6 +110,56 @@ func TestGetStudentByID(t *testing.T) {
 			router.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/students/7", nil))
 			if response.Code != test.wantStatus {
 				t.Fatalf("status=%d, want=%d, body=%s", response.Code, test.wantStatus, response.Body.String())
+			}
+			if err := mock.ExpectationsWereMet(); err != nil {
+				t.Fatal(err)
+			}
+		})
+	}
+}
+
+func TestGetStudentForDashboard(t *testing.T) {
+	gin.SetMode(gin.TestMode)
+	for _, test := range []struct {
+		name       string
+		countErr   error
+		groupsErr  error
+		wantStatus int
+	}{
+		{"returns category counts", nil, nil, http.StatusOK},
+		{"reports count failure", errors.New("count unavailable"), nil, http.StatusInternalServerError},
+		{"reports category failure", nil, errors.New("categories unavailable"), http.StatusInternalServerError},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			db, mock := mockedStudentDB(t)
+			count := mock.ExpectQuery(`SELECT count\(\*\) FROM "students"`)
+			if test.countErr != nil {
+				count.WillReturnError(test.countErr)
+			} else {
+				count.WillReturnRows(sqlmock.NewRows([]string{"count"}).AddRow(5))
+				categories := mock.ExpectQuery(`(?s)SELECT.*Active Students`)
+				if test.groupsErr != nil {
+					categories.WillReturnError(test.groupsErr)
+				} else {
+					categories.WillReturnRows(sqlmock.NewRows([]string{"category", "count"}).
+						AddRow("Active Students", 3).AddRow("Inactive Students", 2))
+				}
+			}
+			router := gin.New()
+			router.GET("/dashboard", func(c *gin.Context) { GetStudentForDashboard(c, db) })
+			response := httptest.NewRecorder()
+			router.ServeHTTP(response, httptest.NewRequest(http.MethodGet, "/dashboard", nil))
+			if response.Code != test.wantStatus {
+				t.Fatalf("status=%d, want=%d, body=%s", response.Code, test.wantStatus, response.Body.String())
+			}
+			if test.wantStatus == http.StatusOK {
+				var body map[string]any
+				if err := json.Unmarshal(response.Body.Bytes(), &body); err != nil {
+					t.Fatal(err)
+				}
+				if body["totalStudents"] != float64(5) || len(body["studentsByCategory"].([]any)) != 2 {
+					t.Fatalf("unexpected dashboard: %v", body)
+				}
 			}
 			if err := mock.ExpectationsWereMet(); err != nil {
 				t.Fatal(err)
