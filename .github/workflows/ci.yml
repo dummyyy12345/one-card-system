@@ -39,6 +39,14 @@ jobs:
           go-version-file: backend/go.mod
           cache: true
           cache-dependency-path: backend/go.sum
+      - name: Check Go formatting
+        run: |
+          files="$(gofmt -l .)"
+          if [ -n "$files" ]; then
+            printf '%s\n' "$files"
+            exit 1
+          fi
+      - run: go vet ./...
       - run: go build ./...
       - run: go test ./...
       - run: go install golang.org/x/vuln/cmd/govulncheck@v1.1.4
