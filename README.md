@@ -53,6 +53,7 @@ The frontend expects `NEXT_PUBLIC_API_SERVER_URL=http://localhost:8888`. Visit <
 cd backend
 go build ./...
 go test ./...
+sh scripts/check-coverage.sh
 
 cd ../frontend
 npm ci --ignore-scripts
@@ -63,7 +64,7 @@ npm test -- --coverage
 npm run build
 ```
 
-CI runs these checks on pushes and pull requests, plus `npm audit --audit-level=high` and `govulncheck ./...`. The frontend coverage gate requires at least 50% statements, lines, and functions in the core student, user, and device flows named in `frontend/jest.config.js`; other frontend files are not yet part of that threshold.
+CI runs these checks on pushes and pull requests, plus `npm audit --audit-level=high` and `govulncheck ./...`. The frontend coverage gate requires at least 50% statements, lines, and functions in the core student, user, and device flows named in `frontend/jest.config.js`; other frontend files are not yet part of that threshold. The backend gate requires at least 50% statement coverage in `controllers/registrarcontrollers`; it does not set a threshold for the entire backend.
 
 ## Environment variables
 

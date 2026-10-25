@@ -27,7 +27,7 @@ jobs:
           elif [ -n "$BEFORE_SHA" ] && git cat-file -e "$BEFORE_SHA^{commit}" 2>/dev/null; then
             base="$BEFORE_SHA"
           else
-            base="$(git rev-parse HEAD^ 2>/dev/null || true)"
+            base="$(git merge-base HEAD origin/main 2>/dev/null || git rev-parse HEAD^ 2>/dev/null || true)"
           fi
           if [ -n "$base" ]; then
             ./gitleaks git --redact=100 --no-banner --log-opts="$base..HEAD" .
@@ -78,6 +78,7 @@ jobs:
           fi
       - run: go vet ./...
       - run: go build ./...
-      - run: go test ./...
+      - run: go test -cover ./...
+      - run: sh scripts/check-coverage.sh
       - run: go install golang.org/x/vuln/cmd/govulncheck@v1.1.4
       - run: govulncheck ./...
