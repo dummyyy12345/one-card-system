@@ -3,7 +3,13 @@ import axios from "axios";
 import { toast } from "sonner";
 import reducer, {
   DataRecievedWhileFetchStudents,
+  DataSendToCreateStudent,
+  handleCreateStudent,
   handleFetchStudents,
+  handleGetSingleStudent,
+  handleUpdateStudentCard,
+  SexType,
+  StatusType,
   StudentRecieved,
 } from "../students";
 
@@ -19,6 +25,27 @@ const response: DataRecievedWhileFetchStudents = {
   totalPages: 3,
   totalStudents: 21,
   data: [student],
+};
+const createInput: DataSendToCreateStudent = {
+  student_id: "ST9",
+  first_name: "Ada",
+  father_name: "Lovelace",
+  grand_father_name: "Byron",
+  email: "ada@example.com",
+  phone: "0912345678",
+  sex: SexType.Female,
+  date_of_birth: new Date("2000-01-01"),
+  program: "Math",
+  section: "A",
+  year: 1,
+  semester: 1,
+  religion: "",
+  library_id: null,
+  cafeteria_id: null,
+  dormitory_id: null,
+  registered_by_id: null,
+  status: StatusType.Active,
+  is_manually_add: true,
 };
 
 beforeEach(() => jest.clearAllMocks());
@@ -75,4 +102,62 @@ it("keeps the API error available to the page", async () => {
   expect(handleFetchStudents.rejected.match(action)).toBe(true);
   expect(store.getState().isGetStudentError).toBe("service unavailable");
   expect(toast.error).toHaveBeenCalledWith("service unavailable");
+});
+
+it("creates a student and exposes the returned record", async () => {
+  (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce({
+    data: { data: student },
+  });
+  const store = configureStore({ reducer });
+  const action = await store.dispatch(handleCreateStudent(createInput));
+
+  expect(handleCreateStudent.fulfilled.match(action)).toBe(true);
+  expect(store.getState().student).toEqual(student);
+  expect(store.getState().isCreateStudentLoading).toBe(false);
+  expect(toast.success).toHaveBeenCalledWith("Student created successfully");
+  expect(axios).toHaveBeenCalledWith(
+    expect.objectContaining({ method: "POST", data: createInput })
+  );
+});
+
+it("preserves a create failure for the form", async () => {
+  (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+    response: { data: { error: "duplicate student ID" } },
+  });
+  const store = configureStore({ reducer });
+  const action = await store.dispatch(handleCreateStudent(createInput));
+
+  expect(handleCreateStudent.rejected.match(action)).toBe(true);
+  expect(store.getState().student).toBeNull();
+  expect(store.getState().isCreateStudentError).toBe("duplicate student ID");
+});
+
+it("loads a single student and updates the card without logging the payload", async () => {
+  (axios as jest.MockedFunction<typeof axios>)
+    .mockResolvedValueOnce({ data: { data: student } })
+    .mockResolvedValueOnce({
+      data: { data: { ...student, card_number: "12345678" } },
+    });
+  const store = configureStore({ reducer });
+  const loaded = await store.dispatch(handleGetSingleStudent({ id: 9 }));
+  expect(handleGetSingleStudent.fulfilled.match(loaded)).toBe(true);
+  expect(store.getState().student?.ID).toBe(9);
+
+  const updateInput = {
+    ...createInput,
+    ID: 9,
+    card_number: "12345678",
+    photo: "",
+    library_id: 0,
+    cafeteria_id: 0,
+    dormitory_id: 0,
+    registered_by_id: 0,
+    status: StatusType.Active,
+  };
+  const updated = await store.dispatch(handleUpdateStudentCard(updateInput));
+  expect(handleUpdateStudentCard.fulfilled.match(updated)).toBe(true);
+  expect(store.getState().student?.card_number).toBe("12345678");
+  expect(axios).toHaveBeenLastCalledWith(
+    expect.objectContaining({ method: "PATCH", data: updateInput })
+  );
 });

@@ -2,8 +2,11 @@ import { configureStore } from "@reduxjs/toolkit";
 import axios from "axios";
 import { toast } from "sonner";
 import reducer, {
+  handleCreateUser,
   handleDeleteUser,
   handleFetchUser,
+  handleSendEmail,
+  handleUpdateUser,
   UserRecieved,
 } from "../user";
 
@@ -84,4 +87,62 @@ it("reports a failed delete request to the page", async () => {
   expect(handleDeleteUser.rejected.match(action)).toBe(true);
   expect(store.getState().isUserError).toBe("permission denied");
   expect(toast.error).toHaveBeenCalledWith("permission denied");
+});
+
+it("creates and updates a user in the visible list", async () => {
+  const createInput = {
+    first_name: "Ada",
+    father_name: "Lovelace",
+    grand_father_name: "Byron",
+    email: "ada@example.com",
+    role_id: 2,
+  };
+  const updatedUser = { ...user, first_name: "Updated" };
+  (axios as jest.MockedFunction<typeof axios>)
+    .mockResolvedValueOnce({ data: { data: user } })
+    .mockResolvedValueOnce({ data: { data: updatedUser } });
+  const store = configureStore({ reducer });
+  await store.dispatch(handleCreateUser(createInput));
+  expect(store.getState().user).toEqual(user);
+  expect(store.getState().currentPageUserCreate).toBe(2);
+
+  store.dispatch(
+    handleFetchUser.fulfilled(
+      { data: [user], currentPage: 1, totalPages: 1, totalUsers: 1 },
+      "fetch",
+      fetchRequest
+    )
+  );
+  const action = await store.dispatch(
+    handleUpdateUser({ ...createInput, id: 4 })
+  );
+  expect(handleUpdateUser.fulfilled.match(action)).toBe(true);
+  expect(store.getState().users).toEqual([updatedUser]);
+  expect(store.getState().user).toEqual(updatedUser);
+});
+
+it("reports an email failure without logging the password", async () => {
+  const consoleLog = jest.spyOn(console, "log").mockImplementation(() => {});
+  try {
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+      response: { data: { error: "SMTP unavailable" } },
+    });
+    const store = configureStore({ reducer });
+    const action = await store.dispatch(
+      handleSendEmail({
+        email: "ada@example.com",
+        subject: "Welcome",
+        password: "private-password",
+        role: "Admin",
+        roledescription: [],
+        name: "Ada",
+      })
+    );
+    expect(handleSendEmail.rejected.match(action)).toBe(true);
+    expect(store.getState().sendEmailError).toBe("Send email failed");
+    expect(toast.error).toHaveBeenCalledWith("SMTP unavailable");
+    expect(consoleLog).not.toHaveBeenCalled();
+  } finally {
+    consoleLog.mockRestore();
+  }
 });
