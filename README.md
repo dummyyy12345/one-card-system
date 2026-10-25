@@ -84,4 +84,4 @@ Credentials were previously committed to this repository. If they were real, rot
 - The backend writes structured JSON request logs with method, route template, status, and duration; URL identifiers and query values are omitted.
 - `backend/models` defines persisted records; `backend/migrate` creates tables; `backend/skeletons` contains repository/use case interfaces and mocks used by tests in `backend/test`.
 - `frontend/app` contains Next.js routes and page components; `frontend/store/slices` holds Redux Toolkit state and async API actions; `frontend/components` contains shared UI.
-- `compose.yaml` builds both applications and starts PostgreSQL for local development.
+- `docker-compose.yml` builds both applications and starts PostgreSQL for local development.
