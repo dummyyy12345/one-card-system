@@ -2,7 +2,6 @@ package registrarcontrollers
 
 import (
 	"errors"
-	"log"
 	"math"
 	"net/http"
 	"strconv"
@@ -143,6 +142,7 @@ func CreateStudentManually(c *gin.Context, db *gorm.DB) {
 	var student registrarmodels.Student
 	if err := c.ShouldBindJSON(&student); err != nil {
 		utils.ResponseWithError(c, http.StatusBadRequest, "Invalid JSON", err)
+		return
 	}
 	if err := student.Validate(db); err != nil {
 		utils.ResponseWithError(c, http.StatusBadRequest, "Validation error", err)
@@ -161,8 +161,8 @@ func CreateStudentManually(c *gin.Context, db *gorm.DB) {
 	}
 	//Create student
 	if err := db.Create(&student).Error; err != nil {
-		utils.ResponseWithError(c, http.StatusInternalServerError, "Error inserting new student")
-		log.Println("Error inserting new student:", err)
+		utils.ResponseWithError(c, http.StatusInternalServerError, "Error inserting new student", err)
+		return
 	}
 	//Send students to all devices
 	sendStudentToDevicesConcurrently(devices, student)
@@ -192,7 +192,6 @@ func UpdateStudentManually(c *gin.Context, db *gorm.DB) {
 	// Use GORM's `Updates` method to update the specific fields
 	if err := db.Model(&existingStudent).Updates(student).Error; err != nil {
 		utils.ResponseWithError(c, http.StatusInternalServerError, "Error updating student", err)
-		log.Println("Error updating student:", err)
 		return
 	}
 
