@@ -187,7 +187,7 @@ const userSlice = createSlice({
       })
       .addCase(handleDeleteUser.rejected, (state, action) => {
         state.isUserCreateLoading = false;
-        state.isUserError = null;
+        state.isUserError = action.error.message || "Delete user failed";
       })
       .addCase(handleSendEmail.pending, (state) => {
         state.sendEmailLoading = true;
@@ -346,7 +346,6 @@ export const handleDeleteUser = createAsyncThunk<
 export const handleSendEmail = createAsyncThunk<string, DataSendToSendEmail>(
   "user/sendEmail",
   async (data) => {
-    console.log("DATE SENT FOR THE EMAIL", data);
     const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/admin/sendemail`;
 
     const config: AxiosRequestConfig = {
