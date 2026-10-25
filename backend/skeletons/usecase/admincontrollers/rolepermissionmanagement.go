@@ -15,32 +15,27 @@ func NewrolepermissionmanagementUsecase(rolepermissionmanagementRepository admin
 	}
 }
 
-
 // CreateRolePermission implements repo.RolepermissionmanagementUsecase.
 func (r *rolepermissionmanagementUsecase) CreateRolePermission(creatcreateRolepermissioneDevice *adminRepo.RolepermissionmanagementRequest) (adminmodels.Permissions, error) {
-	return r.RolepermissionmanagementRepository.CreateRolePermission(creatcreateRolepermissioneDevice )
+	return r.RolepermissionmanagementRepository.CreateRolePermission(creatcreateRolepermissioneDevice)
 }
 
 // GetRolePermissions implements repo.RolepermissionmanagementUsecase.
 func (r *rolepermissionmanagementUsecase) GetRolePermissions(deleteRolepermissionById *adminRepo.RolepermissionmanagementRequest) ([]adminmodels.Permissions, error) {
-	return r.RolepermissionmanagementRepository.GetRolePermissions(deleteRolepermissionById )
+	return r.RolepermissionmanagementRepository.GetRolePermissions(deleteRolepermissionById)
 }
-
-
 
 // GetRolePermissionByRoleId implements repo.RolepermissionmanagementUsecase.
 func (r *rolepermissionmanagementUsecase) GetRolePermissionByRoleId(getRolepermissionById *adminRepo.RolepermissionmanagementRequest) (adminmodels.Permissions, error) {
-	return r.RolepermissionmanagementRepository.GetRolePermissionByRoleId(getRolepermissionById )
+	return r.RolepermissionmanagementRepository.GetRolePermissionByRoleId(getRolepermissionById)
 }
 
 // DeleteRolePermissionById implements repo.RolepermissionmanagementUsecase.
 func (r *rolepermissionmanagementUsecase) DeleteRolePermissionById(getRolepermission *adminRepo.RolepermissionmanagementRequest) (adminmodels.Permissions, error) {
-	return r.RolepermissionmanagementRepository.DeleteRolePermissionById(getRolepermission )
+	return r.RolepermissionmanagementRepository.DeleteRolePermissionById(getRolepermission)
 }
-
 
 // UpdateRolePermissions implements repo.RolepermissionmanagementUsecase.
 func (r *rolepermissionmanagementUsecase) UpdateRolePermission(updateRolepermissionById *adminRepo.RolepermissionmanagementRequest) (adminmodels.Permissions, error) {
-	return r.RolepermissionmanagementRepository.UpdateRolePermission(updateRolepermissionById )
+	return r.RolepermissionmanagementRepository.UpdateRolePermission(updateRolepermissionById)
 }
-

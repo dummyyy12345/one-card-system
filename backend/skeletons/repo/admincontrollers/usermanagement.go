@@ -1,4 +1,3 @@
-
 package adminRepo
 
 import (
@@ -7,24 +6,21 @@ import (
 	"gorm.io/gorm"
 )
 
-type CreateUserRequest struct{
+type CreateUserRequest struct {
 	Ctx *gin.Context
-	Gm *gorm.DB
+	Gm  *gorm.DB
 }
 
-type UserRepository interface{
+type UserRepository interface {
 	CreateUser(createUser *CreateUserRequest) (adminmodels.Users, error)
 	GetUsersByRoleId(createUser *CreateUserRequest) (adminmodels.Users, error)
 	DeleteUserById(createUser *CreateUserRequest) (adminmodels.Users, error)
 	UpdateUserById(createUser *CreateUserRequest) (adminmodels.Users, error)
-	
 }
 
-type UserUsecase interface{
+type UserUsecase interface {
 	CreateUser(createUser *CreateUserRequest) (adminmodels.Users, error)
 	GetUsersByRoleId(createUser *CreateUserRequest) (adminmodels.Users, error)
 	DeleteUserById(createUser *CreateUserRequest) (adminmodels.Users, error)
 	UpdateUserById(createUser *CreateUserRequest) (adminmodels.Users, error)
-	
-	
 }

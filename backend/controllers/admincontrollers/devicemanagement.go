@@ -13,14 +13,12 @@ import (
 	"gorm.io/gorm"
 )
 
-
-
 // create device with location type and ID
 func CreateDevice(c *gin.Context, db *gorm.DB) {
 	var device adminmodels.Devices
 	if err := c.ShouldBindJSON(&device); err != nil {
 		utils.ResponseWithError(c, http.StatusBadRequest, "Invalid input", err)
-		return 
+		return
 	}
 	if err := device.ValidateDevice(db); err != nil {
 		utils.ResponseWithError(c, http.StatusBadRequest, "Invalid input", err)
@@ -253,6 +251,3 @@ func TestGetDeviceById(t *testing.T) {
   }
 
 */
-
-
-

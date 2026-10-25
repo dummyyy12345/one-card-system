@@ -1,12 +1,12 @@
 package routes
 
 import (
-	"net/http"
 	"github.com/SolomonAHailu/one-card-system/routes/adminroutes"
 	"github.com/SolomonAHailu/one-card-system/routes/gateroutes"
 	"github.com/SolomonAHailu/one-card-system/routes/registrarroutes"
 	"github.com/SolomonAHailu/one-card-system/routes/userroutes"
 	"github.com/gin-gonic/gin"
+	"net/http"
 )
 
 func RegisterRoutes(r *gin.Engine) {

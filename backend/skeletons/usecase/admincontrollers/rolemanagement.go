@@ -9,13 +9,11 @@ type roleUsecase struct {
 	roleRespository adminRepo.RoleRepository
 }
 
-
 func NewRoleUsecase(roleRespository adminRepo.RoleRepository) adminRepo.RoleUsecase {
 	return &roleUsecase{
 		roleRespository: roleRespository,
 	}
 }
-
 
 // CreatedRole implements rolemanagement.RoleUsecase.
 func (d *roleUsecase) CreatedRole(createRole *adminRepo.CreateRoleRequest) (adminmodels.Roles, error) {
