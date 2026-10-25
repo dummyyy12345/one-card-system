@@ -56,10 +56,11 @@ npm ci --ignore-scripts
 npm run lint
 npm run typecheck
 npm test
+npm test -- --coverage
 npm run build
 ```
 
-CI runs these checks on pushes and pull requests, plus `npm audit --audit-level=high` and `govulncheck ./...`. The frontend tests cover device slice state and its fetch thunk, along with student card and image validation.
+CI runs these checks on pushes and pull requests, plus `npm audit --audit-level=high` and `govulncheck ./...`. The frontend coverage gate requires at least 50% statements, lines, and functions in the core student, user, and device flows named in `frontend/jest.config.js`; other frontend files are not yet part of that threshold.
 
 ## Environment variables
 
