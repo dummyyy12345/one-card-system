@@ -2,7 +2,7 @@
 
 Campus access control application with a Next.js/Redux frontend and a Go/Gin API. PostgreSQL stores users, devices, and student records. Device synchronization and SMTP need real external services when those features are used; the development setup starts without them.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for change and test guidance and [CHANGELOG.md](CHANGELOG.md) for the current development changes.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for change and test guidance, [CHANGELOG.md](CHANGELOG.md) for the current development changes, and [SECURITY.md](SECURITY.md) for the historical credential audit.
 
 ## Quick start with Docker
 
