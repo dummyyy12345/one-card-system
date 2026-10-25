@@ -3,7 +3,12 @@ import axios from "axios";
 import reducer, {
   DeviceRecieved,
   handleCreateDevice,
+  handleDeleteDevice,
   handleFetchDevice,
+  handleUpdateDevice,
+  resetDeviceCreateSuccess,
+  resetDeviceDeleteSuccess,
+  resetDeviceUpdateSuccess,
 } from "../device";
 
 jest.mock("axios");
@@ -30,6 +35,8 @@ const createInput = {
   port: device.port,
   location: device.location,
 };
+
+beforeEach(() => jest.clearAllMocks());
 
 describe("device slice", () => {
   it("tracks fetch pending, fulfilled, and rejected state", () => {
@@ -92,5 +99,51 @@ describe("device slice", () => {
     expect(axios).toHaveBeenCalledWith(
       expect.objectContaining({ method: "GET", withCredentials: true })
     );
+  });
+
+  it("creates, updates, and deletes a device through the API", async () => {
+    const updatedDevice = { ...device, name: "Updated gate" };
+    (axios as jest.MockedFunction<typeof axios>)
+      .mockResolvedValueOnce({ data: { data: device } })
+      .mockResolvedValueOnce({ data: { data: updatedDevice } })
+      .mockResolvedValueOnce({ data: { data: updatedDevice } });
+    const store = configureStore({ reducer });
+
+    const created = await store.dispatch(handleCreateDevice(createInput));
+    expect(handleCreateDevice.fulfilled.match(created)).toBe(true);
+    expect(store.getState().devices).toEqual([device]);
+    expect(store.getState().isDeviceCreateSuccess).toBe(true);
+    store.dispatch(resetDeviceCreateSuccess());
+    expect(store.getState().isDeviceCreateSuccess).toBe(false);
+
+    const updated = await store.dispatch(
+      handleUpdateDevice({ ...createInput, id: 4, name: "Updated gate" })
+    );
+    expect(handleUpdateDevice.fulfilled.match(updated)).toBe(true);
+    expect(store.getState().devices).toEqual([updatedDevice]);
+    expect(store.getState().isDeviceUpdateSuccess).toBe(true);
+    store.dispatch(resetDeviceUpdateSuccess());
+    expect(store.getState().isDeviceUpdateSuccess).toBe(false);
+
+    const deleted = await store.dispatch(handleDeleteDevice({ id: 4 }));
+    expect(handleDeleteDevice.fulfilled.match(deleted)).toBe(true);
+    expect(store.getState().devices).toEqual([]);
+    expect(store.getState().isDeviceDeleteSuccess).toBe(true);
+    store.dispatch(resetDeviceDeleteSuccess());
+    expect(store.getState().isDeviceDeleteSuccess).toBe(false);
+    expect(axios).toHaveBeenLastCalledWith(
+      expect.objectContaining({ method: "DELETE", withCredentials: true })
+    );
+  });
+
+  it("keeps a failed delete visible to the page", async () => {
+    (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+      response: { data: { error: "device busy" } },
+    });
+    const store = configureStore({ reducer });
+    const action = await store.dispatch(handleDeleteDevice({ id: 4 }));
+    expect(handleDeleteDevice.rejected.match(action)).toBe(true);
+    expect(store.getState().isDeviceError).toBe("device busy");
+    expect(store.getState().isDeviceDeleteLoading).toBe(false);
   });
 });

@@ -140,7 +140,7 @@ const deviceSlice = createSlice({
       })
       .addCase(handleDeleteDevice.rejected, (state, action) => {
         state.isDeviceDeleteLoading = false;
-        state.isDeviceError = null;
+        state.isDeviceError = action.error.message || "Delete device failed";
       });
   },
 });
