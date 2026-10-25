@@ -4,7 +4,7 @@ import (
 	"bytes"
 	"encoding/json"
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"sync"
@@ -41,12 +41,12 @@ func sendStudentToDevice(device adminmodels.Devices, student registrarmodels.Stu
 	}
 	jsonData, err := json.Marshal(payload)
 	if err != nil {
-		log.Printf("failed to marshal JSON payload: %v", err)
+		slog.Error("device_payload_encode_failed", "error", err)
 		return
 	}
 	resp, err := client.Post(apiURL, "application/json", bytes.NewBuffer(jsonData))
 	if err != nil {
-		log.Printf("failed to send request: %v", err)
+		slog.Error("device_student_sync_failed", "error", err)
 		return
 	}
 	defer resp.Body.Close()

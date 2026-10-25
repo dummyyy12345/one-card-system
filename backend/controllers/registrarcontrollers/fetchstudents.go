@@ -2,7 +2,7 @@ package registrarcontrollers
 
 import (
 	"fmt"
-	"log"
+	"log/slog"
 	"net/http"
 	"os"
 	"sync"
@@ -56,11 +56,11 @@ func SyncDataFromSMS(c *gin.Context, db *gorm.DB) {
 
 	// Handle device errors
 	for err := range deviceErrors {
-		log.Println(err)
+		slog.Error("device_check_failed", "error", err)
 		utils.ResponseWithError(c, http.StatusInternalServerError, "Device status check failed", err)
 		return
 	}
-	fmt.Println("All devices are online")
+	slog.Info("device_checks_complete", "devices", len(devices))
 
 	// Synchronize student data
 	for _, student := range students {
@@ -71,32 +71,32 @@ func SyncDataFromSMS(c *gin.Context, db *gorm.DB) {
 			if result.Error == gorm.ErrRecordNotFound {
 				// New student, validate and insert
 				if err := student.Validate(db); err != nil {
-					log.Printf("Validation error for student %s: %v", student.StudentID, err)
+					slog.Error("student_validation_failed", "student_id", student.StudentID, "error", err)
 					continue
 				}
 				if err := db.Create(&student).Error; err != nil {
-					log.Printf("Failed to insert new student %s: %v", student.StudentID, err)
+					slog.Error("student_insert_failed", "student_id", student.StudentID, "error", err)
 					continue
 				}
 				sendStudentToDevicesConcurrently(devices, student)
 			} else {
-				log.Printf("Failed to fetch student %s: %v", student.StudentID, result.Error)
+				slog.Error("student_fetch_failed", "student_id", student.StudentID, "error", result.Error)
 				continue
 			}
 		} else {
 			// Existing student, check for updates
 			if shouldUpdateStudent(existingStudent, student) {
 				if err := student.ValidateForUpdate(db, existingStudent.ID); err != nil {
-					log.Printf("Validation error for student %s: %v", student.StudentID, err)
+					slog.Error("student_validation_failed", "student_id", student.StudentID, "error", err)
 					continue
 				}
 				if err := db.Model(&existingStudent).Updates(student).Error; err != nil {
-					log.Printf("Failed to update student %s: %v", student.StudentID, err)
+					slog.Error("student_update_failed", "student_id", student.StudentID, "error", err)
 					continue
 				}
 				sendStudentToDevicesConcurrently(devices, student)
 			}
 		}
 	}
-	log.Println("Data synchronization completed successfully")
+	slog.Info("student_sync_complete")
 }
