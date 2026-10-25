@@ -8,7 +8,9 @@ import reducer, {
 } from "../students";
 
 jest.mock("axios");
-jest.mock("sonner", () => ({ toast: { error: jest.fn(), success: jest.fn() } }));
+jest.mock("sonner", () => ({
+  toast: { error: jest.fn(), success: jest.fn() },
+}));
 
 const student = { ID: 9, student_id: "ST9" } as StudentRecieved;
 const request = { page: 2, limit: 10, status: "Active" };
@@ -22,7 +24,10 @@ const response: DataRecievedWhileFetchStudents = {
 beforeEach(() => jest.clearAllMocks());
 
 it("tracks fetch state and uses the API's totalStudents field", () => {
-  const pending = reducer(undefined, handleFetchStudents.pending("fetch", request));
+  const pending = reducer(
+    undefined,
+    handleFetchStudents.pending("fetch", request)
+  );
   expect(pending.isGetStudentLoading).toBe(true);
 
   const fulfilled = reducer(
@@ -43,7 +48,9 @@ it("tracks fetch state and uses the API's totalStudents field", () => {
 });
 
 it("fetches students with the requested filters", async () => {
-  (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce({ data: response });
+  (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce({
+    data: response,
+  });
   const store = configureStore({ reducer });
   const action = await store.dispatch(handleFetchStudents(request));
 

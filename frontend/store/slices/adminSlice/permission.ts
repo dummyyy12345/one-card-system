@@ -250,6 +250,9 @@ export const handleDeletePermission = createAsyncThunk<
   }
 });
 
-export const { resetRoleCreateSuccess, resetPermissionUpdateSuccess,resetPermissionCreateSuccess } =
-  permissionSlice.actions;
+export const {
+  resetRoleCreateSuccess,
+  resetPermissionUpdateSuccess,
+  resetPermissionCreateSuccess,
+} = permissionSlice.actions;
 export default permissionSlice.reducer;

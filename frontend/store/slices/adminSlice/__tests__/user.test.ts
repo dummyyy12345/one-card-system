@@ -8,7 +8,9 @@ import reducer, {
 } from "../user";
 
 jest.mock("axios");
-jest.mock("sonner", () => ({ toast: { error: jest.fn(), success: jest.fn() } }));
+jest.mock("sonner", () => ({
+  toast: { error: jest.fn(), success: jest.fn() },
+}));
 
 const user = { ID: 4, email: "admin@example.com" } as UserRecieved;
 const fetchRequest = { role_id: 2, page: 1, limit: 10 };
@@ -16,7 +18,10 @@ const fetchRequest = { role_id: 2, page: 1, limit: 10 };
 beforeEach(() => jest.clearAllMocks());
 
 it("stores fetched users and pagination state", () => {
-  const pending = reducer(undefined, handleFetchUser.pending("fetch", fetchRequest));
+  const pending = reducer(
+    undefined,
+    handleFetchUser.pending("fetch", fetchRequest)
+  );
   expect(pending.isUserLoading).toBe(true);
 
   const fulfilled = reducer(
@@ -47,10 +52,15 @@ it("keeps delete errors visible and removes a user only on success", () => {
       fetchRequest
     )
   );
-  const pending = reducer(withUser, handleDeleteUser.pending("delete", { id: 4 }));
+  const pending = reducer(
+    withUser,
+    handleDeleteUser.pending("delete", { id: 4 })
+  );
   const rejected = reducer(
     pending,
-    handleDeleteUser.rejected(new Error("permission denied"), "delete", { id: 4 })
+    handleDeleteUser.rejected(new Error("permission denied"), "delete", {
+      id: 4,
+    })
   );
   expect(rejected.users).toEqual([user]);
   expect(rejected.isUserError).toBe("permission denied");

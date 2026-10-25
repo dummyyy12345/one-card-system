@@ -1,16 +1,15 @@
 {
-    "admindashboard": {
-        "totalusers": "Total Users",
-        "totalroles": "Total Roles",
-        "totalpermissions": "Total Permissions",
-        "totaldevices": "Total Devices",
-        "userroledistribution": "Users' Roles Distribution",
-        "studentcategoriesoverview": "Users' Roles Radar View",
-        "totalusersdescription": "Total number of users",
-        "totalrolesdescription": "Total number of roles",
-        "totalpermissionsdescription": "Total number of permissions",
-        "totaldevicesdescription": "Total number of devices",
-        "asof":""
-    }     
+  "admindashboard": {
+    "totalusers": "Total Users",
+    "totalroles": "Total Roles",
+    "totalpermissions": "Total Permissions",
+    "totaldevices": "Total Devices",
+    "userroledistribution": "Users' Roles Distribution",
+    "studentcategoriesoverview": "Users' Roles Radar View",
+    "totalusersdescription": "Total number of users",
+    "totalrolesdescription": "Total number of roles",
+    "totalpermissionsdescription": "Total number of permissions",
+    "totaldevicesdescription": "Total number of devices",
+    "asof": ""
+  }
 }
-

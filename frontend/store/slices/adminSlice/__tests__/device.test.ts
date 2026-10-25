@@ -7,7 +7,9 @@ import reducer, {
 } from "../device";
 
 jest.mock("axios");
-jest.mock("sonner", () => ({ toast: { success: jest.fn(), error: jest.fn() } }));
+jest.mock("sonner", () => ({
+  toast: { success: jest.fn(), error: jest.fn() },
+}));
 
 const device: DeviceRecieved = {
   ID: 4,
@@ -52,7 +54,10 @@ describe("device slice", () => {
   });
 
   it("adds a created device and records create errors", () => {
-    const pending = reducer(undefined, handleCreateDevice.pending("create", createInput));
+    const pending = reducer(
+      undefined,
+      handleCreateDevice.pending("create", createInput)
+    );
     expect(pending.isDeviceCreateLoading).toBe(true);
 
     const fulfilled = reducer(
@@ -65,7 +70,11 @@ describe("device slice", () => {
 
     const rejected = reducer(
       pending,
-      handleCreateDevice.rejected(new Error("invalid device"), "create", createInput)
+      handleCreateDevice.rejected(
+        new Error("invalid device"),
+        "create",
+        createInput
+      )
     );
     expect(rejected.devices).toEqual([]);
     expect(rejected.isDeviceCreateSuccess).toBe(false);

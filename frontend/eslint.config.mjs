@@ -6,10 +6,19 @@ export default defineConfig([
   {
     files: ["**/*.{js,jsx,ts,tsx}"],
     rules: {
-      "max-lines": ["error", { max: 500, skipBlankLines: true, skipComments: true }],
+      "max-lines": [
+        "error",
+        { max: 500, skipBlankLines: true, skipComments: true },
+      ],
       "react-hooks/set-state-in-effect": "off",
       "react-hooks/incompatible-library": "off",
     },
   },
-  globalIgnores([".next/**", "node_modules/**", "coverage/**", "build/**", "next-env.d.ts"]),
+  globalIgnores([
+    ".next/**",
+    "node_modules/**",
+    "coverage/**",
+    "build/**",
+    "next-env.d.ts",
+  ]),
 ]);

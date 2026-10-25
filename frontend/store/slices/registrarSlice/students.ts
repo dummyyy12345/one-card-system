@@ -1,8 +1,21 @@
 import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
 import axios, { AxiosRequestConfig } from "axios";
 import { toast } from "sonner";
-import { StudentRecieved, SexType, StatusType, StudentState, DataForDashboard } from "./types";
-export type { StudentRecieved, LibraryRecieved, CafeRecieved, DormRecieved, StudentState, DataForDashboard } from "./types";
+import {
+  StudentRecieved,
+  SexType,
+  StatusType,
+  StudentState,
+  DataForDashboard,
+} from "./types";
+export type {
+  StudentRecieved,
+  LibraryRecieved,
+  CafeRecieved,
+  DormRecieved,
+  StudentState,
+  DataForDashboard,
+} from "./types";
 export { SexType, StatusType } from "./types";
 
 export interface DataRecievedWhileFetchStudents {

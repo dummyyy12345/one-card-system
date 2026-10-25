@@ -31,8 +31,8 @@ export function AppSidebar() {
     user?.role.role_name === "Admin"
       ? adminSidebar
       : user?.role.role_name === "Registrar"
-      ? registrarSidebar
-      : gateSidebar;
+        ? registrarSidebar
+        : gateSidebar;
 
   const currentSidebarItems = rolePermission.filter(
     (role) => role.role.toLowerCase().trim() === userRole
