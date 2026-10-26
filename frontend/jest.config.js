@@ -14,5 +14,6 @@ module.exports = createJestConfig({
   ],
   coverageThreshold: {
     global: { statements: 30 },
+    "./components/": { statements: 50 },
   },
 });
