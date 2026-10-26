@@ -1,6 +1,7 @@
 import { configureStore } from "@reduxjs/toolkit";
 import apiClient from "@/store/apiClient";
 import { toast } from "sonner";
+import { reportError } from "@/lib/errorReporter";
 import reducer, {
   handleCreateUser,
   handleDeleteUser,
@@ -14,6 +15,7 @@ jest.mock("@/store/apiClient", () => ({
   __esModule: true,
   default: jest.fn(),
 }));
+jest.mock("@/lib/errorReporter", () => ({ reportError: jest.fn() }));
 jest.mock("sonner", () => ({
   toast: { error: jest.fn(), success: jest.fn() },
 }));
@@ -90,6 +92,12 @@ it("reports a failed delete request to the page", async () => {
   expect(handleDeleteUser.rejected.match(action)).toBe(true);
   expect(store.getState().isUserError).toBe("permission denied");
   expect(toast.error).toHaveBeenCalledWith("permission denied");
+  expect(reportError).toHaveBeenCalledWith(
+    "user.delete",
+    expect.objectContaining({
+      response: { data: { error: "permission denied" } },
+    })
+  );
 });
 
 it("creates and updates a user in the visible list", async () => {

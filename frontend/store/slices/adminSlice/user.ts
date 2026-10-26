@@ -1,6 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { AxiosRequestConfig } from "axios";
 import apiClient from "@/store/apiClient";
+import { reportError } from "@/lib/errorReporter";
 import { addAsyncCases } from "@/store/sliceHelpers";
 import { toast } from "sonner";
 
@@ -215,6 +216,7 @@ export const handleFetchUser = createAsyncThunk<
       throw new Error("Fetch users failed");
     }
   } catch (error: any) {
+    reportError("user.fetch", error);
     toast.error(error.response?.data?.error || "Fetch users failed");
     throw new Error(error.response?.data?.error || "Fetch users failed");
   }
@@ -242,6 +244,7 @@ export const handleCreateUser = createAsyncThunk<
       throw new Error("Create users failed");
     }
   } catch (error: any) {
+    reportError("user.create", error);
     toast.error(error.response?.data?.error || "Create users failed");
     throw new Error(error.response?.data?.error || "Create users failed");
   }
@@ -269,6 +272,7 @@ export const handleUpdateUser = createAsyncThunk<
       throw new Error("Update user failed");
     }
   } catch (error: any) {
+    reportError("user.update", error);
     toast.error(error.response?.data?.error || "Update user failed");
     throw new Error(error.response?.data?.error || "Update user failed");
   }
@@ -296,6 +300,7 @@ export const handleDeleteUser = createAsyncThunk<
       throw new Error("Delete user failed");
     }
   } catch (error: any) {
+    reportError("user.delete", error);
     toast.error(error.response?.data?.error || "Delete user failed");
     throw new Error(error.response?.data?.error || "Delete user failed");
   }
@@ -322,6 +327,7 @@ export const handleSendEmail = createAsyncThunk<string, DataSendToSendEmail>(
         throw new Error("Send email failed");
       }
     } catch (error: any) {
+      reportError("user.sendEmail", error);
       toast.error(error.response?.data?.error || "Send email failed");
       throw new Error(error.response?.data?.error || "Send email failed");
     }
@@ -346,6 +352,7 @@ export const handleGetDashboardInformation = createAsyncThunk<DataForDashboard>(
         throw new Error("Fetch dashboard information failed");
       }
     } catch (error: any) {
+      reportError("user.dashboard", error);
       toast.error(
         error.response?.data?.error || "Fetch dashboard information failed"
       );
