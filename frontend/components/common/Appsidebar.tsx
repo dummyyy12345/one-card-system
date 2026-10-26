@@ -37,8 +37,6 @@ export function AppSidebar() {
   const currentSidebarItems = rolePermission.filter(
     (role) => role.role.toLowerCase().trim() === userRole
   );
-  console.log("CUURENT SIDE BAR ITEMS", currentSidebarItems);
-
   return (
     <Sidebar variant="floating">
       <SidebarHeader>

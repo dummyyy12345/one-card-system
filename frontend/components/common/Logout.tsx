@@ -1,34 +1,30 @@
 "use client";
-import { IoMdLogOut } from "react-icons/io";
 import { LogOut } from "lucide-react";
 import { Button } from "../ui/button";
 import {
   Dialog,
   DialogClose,
   DialogContent,
-  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 
 import { handleLogout } from "@/store/slices/common/authSlice";
+import type { AppDispatch } from "@/store";
 import { useDispatch } from "react-redux";
 import { useRouter, usePathname } from "next/navigation";
-import { useState } from "react";
 
 const LogoutButton = () => {
   const router = useRouter();
   const currentPath = usePathname();
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const languagePrefix = currentPath.split("/")[1];
 
   return (
     <Dialog>
-      <DialogTrigger>
-        {/* <div className="bg-transparent hover:bg-background/90"> */}
+      <DialogTrigger aria-label="Log out">
         <div className="bg-transparent">
-          {/* <IoMdLogOut className="text-red-500" /> */}
           <LogOut className="text-red-500" size={17} />
         </div>
       </DialogTrigger>
@@ -42,9 +38,7 @@ const LogoutButton = () => {
           </DialogClose>
           <Button
             className="bg-green-500 hover:bg-green-400 px-7 text-white"
-            onClick={() =>
-              dispatch<any>(handleLogout({ router, languagePrefix }))
-            }
+            onClick={() => dispatch(handleLogout({ router, languagePrefix }))}
           >
             Confirm
           </Button>
