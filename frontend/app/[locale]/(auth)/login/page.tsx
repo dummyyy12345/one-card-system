@@ -6,11 +6,11 @@ import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { createLoginSchema } from "@/validators/common/login-validator";
 import { FaSpinner } from "react-icons/fa";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store";
+import { AppDispatch, RootState } from "@/store";
 import { handleLogin } from "@/store/slices/common/authSlice";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
@@ -24,7 +24,8 @@ interface LoginFormInputs {
 
 const LoginPage = () => {
   const t = useTranslations("login");
-  const dispatch = useDispatch();
+  const locale = useLocale();
+  const dispatch = useDispatch<AppDispatch>();
   const router = useRouter();
   const { isLoading, error } = useSelector((state: RootState) => state.auth);
   const [visible, setVisible] = useState<boolean>(false);
@@ -38,7 +39,7 @@ const LoginPage = () => {
   });
 
   const onSubmit = async (data: LoginFormInputs) => {
-    dispatch<any>(handleLogin({ data, router }));
+    dispatch(handleLogin({ data, router, locale }));
   };
 
   return (

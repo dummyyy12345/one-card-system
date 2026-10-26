@@ -1,5 +1,5 @@
-const DormitoryDashboard = () => {
-  return <div>DormitoryDashboard</div>;
-};
+import AccessDashboard from "@/components/access/AccessDashboard";
 
-export default DormitoryDashboard;
+export default function DormitoryPage() {
+  return <AccessDashboard location="dormitory" />;
+}

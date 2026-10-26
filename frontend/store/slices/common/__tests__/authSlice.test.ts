@@ -30,7 +30,7 @@ it("logs in, clears the user on logout, and routes to the login page", async () 
   expect(handleLogin.fulfilled.match(login)).toBe(true);
   expect(store.getState().isAuthenticated).toBe(true);
   expect(store.getState().user?.ID).toBe(4);
-  expect(router.push).toHaveBeenCalledWith("admin");
+  expect(router.push).toHaveBeenCalledWith("/en/admin");
 
   await store.dispatch(handleLogout({ router, languagePrefix: "en" }));
   expect(store.getState().isAuthenticated).toBe(false);

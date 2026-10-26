@@ -45,7 +45,7 @@ cd frontend
 npm run dev
 ```
 
-The frontend expects `NEXT_PUBLIC_API_SERVER_URL=http://localhost:8888`. Visit <http://localhost:3000>. The API health route does not require authentication. Student synchronization currently uses placeholder student data in `backend/controllers/registrarcontrollers/utils.go`; connected access devices and SMTP need valid credentials and reachable services.
+The frontend expects `NEXT_PUBLIC_API_SERVER_URL=http://localhost:8888`. Visit <http://localhost:3000>. The API health route does not require authentication. Student synchronization runs only when `SERVICE` is configured with a reachable student-system URL. Connected access devices and SMTP need valid credentials and reachable services.
 
 ## Test and checks
 
@@ -54,6 +54,9 @@ cd backend
 go build ./...
 go test ./...
 sh scripts/check-coverage.sh
+
+# With a disposable PostgreSQL database:
+INTEGRATION_DB_DSN='postgres://onecard:password@localhost:5432/onecard_integration?sslmode=disable' go test -tags=integration ./controllers/registrarcontrollers
 
 cd ../frontend
 npm ci --ignore-scripts
@@ -65,7 +68,7 @@ npm run test:core-coverage
 npm run build
 ```
 
-CI runs these checks on pushes and pull requests, plus `npm audit --audit-level=high` and `govulncheck ./...`. The frontend requires at least 30% statement coverage across all TypeScript source files and 50% statement coverage across `frontend/components`. A separate core gate requires 50% statements, lines, and functions across key student, user, device, chart, and user-list flows. Role, permission, chart, and user-list files each also require 50% statements. The backend gate requires at least 50% statement coverage in `controllers/registrarcontrollers`; it does not set a threshold for the entire backend.
+CI runs these checks on pushes and pull requests, including a PostgreSQL-backed integration test, plus `npm audit --audit-level=high` and `govulncheck ./...`. The frontend requires at least 30% statement coverage across all TypeScript source files and 50% statement coverage across `frontend/components`. A separate core gate requires 50% statements, lines, and functions across key student, user, device, chart, and user-list flows. Role, permission, chart, and user-list files each also require 50% statements. The backend gate requires at least 50% statement coverage in `controllers/registrarcontrollers`; it does not set a threshold for the entire backend.
 
 ## Environment variables
 
@@ -78,11 +81,21 @@ Copy the example files; never commit the resulting `.env` files. The root `.env.
 | `DEVICE_USERNAME`, `DEVICE_PASSWORD` | Credentials for access control devices |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | Outbound email settings |
 | `PGADMIN_DEFAULT_EMAIL`, `PGADMIN_DEFAULT_PASSWORD` | Optional pgAdmin settings; pgAdmin is not part of Compose |
-| `SERVICE` | Reserved for an external student service integration |
+| `SERVICE`, `SERVICE_TOKEN` | Student-system HTTP endpoint and optional bearer token |
 
 `frontend/.env.example` contains `NEXT_PUBLIC_API_SERVER_URL`, the API URL visible to the browser. It is embedded into the frontend build, so rebuild after changing it.
 
 Credentials were previously committed to this repository. If they were real, rotate them in the database, devices, SMTP service, and any other affected system; removing the files now does not erase git history.
+
+## Student-system and device synchronization
+
+Set `SERVICE` to an absolute HTTP(S) URL. The source must answer `GET` with JSON shaped like `{"students":[{"student_id":"ST1","first_name":"Ada","father_name":"Example","grand_father_name":"Test","email":"ada@example.com","phone":"0982010311","sex":"Female","date_of_birth":"2000-01-02","program":"Science","section":"A","year":1,"semester":1,"religion":"","registered_date":"2026-01-01","status":"Active"}]}`. Dates use `YYYY-MM-DD`; status is `Active` or `Inactive`. If the source needs a bearer token, set `SERVICE_TOKEN`. The API rejects malformed records and responses over 5 MiB. With `SERVICE` empty, scheduled import is skipped.
+
+Student writes queue a delivery record for each configured device; adding or changing a device queues all existing students for that device. The backend retries failed deliveries with increasing delays and records each device's status. Registrars can inspect and retry failures from the student list. The API routes are `GET /api/v1/registrar/student/:id/sync` and `POST /api/v1/registrar/student/:id/sync/retry`. Card and photo updates use their existing direct device path and are not part of this retry queue. Start the migration before running the updated backend.
+
+## Access decisions
+
+Gate, cafeteria, dormitory, and library staff can check cards and view recent decisions on their dashboards. The authenticated `POST /api/v1/access/check` route accepts `card_number`, `location` (`gate`, `cafeteria`, `dormitory`, or `library`), and `station`. A student must be active; cafeteria, dormitory, and library access also require the matching assignment. Each decision is stored with time, station, operator ID, and reason. Unknown card numbers are stored only as an HMAC fingerprint. `GET /api/v1/access/events?location=gate` returns the latest 50 decisions and `GET /api/v1/access/summary?location=gate` returns 24-hour counts. Only admins and staff assigned to that location can use these routes. Set an access-event retention policy suitable for your institution before using real student records.
 
 ## Architecture
 

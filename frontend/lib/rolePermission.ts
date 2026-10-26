@@ -8,4 +8,29 @@ export const rolePermission = [
   { role: "registrar", permission: "Students", icon: Users },
   { role: "gate", permission: "Current", icon: ScanFace },
   { role: "gate", permission: "History", icon: Logs },
+  {
+    role: "cafeteria",
+    permission: "cafe",
+    icon: Users,
+    label: "Access dashboard",
+  },
+  { role: "cafe", permission: "cafe", icon: Users, label: "Access dashboard" },
+  {
+    role: "dormitory",
+    permission: "dormitory",
+    icon: Users,
+    label: "Access dashboard",
+  },
+  {
+    role: "librarian",
+    permission: "librarian",
+    icon: Users,
+    label: "Access dashboard",
+  },
+  {
+    role: "library",
+    permission: "librarian",
+    icon: Users,
+    label: "Access dashboard",
+  },
 ];

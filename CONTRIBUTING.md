@@ -27,6 +27,8 @@ go vet ./...
 go build ./...
 ```
 
+For database changes, also run `INTEGRATION_DB_DSN='postgres://onecard:password@localhost:5432/onecard_integration?sslmode=disable' go test -tags=integration ./controllers/registrarcontrollers` against a disposable PostgreSQL database. CI runs this with a service container.
+
 CI also scans dependencies and new commits for known vulnerabilities and secrets. Device and SMTP features require real services when used; keep their test paths offline by injecting clients or using local HTTP test servers.
 
 ## Pull requests
