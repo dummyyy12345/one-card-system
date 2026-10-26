@@ -32,12 +32,17 @@ func TestRoleRoutesRejectNonAdmins(t *testing.T) {
 				status      int
 			}{
 				{"anonymous", "", http.StatusUnauthorized},
+				{"malformed bearer", "WrongBearer " + studentToken, http.StatusUnauthorized},
 				{"registrar", studentToken, http.StatusForbidden},
 			} {
 				t.Run(tc.name, func(t *testing.T) {
 					request := httptest.NewRequest(route.method, route.path, nil)
 					if tc.token != "" {
-						request.Header.Set("Authorization", "Bearer "+tc.token)
+						if tc.name == "malformed bearer" {
+							request.Header.Set("Authorization", tc.token)
+						} else {
+							request.Header.Set("Authorization", "Bearer "+tc.token)
+						}
 					}
 					response := httptest.NewRecorder()
 					router.ServeHTTP(response, request)

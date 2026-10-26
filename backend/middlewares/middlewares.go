@@ -36,11 +36,14 @@ func AuthMiddleware() gin.HandlerFunc {
 		var tokenString string
 
 		if authHeader != "" {
-			parts := strings.Split(authHeader, "Bearer ")
-			if len(parts) == 2 {
-				tokenString = parts[1]
-			} else {
+			if !strings.HasPrefix(authHeader, "Bearer ") {
 				utils.ResponseWithError(c, http.StatusUnauthorized, "Authorization format must be Bearer <token>")
+				c.Abort()
+				return
+			}
+			tokenString = strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+			if tokenString == "" {
+				utils.ResponseWithError(c, http.StatusUnauthorized, "Authorization token required")
 				c.Abort()
 				return
 			}
