@@ -1,6 +1,5 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios, { AxiosRequestConfig } from "axios";
-import { AppDispatch } from "../..";
 import { toast } from "sonner";
 
 // Define your types
@@ -121,7 +120,7 @@ export const handleLogout = createAsyncThunk(
   "auth/logout",
   async (
     { router, languagePrefix }: { router: any; languagePrefix: string },
-    { dispatch }: { dispatch: AppDispatch }
+    { dispatch }
   ) => {
     dispatch(clearAuthUser());
     toast.success("Logged out successfully");

@@ -15,7 +15,7 @@ import {
 import { Form } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { RootState } from "@/store";
+import { AppDispatch, RootState } from "@/store";
 import {
   DataSendToCreateStudent,
   DataSendToUpdateStudent,
@@ -48,7 +48,7 @@ type Props = {
 };
 export default function StudentForm({ student }: Props) {
   const t = useTranslations("addStudent");
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const webcamRef = useRef<Webcam | null>(null);
   const [image, setImage] = useState<string | null>(null);
   const [cardNumber, setCardNumber] = useState<string | null>(null);
@@ -71,7 +71,7 @@ export default function StudentForm({ student }: Props) {
       toast.error("Card number must be 8 digits");
       return;
     }
-    dispatch<any>(
+    dispatch(
       handleUpdateStudentCard({
         ...(newStudentCreated ?? student),
         card_number: cardNumber,
@@ -91,7 +91,7 @@ export default function StudentForm({ student }: Props) {
       toast.error("Image is required");
       return;
     }
-    dispatch<any>(
+    dispatch(
       handleUpdateStudentPhoto({
         ...(newStudentCreated ?? student),
         photo: image,
@@ -135,10 +135,10 @@ export default function StudentForm({ student }: Props) {
 
   const onSubmit = (data: DataSendToCreateStudent) => {
     if (student?.ID) {
-      dispatch<any>(handleUpdateStudent(data));
+      dispatch(handleUpdateStudent(data));
     } else {
-      dispatch<any>(handleCreateStudent(data)).then((res: any) => {
-        if (res.meta.requestStatus === "fulfilled") {
+      dispatch(handleCreateStudent(data)).then((res) => {
+        if (handleCreateStudent.fulfilled.match(res)) {
           setNewStudentCreated(res.payload);
         }
       });

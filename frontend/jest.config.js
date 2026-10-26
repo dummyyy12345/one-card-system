@@ -7,12 +7,12 @@ module.exports = createJestConfig({
   testEnvironment: "jsdom",
   moduleNameMapper: { "^@/(.*)$": "<rootDir>/$1" },
   collectCoverageFrom: [
-    "store/slices/adminSlice/device.ts",
-    "store/slices/adminSlice/user.ts",
-    "store/slices/registrarSlice/students.ts",
-    "**/StudentForm.tsx",
+    "**/*.{ts,tsx}",
+    "!**/*.d.ts",
+    "!**/node_modules/**",
+    "!**/.next/**",
   ],
   coverageThreshold: {
-    global: { statements: 50, lines: 50, functions: 50 },
+    global: { statements: 30 },
   },
 });

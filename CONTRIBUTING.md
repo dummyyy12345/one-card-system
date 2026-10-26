@@ -15,6 +15,7 @@ npm run lint
 npm run format:check
 npm run typecheck
 npm test -- --coverage
+npm run test:core-coverage
 npm run build
 ```
 

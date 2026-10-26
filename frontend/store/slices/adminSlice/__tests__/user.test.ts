@@ -1,5 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
-import axios from "axios";
+import apiClient from "@/store/apiClient";
 import { toast } from "sonner";
 import reducer, {
   handleCreateUser,
@@ -10,7 +10,10 @@ import reducer, {
   UserRecieved,
 } from "../user";
 
-jest.mock("axios");
+jest.mock("@/store/apiClient", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
 jest.mock("sonner", () => ({
   toast: { error: jest.fn(), success: jest.fn() },
 }));
@@ -78,7 +81,7 @@ it("keeps delete errors visible and removes a user only on success", () => {
 });
 
 it("reports a failed delete request to the page", async () => {
-  (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+  (apiClient as jest.MockedFunction<typeof apiClient>).mockRejectedValueOnce({
     response: { data: { error: "permission denied" } },
   });
   const store = configureStore({ reducer });
@@ -98,7 +101,7 @@ it("creates and updates a user in the visible list", async () => {
     role_id: 2,
   };
   const updatedUser = { ...user, first_name: "Updated" };
-  (axios as jest.MockedFunction<typeof axios>)
+  (apiClient as jest.MockedFunction<typeof apiClient>)
     .mockResolvedValueOnce({ data: { data: user } })
     .mockResolvedValueOnce({ data: { data: updatedUser } });
   const store = configureStore({ reducer });
@@ -124,7 +127,7 @@ it("creates and updates a user in the visible list", async () => {
 it("reports an email failure without logging the password", async () => {
   const consoleLog = jest.spyOn(console, "log").mockImplementation(() => {});
   try {
-    (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+    (apiClient as jest.MockedFunction<typeof apiClient>).mockRejectedValueOnce({
       response: { data: { error: "SMTP unavailable" } },
     });
     const store = configureStore({ reducer });

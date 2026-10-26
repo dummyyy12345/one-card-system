@@ -1,19 +1,25 @@
 import { configureStore } from "@reduxjs/toolkit";
-import axios from "axios";
+import apiClient from "@/store/apiClient";
 import { toast } from "sonner";
 import reducer, {
   DataRecievedWhileFetchStudents,
   DataSendToCreateStudent,
   handleCreateStudent,
   handleFetchStudents,
+  handleGetDashboardInformationForStudent,
   handleGetSingleStudent,
+  handleUpdateStudent,
   handleUpdateStudentCard,
+  handleUpdateStudentPhoto,
   SexType,
   StatusType,
   StudentRecieved,
 } from "../students";
 
-jest.mock("axios");
+jest.mock("@/store/apiClient", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
 jest.mock("sonner", () => ({
   toast: { error: jest.fn(), success: jest.fn() },
 }));
@@ -75,7 +81,7 @@ it("tracks fetch state and uses the API's totalStudents field", () => {
 });
 
 it("fetches students with the requested filters", async () => {
-  (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce({
+  (apiClient as jest.MockedFunction<typeof apiClient>).mockResolvedValueOnce({
     data: response,
   });
   const store = configureStore({ reducer });
@@ -83,17 +89,16 @@ it("fetches students with the requested filters", async () => {
 
   expect(handleFetchStudents.fulfilled.match(action)).toBe(true);
   expect(store.getState().totalStudents).toBe(21);
-  expect(axios).toHaveBeenCalledWith(
+  expect(apiClient).toHaveBeenCalledWith(
     expect.objectContaining({
       method: "GET",
       params: expect.objectContaining({ page: 2, limit: 10, status: "Active" }),
-      withCredentials: true,
     })
   );
 });
 
 it("keeps the API error available to the page", async () => {
-  (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+  (apiClient as jest.MockedFunction<typeof apiClient>).mockRejectedValueOnce({
     response: { data: { error: "service unavailable" } },
   });
   const store = configureStore({ reducer });
@@ -105,7 +110,7 @@ it("keeps the API error available to the page", async () => {
 });
 
 it("creates a student and exposes the returned record", async () => {
-  (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce({
+  (apiClient as jest.MockedFunction<typeof apiClient>).mockResolvedValueOnce({
     data: { data: student },
   });
   const store = configureStore({ reducer });
@@ -115,13 +120,13 @@ it("creates a student and exposes the returned record", async () => {
   expect(store.getState().student).toEqual(student);
   expect(store.getState().isCreateStudentLoading).toBe(false);
   expect(toast.success).toHaveBeenCalledWith("Student created successfully");
-  expect(axios).toHaveBeenCalledWith(
+  expect(apiClient).toHaveBeenCalledWith(
     expect.objectContaining({ method: "POST", data: createInput })
   );
 });
 
 it("preserves a create failure for the form", async () => {
-  (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+  (apiClient as jest.MockedFunction<typeof apiClient>).mockRejectedValueOnce({
     response: { data: { error: "duplicate student ID" } },
   });
   const store = configureStore({ reducer });
@@ -133,7 +138,7 @@ it("preserves a create failure for the form", async () => {
 });
 
 it("loads a single student and updates the card without logging the payload", async () => {
-  (axios as jest.MockedFunction<typeof axios>)
+  (apiClient as jest.MockedFunction<typeof apiClient>)
     .mockResolvedValueOnce({ data: { data: student } })
     .mockResolvedValueOnce({
       data: { data: { ...student, card_number: "12345678" } },
@@ -157,7 +162,72 @@ it("loads a single student and updates the card without logging the payload", as
   const updated = await store.dispatch(handleUpdateStudentCard(updateInput));
   expect(handleUpdateStudentCard.fulfilled.match(updated)).toBe(true);
   expect(store.getState().student?.card_number).toBe("12345678");
-  expect(axios).toHaveBeenLastCalledWith(
+  expect(apiClient).toHaveBeenLastCalledWith(
     expect.objectContaining({ method: "PATCH", data: updateInput })
+  );
+});
+
+it("updates student details and photo through distinct endpoints", async () => {
+  const updatedStudent = { ...student, first_name: "Grace" };
+  (apiClient as jest.MockedFunction<typeof apiClient>)
+    .mockResolvedValueOnce({ data: { data: updatedStudent } })
+    .mockResolvedValueOnce({
+      data: { data: { ...updatedStudent, photo: "image" } },
+    });
+  const store = configureStore({ reducer });
+  const details = await store.dispatch(
+    handleUpdateStudent({ ...createInput, id: 9 })
+  );
+  expect(handleUpdateStudent.fulfilled.match(details)).toBe(true);
+  expect(store.getState().student?.first_name).toBe("Grace");
+
+  const photoInput = {
+    ...createInput,
+    ID: 9,
+    card_number: "12345678",
+    photo: "image",
+    library_id: 0,
+    cafeteria_id: 0,
+    dormitory_id: 0,
+    registered_by_id: 0,
+    status: StatusType.Active,
+  };
+  const photo = await store.dispatch(handleUpdateStudentPhoto(photoInput));
+  expect(handleUpdateStudentPhoto.fulfilled.match(photo)).toBe(true);
+  expect(store.getState().student?.photo).toBe("image");
+  expect(apiClient).toHaveBeenLastCalledWith(
+    expect.objectContaining({ url: "/api/v1/registrar/student/photo/9" })
+  );
+});
+
+it("loads dashboard totals and clears them after a failure", async () => {
+  const dashboard = {
+    totalStudents: 21,
+    studentsByCategory: [{ category: "Active", count: 21 }],
+  };
+  (apiClient as jest.MockedFunction<typeof apiClient>)
+    .mockResolvedValueOnce({ data: dashboard })
+    .mockRejectedValueOnce({
+      response: { data: { error: "dashboard offline" } },
+    });
+  const store = configureStore({ reducer });
+
+  const success = await store.dispatch(
+    handleGetDashboardInformationForStudent()
+  );
+  expect(handleGetDashboardInformationForStudent.fulfilled.match(success)).toBe(
+    true
+  );
+  expect(store.getState().studentDataForDashboard).toEqual(dashboard);
+
+  const failure = await store.dispatch(
+    handleGetDashboardInformationForStudent()
+  );
+  expect(handleGetDashboardInformationForStudent.rejected.match(failure)).toBe(
+    true
+  );
+  expect(store.getState().studentDataForDashboard).toBeNull();
+  expect(store.getState().isGetStudentForDashboardError).toBe(
+    "dashboard offline"
   );
 });

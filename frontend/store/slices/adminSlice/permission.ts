@@ -94,11 +94,11 @@ const permissionSlice = createSlice({
         state.isPermissionError = action.error.message as string;
       })
       .addCase(handleUpdatePermission.pending, (state, action) => {
-        state.isPermissionCreateLoading = true;
+        state.isPermissionUpdateLoading = true;
         state.isPermissionError = null;
       })
       .addCase(handleUpdatePermission.fulfilled, (state, action) => {
-        state.isPermissionCreateLoading = false;
+        state.isPermissionUpdateLoading = false;
         state.isPermissionError = null;
         state.permissions = state.permissions.map((permission) => {
           if (permission.ID === action.payload.ID) {
@@ -109,7 +109,7 @@ const permissionSlice = createSlice({
         state.isPermissionUpdateSuccess = true;
       })
       .addCase(handleUpdatePermission.rejected, (state, action) => {
-        state.isPermissionCreateLoading = false;
+        state.isPermissionUpdateLoading = false;
         state.isPermissionError = action.error.message as string;
       })
       .addCase(handleDeletePermission.pending, (state, action) => {
@@ -154,7 +154,7 @@ export const handleFetchPermissions = createAsyncThunk<PermissionsRecievedData>(
         throw new Error("Get permission Failed");
       }
     } catch (error: any) {
-      toast.error(`${error.response?.data?.error} || "Get permission Failed"`);
+      toast.error(error.response?.data?.error || "Get permission Failed");
       throw new Error(error.response?.data?.error || "Get permission Failed");
     }
   }
@@ -185,7 +185,7 @@ export const handleCreatePermission = createAsyncThunk<
       throw new Error("Create permission Failed");
     }
   } catch (error: any) {
-    toast.error(`${error.response?.data?.error} || "Create permission Failed"`);
+    toast.error(error.response?.data?.error || "Create permission Failed");
     throw new Error(error.response?.data?.error || "Create permission Failed");
   }
 });
@@ -215,7 +215,7 @@ export const handleUpdatePermission = createAsyncThunk<
       throw new Error("Update permission Failed");
     }
   } catch (error: any) {
-    toast.error(`${error.response?.data?.error} || "Update permission Failed"`);
+    toast.error(error.response?.data?.error || "Update permission Failed");
     throw new Error(error.response?.data?.error || "Update permission Failed");
   }
 });

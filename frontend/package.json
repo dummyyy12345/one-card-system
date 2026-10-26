@@ -9,7 +9,8 @@
     "lint": "eslint . --max-warnings=0",
     "format:check": "prettier --check .",
     "typecheck": "tsc --noEmit",
-    "test": "jest --runInBand"
+    "test": "jest --runInBand",
+    "test:core-coverage": "jest --runInBand --coverage --config jest.core.config.js"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.9.2",

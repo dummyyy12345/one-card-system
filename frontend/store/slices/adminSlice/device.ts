@@ -1,6 +1,9 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import axios, { AxiosRequestConfig } from "axios";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import type { AxiosRequestConfig } from "axios";
+import apiClient from "@/store/apiClient";
 import { toast } from "sonner";
+import { reportError } from "@/lib/errorReporter";
+import { addAsyncCases } from "@/store/sliceHelpers";
 
 export interface DataSendToCreateDevice {
   id?: number;
@@ -70,103 +73,67 @@ const deviceSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder
-      .addCase(handleFetchDevice.pending, (state) => {
-        state.isDeviceLoading = true;
-        state.isDeviceError = null;
-      })
-      .addCase(
-        handleFetchDevice.fulfilled,
-        (state, action: PayloadAction<DataRecievedWhileFetchDevice>) => {
-          state.devices = action.payload.data;
-          state.isDeviceLoading = false;
-          state.isDeviceError = null;
-        }
-      )
-      .addCase(handleFetchDevice.rejected, (state, action) => {
-        state.isDeviceLoading = false;
-        state.isDeviceError = action.error.message || "Fetch devices failed";
-      });
-    builder
-      .addCase(handleCreateDevice.pending, (state) => {
-        state.isDeviceCreateLoading = true;
-        state.isDeviceCreateError = null;
-      })
-      .addCase(
-        handleCreateDevice.fulfilled,
-        (state, action: PayloadAction<DataRecievedWhileCreateDevice>) => {
-          state.devices.push(action.payload.data);
-          state.isDeviceCreateSuccess = true;
-          state.isDeviceCreateLoading = false;
-          state.isDeviceCreateError = null;
-        }
-      )
-      .addCase(handleCreateDevice.rejected, (state, action) => {
-        state.isDeviceCreateLoading = false;
-        state.isDeviceCreateError =
-          action.error.message || "Create device failed";
-      })
-      .addCase(handleUpdateDevice.pending, (state) => {
-        state.isDeviceUpdateLoading = true;
-        state.isDeviceCreateError = null;
-      })
-      .addCase(handleUpdateDevice.fulfilled, (state, action) => {
-        state.devices = state.devices.map((device) => {
-          if (device.ID === action.payload.data.ID) {
-            return action.payload.data;
-          }
-          return device;
-        });
-        state.isDeviceUpdateSuccess = true;
-        state.isDeviceUpdateLoading = false;
-        state.isDeviceCreateError = null;
-      })
-      .addCase(handleUpdateDevice.rejected, (state, action) => {
-        state.isDeviceUpdateLoading = false;
-        state.isDeviceCreateError =
-          action.error.message || "Update Device failed";
-      })
-      .addCase(handleDeleteDevice.pending, (state, action) => {
-        state.isDeviceDeleteLoading = true;
-        state.isDeviceError = null;
-      })
-      .addCase(handleDeleteDevice.fulfilled, (state, action) => {
-        state.devices = state.devices.filter(
-          (device) => device.ID !== action.payload.data.ID
+    addAsyncCases(builder, handleFetchDevice, {
+      loadingKey: "isDeviceLoading",
+      errorKey: "isDeviceError",
+      fallbackError: "Fetch devices failed",
+      onFulfilled: (state, payload) => {
+        state.devices = payload.data;
+      },
+    });
+    addAsyncCases(builder, handleCreateDevice, {
+      loadingKey: "isDeviceCreateLoading",
+      errorKey: "isDeviceCreateError",
+      fallbackError: "Create device failed",
+      onFulfilled: (state, payload) => {
+        state.devices.push(payload.data);
+        state.isDeviceCreateSuccess = true;
+      },
+    });
+    addAsyncCases(builder, handleUpdateDevice, {
+      loadingKey: "isDeviceUpdateLoading",
+      errorKey: "isDeviceCreateError",
+      fallbackError: "Update Device failed",
+      onFulfilled: (state, payload) => {
+        state.devices = state.devices.map((device) =>
+          device.ID === payload.data.ID ? payload.data : device
         );
-        state.isDeviceDeleteLoading = false;
+        state.isDeviceUpdateSuccess = true;
+      },
+    });
+    addAsyncCases(builder, handleDeleteDevice, {
+      loadingKey: "isDeviceDeleteLoading",
+      errorKey: "isDeviceError",
+      fallbackError: "Delete device failed",
+      onFulfilled: (state, payload) => {
+        state.devices = state.devices.filter(
+          (device) => device.ID !== payload.data.ID
+        );
         state.isDeviceDeleteSuccess = true;
-        state.isDeviceError = null;
-      })
-      .addCase(handleDeleteDevice.rejected, (state, action) => {
-        state.isDeviceDeleteLoading = false;
-        state.isDeviceError = action.error.message || "Delete device failed";
-      });
+      },
+    });
   },
 });
 
 export const handleFetchDevice = createAsyncThunk<DataRecievedWhileFetchDevice>(
   "device/fetchDevice",
   async (data) => {
-    const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/admin/devices`;
+    const url = `/api/v1/admin/devices`;
 
     const config: AxiosRequestConfig = {
       url,
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      withCredentials: true,
     };
 
     try {
-      const response = await axios(config);
+      const response = await apiClient(config);
       if (response.data) {
         return response.data;
       } else {
         throw new Error("Fetch devices failed");
       }
     } catch (error: any) {
+      reportError("device.fetch", error);
       throw new Error(error.response?.data?.error || "Fetch devices failed");
     }
   }
@@ -176,20 +143,16 @@ export const handleCreateDevice = createAsyncThunk<
   DataRecievedWhileCreateDevice,
   DataSendToCreateDevice
 >("device/createDevice", async (data) => {
-  const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/admin/createdevice`;
+  const url = `/api/v1/admin/createdevice`;
 
   const config: AxiosRequestConfig = {
     url,
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     data: data,
-    withCredentials: true,
   };
 
   try {
-    const response = await axios(config);
+    const response = await apiClient(config);
     if (response.data) {
       toast.success("Device created successfully");
       return response.data;
@@ -198,6 +161,7 @@ export const handleCreateDevice = createAsyncThunk<
       throw new Error("Create devices failed");
     }
   } catch (error: any) {
+    reportError("device.create", error);
     toast.error(error.response?.data?.error || "Create Devices failed");
     throw new Error(error.response?.data?.error || "Create Devices failed");
   }
@@ -206,20 +170,16 @@ export const handleUpdateDevice = createAsyncThunk<
   DataRecievedWhileCreateDevice,
   DataSendToCreateDevice
 >("device/updateDevice", async (data) => {
-  const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/admin/device/${data.id}`;
+  const url = `/api/v1/admin/device/${data.id}`;
 
   const config: AxiosRequestConfig = {
     url,
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
     data: data,
-    withCredentials: true,
   };
 
   try {
-    const response = await axios(config);
+    const response = await apiClient(config);
     if (response.data) {
       toast.success("device updated successfully");
       return response.data;
@@ -228,6 +188,7 @@ export const handleUpdateDevice = createAsyncThunk<
       throw new Error("Update device failed");
     }
   } catch (error: any) {
+    reportError("device.update", error);
     toast.error(error.response?.data?.error || "Update device failed");
     throw new Error(error.response?.data?.error || "Update device failed");
   }
@@ -237,20 +198,16 @@ export const handleDeleteDevice = createAsyncThunk<
   DataRecievedWhileCreateDevice,
   { id: number }
 >("device/deleteDevice", async (data) => {
-  const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/admin/device/${data.id}`;
+  const url = `/api/v1/admin/device/${data.id}`;
 
   const config: AxiosRequestConfig = {
     url,
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
     data: data,
-    withCredentials: true,
   };
 
   try {
-    const response = await axios(config);
+    const response = await apiClient(config);
     if (response.data) {
       toast.success("device deleted successfully");
       return response.data;
@@ -259,6 +216,7 @@ export const handleDeleteDevice = createAsyncThunk<
       throw new Error("Delete device failed");
     }
   } catch (error: any) {
+    reportError("device.delete", error);
     toast.error(error.response?.data?.error || "Delete device failed");
     throw new Error(error.response?.data?.error || "Delete device failed");
   }

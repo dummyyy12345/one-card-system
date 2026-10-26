@@ -61,10 +61,11 @@ npm run lint
 npm run typecheck
 npm test
 npm test -- --coverage
+npm run test:core-coverage
 npm run build
 ```
 
-CI runs these checks on pushes and pull requests, plus `npm audit --audit-level=high` and `govulncheck ./...`. The frontend coverage gate requires at least 50% statements, lines, and functions in the core student, user, and device flows named in `frontend/jest.config.js`; other frontend files are not yet part of that threshold. The backend gate requires at least 50% statement coverage in `controllers/registrarcontrollers`; it does not set a threshold for the entire backend.
+CI runs these checks on pushes and pull requests, plus `npm audit --audit-level=high` and `govulncheck ./...`. The frontend requires at least 30% statement coverage across all TypeScript source files and separately requires 50% statements, lines, and functions across key student, user, device, chart, and user-list flows. Role, permission, chart, and user-list files each also require 50% statements. The backend gate requires at least 50% statement coverage in `controllers/registrarcontrollers`; it does not set a threshold for the entire backend.
 
 ## Environment variables
 
