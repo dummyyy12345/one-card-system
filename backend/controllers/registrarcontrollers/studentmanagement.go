@@ -164,8 +164,10 @@ func CreateStudentManually(c *gin.Context, db *gorm.DB) {
 		utils.ResponseWithError(c, http.StatusInternalServerError, "Error inserting new student", err)
 		return
 	}
-	//Send students to all devices
-	sendStudentToDevicesConcurrently(devices, student)
+	if err := queueStudentSync(db, devices, student); err != nil {
+		utils.ResponseWithError(c, http.StatusInternalServerError, "Student saved but device sync could not be queued", err)
+		return
+	}
 	c.JSON(http.StatusOK, gin.H{"message": "Student successfully created", "data": student})
 }
 
@@ -184,7 +186,7 @@ func UpdateStudentManually(c *gin.Context, db *gorm.DB) {
 	}
 
 	// Validate the updated student
-	if err := student.ValidateForUpdate(db, student.ID); err != nil {
+	if err := student.ValidateForUpdate(db, existingStudent.ID); err != nil {
 		utils.ResponseWithError(c, http.StatusBadRequest, "Validation error", err)
 		return
 	}
@@ -201,7 +203,10 @@ func UpdateStudentManually(c *gin.Context, db *gorm.DB) {
 		utils.ResponseWithError(c, http.StatusInternalServerError, "Error fetching devices", err)
 		return
 	}
-	sendStudentToDevicesConcurrently(devices, existingStudent)
+	if err := queueStudentSync(db, devices, existingStudent); err != nil {
+		utils.ResponseWithError(c, http.StatusInternalServerError, "Student saved but device sync could not be queued", err)
+		return
+	}
 
 	c.JSON(http.StatusOK, gin.H{"message": "Student successfully updated", "data": existingStudent})
 }

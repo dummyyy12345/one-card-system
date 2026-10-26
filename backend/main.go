@@ -24,6 +24,7 @@ func main() {
 
 	// Start the sync process in a separate goroutine
 	go services.StartSync()
+	go services.StartDeviceSync(initializers.DB)
 
 	s := server.NewServer()
 	s.Initialize()

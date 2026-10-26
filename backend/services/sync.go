@@ -2,20 +2,27 @@
 package services
 
 import (
+	"context"
 	"log"
+	"log/slog"
+	"os"
 	"time"
 
 	"github.com/SolomonAHailu/one-card-system/controllers/registrarcontrollers"
 	"github.com/SolomonAHailu/one-card-system/initializers"
-	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 )
 
 // StartSync initializes and starts the sync process
 func StartSync() {
-	registrarcontrollers.SyncDataFromSMS(&gin.Context{}, initializers.DB)
-	log.Println("Initial sync completed.")
-
 	for {
+		if service := os.Getenv("SERVICE"); service != "" && service != "replace-with-sms-service-url" {
+			if err := registrarcontrollers.SyncDataFromSMS(initializers.DB); err != nil {
+				slog.Error("student_source_sync_failed", "error", err)
+			}
+		} else {
+			slog.Info("student_source_sync_skipped", "reason", "SERVICE is not configured")
+		}
 		now := time.Now()
 		sixPM := time.Date(now.Year(), now.Month(), now.Day(), 18, 0, 0, 0, now.Location())
 
@@ -27,7 +34,15 @@ func StartSync() {
 		log.Printf("Next sync scheduled for: %s", sixPM)
 
 		time.Sleep(sleepDuration)
-		registrarcontrollers.SyncDataFromSMS(&gin.Context{}, initializers.DB)
-		time.Sleep(24 * time.Hour)
+	}
+}
+
+// StartDeviceSync retries queued deliveries without blocking student writes.
+func StartDeviceSync(db *gorm.DB) {
+	for {
+		if err := registrarcontrollers.ProcessDeviceSyncJobs(context.Background(), db); err != nil {
+			slog.Error("device_sync_worker_failed", "error", err)
+		}
+		time.Sleep(30 * time.Second)
 	}
 }

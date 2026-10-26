@@ -83,3 +83,33 @@ jobs:
       - run: sh scripts/check-coverage.sh
       - run: go install golang.org/x/vuln/cmd/govulncheck@v1.1.4
       - run: govulncheck ./...
+
+  backend-integration:
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: onecard
+          POSTGRES_PASSWORD: integration-only-password
+          POSTGRES_DB: onecard_integration
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U onecard -d onecard_integration"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: backend/go.mod
+          cache: true
+          cache-dependency-path: backend/go.sum
+      - run: go test -tags=integration ./controllers/registrarcontrollers
+        env:
+          INTEGRATION_DB_DSN: postgres://onecard:integration-only-password@localhost:5432/onecard_integration?sslmode=disable
