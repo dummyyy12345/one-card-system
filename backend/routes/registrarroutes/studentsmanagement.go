@@ -36,5 +36,11 @@ func RegisterStudentManagementRoutes(r *gin.Engine) {
 		v1.GET("/dashboard", func(c *gin.Context) {
 			registrarcontrollers.GetStudentForDashboard(c, initializers.DB)
 		})
+		v1.GET("/student/:id/sync", func(c *gin.Context) {
+			registrarcontrollers.GetStudentSyncStatus(c, initializers.DB)
+		})
+		v1.POST("/student/:id/sync/retry", func(c *gin.Context) {
+			registrarcontrollers.RetryStudentSync(c, initializers.DB)
+		})
 	}
 }

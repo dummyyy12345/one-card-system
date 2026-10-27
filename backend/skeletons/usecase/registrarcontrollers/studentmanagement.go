@@ -9,8 +9,6 @@ type StudentUsecase struct {
 	studentRespository regRepo.StudentRepository
 }
 
-
-
 func NewStudentUsecase(studentRespository regRepo.StudentRepository) regRepo.StudentUsecase {
 	return &StudentUsecase{
 		studentRespository: studentRespository,
@@ -31,4 +29,3 @@ func (s *StudentUsecase) UpdateStudentCardNumber(updateStudentById *regRepo.Stud
 func (s *StudentUsecase) UpdateStudentPhoto(updateStudentPhoto *regRepo.StudentManagementRequest) (registrarmodels.Student, error) {
 	return s.studentRespository.UpdateStudentPhoto(updateStudentPhoto)
 }
-

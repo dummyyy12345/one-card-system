@@ -1,5 +1,5 @@
 {
-"admindashboard": {
+  "admindashboard": {
     "totalusers": "ጠቅላላ ተጠቃሚዎች",
     "totalroles": "ጠቅላላ ሚናዎች",
     "totalpermissions": "ጠቅላላ ፍቃዶች",
@@ -10,6 +10,6 @@
     "totalrolesdescription": "አጠቃላይ የሚናዎች ብዛት",
     "totalpermissionsdescription": "አጠቃላይ የፍቃዶች ብዛት",
     "totaldevicesdescription": "አጠቃላይ የመሳሪያዎች ብዛት",
-    "asof":"እ.ኤ.አ"
-    }  
+    "asof": "እ.ኤ.አ"
+  }
 }

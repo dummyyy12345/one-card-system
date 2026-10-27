@@ -119,7 +119,7 @@ export const handleCreateUserPermission = createAsyncThunk<
 
     try {
       const response = await axios(config);
-      if (response.data) {;
+      if (response.data) {
         dispatch<any>(increareCurrentPage());
         toast.success("User permission created successfully");
         return response.data;

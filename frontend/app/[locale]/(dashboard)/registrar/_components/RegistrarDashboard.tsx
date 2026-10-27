@@ -65,18 +65,21 @@ const formatChartData = (studentsByCategory: any[]) =>
 
 // Helper to generate chart configuration
 const generateChartConfig = (studentsByCategory: any[]) =>
-  studentsByCategory.reduce((config, student, index) => {
-    const name = student.category
-      .replace("Active Students", "Active")
-      .replace("Inactive Students", "Inactive")
-      .replace("Students with Cards", "With Cards")
-      .replace("Students without Cards", "Without Cards");
-    config[name.toLowerCase().replace(" ", "_")] = {
-      label: name,
-      color: `hsl(var(--chart-${index + 1}))`,
-    };
-    return config;
-  }, {} as Record<string, { label: string; color: string }>);
+  studentsByCategory.reduce(
+    (config, student, index) => {
+      const name = student.category
+        .replace("Active Students", "Active")
+        .replace("Inactive Students", "Inactive")
+        .replace("Students with Cards", "With Cards")
+        .replace("Students without Cards", "Without Cards");
+      config[name.toLowerCase().replace(" ", "_")] = {
+        label: name,
+        color: `hsl(var(--chart-${index + 1}))`,
+      };
+      return config;
+    },
+    {} as Record<string, { label: string; color: string }>
+  );
 
 const RegistrarDashboard = () => {
   const t = useTranslations("registrardashboard");

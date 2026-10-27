@@ -75,7 +75,6 @@ export interface DormRecieved {
   registered_by: number;
 }
 
-
 export interface DataForDashboard {
   totalStudents: number;
   // totalClasses: number;
@@ -86,7 +85,6 @@ export interface DataForDashboard {
     count: number;
   }[];
 }
-
 
 export interface StudentState {
   students: StudentRecieved[];
@@ -106,4 +104,3 @@ export interface StudentState {
   isGetStudentForDashboardError: null | string;
   studentDataForDashboard: DataForDashboard | null;
 }
-

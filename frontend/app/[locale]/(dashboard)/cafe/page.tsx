@@ -1,5 +1,5 @@
-const CafteriaDashboard = () => {
-  return <div>CafteriaDashboard</div>;
-};
+import AccessDashboard from "@/components/access/AccessDashboard";
 
-export default CafteriaDashboard;
+export default function CafeteriaPage() {
+  return <AccessDashboard location="cafeteria" />;
+}

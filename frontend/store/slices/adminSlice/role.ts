@@ -96,11 +96,11 @@ const roleSlice = createSlice({
         state.isRoleError = action.error.message as string;
       })
       .addCase(handleUpdateRole.pending, (state, action) => {
-        state.isRoleCreateLoading = true;
+        state.isRoleUpdateLoading = true;
         state.isRoleError = null;
       })
       .addCase(handleUpdateRole.fulfilled, (state, action) => {
-        state.isRoleCreateLoading = false;
+        state.isRoleUpdateLoading = false;
         state.isRoleError = null;
         state.roles = state.roles.map((role) => {
           if (role.ID === action.payload.ID) {
@@ -111,7 +111,7 @@ const roleSlice = createSlice({
         state.isRoleUpdateSuccess = true;
       })
       .addCase(handleUpdateRole.rejected, (state, action) => {
-        state.isRoleCreateLoading = false;
+        state.isRoleUpdateLoading = false;
         state.isRoleError = action.error.message as string;
       })
       .addCase(handleDeleteRole.pending, (state, action) => {

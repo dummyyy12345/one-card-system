@@ -1,5 +1,6 @@
 "use client";
 import { rolePermission } from "@/lib/rolePermission";
+import { roleHomePath } from "@/lib/roleRoutes";
 import { RootState } from "@/store";
 import { useTranslations } from "next-intl";
 import { usePathname, useRouter } from "next/navigation";
@@ -31,23 +32,19 @@ export function AppSidebar() {
     user?.role.role_name === "Admin"
       ? adminSidebar
       : user?.role.role_name === "Registrar"
-      ? registrarSidebar
-      : gateSidebar;
+        ? registrarSidebar
+        : gateSidebar;
 
   const currentSidebarItems = rolePermission.filter(
     (role) => role.role.toLowerCase().trim() === userRole
   );
-  console.log("CUURENT SIDE BAR ITEMS", currentSidebarItems);
-
   return (
     <Sidebar variant="floating">
       <SidebarHeader>
         <div
           className="flex items-center gap-x-2 cursor-pointer"
           onClick={() =>
-            router.push(
-              `/${locale}/${user?.role.role_name.toLowerCase().trim()}`
-            )
+            router.push(roleHomePath(user?.role.role_name || "", locale))
           }
         >
           <div className="relative flex items-center justify-center h-[80px] w-[80px] rounded-full overflow-hidden">
@@ -86,9 +83,9 @@ export function AppSidebar() {
                   }`}
                   onClick={() =>
                     router.push(
-                      `/${locale}/${user?.role.role_name
-                        .toLowerCase()
-                        .trim()}/${role.permission.toLowerCase().trim()}`
+                      role.label
+                        ? roleHomePath(user?.role.role_name || "", locale)
+                        : `${roleHomePath(user?.role.role_name || "", locale)}/${role.permission.toLowerCase().trim()}`
                     )
                   }
                 >
@@ -100,7 +97,7 @@ export function AppSidebar() {
                         : "hidden"
                     }
                   >
-                    {t(`${role.permission.toLowerCase().trim()}`)}
+                    {role.label || t(`${role.permission.toLowerCase().trim()}`)}
                   </h1>
                 </SidebarMenuItem>
               );

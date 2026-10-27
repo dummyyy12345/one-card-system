@@ -14,8 +14,8 @@ const CreateUserFooter = () => {
               currentPageUserCreate === 1
                 ? "w-1/3"
                 : currentPageUserCreate === 2
-                ? "w-2/3"
-                : "w-full"
+                  ? "w-2/3"
+                  : "w-full"
             }     
         } rounded-l-lg bg-[#3A5DD9] h-full`}
           ></div>

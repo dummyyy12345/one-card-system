@@ -4,35 +4,34 @@ import (
 	"errors"
 	"testing"
 
+	"github.com/SolomonAHailu/one-card-system/models/adminmodels"
 	"github.com/SolomonAHailu/one-card-system/skeletons/mocks"
 	adminRepo "github.com/SolomonAHailu/one-card-system/skeletons/repo/admincontrollers"
 	adminUsecase "github.com/SolomonAHailu/one-card-system/skeletons/usecase/admincontrollers"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
 	"gorm.io/gorm"
-	"github.com/SolomonAHailu/one-card-system/models/adminmodels"
 )
 
-func TestCreateRolePermission(t *testing.T){
+func TestCreateRolePermission(t *testing.T) {
 	mockRolepermissionmanagementRepository := mocks.NewRolepermissionmanagementRepository(t)
 
 	cc := &gin.Context{}
 	dbb := &gorm.DB{}
 
 	mockCreateRolePermissionRequest := &adminRepo.RolepermissionmanagementRequest{
-		Ctx : cc,
-		Gm : dbb,
+		Ctx: cc,
+		Gm:  dbb,
 	}
 
 	mockPermission := adminmodels.Permissions{
-		PermissionsName : "test",
-    	Description  : "test",   
+		PermissionsName: "test",
+		Description:     "test",
 	}
 
-	
-	t.Run("success", func(t *testing.T){
+	t.Run("success", func(t *testing.T) {
 
-		mockRolepermissionmanagementRepository.On("CreateRolePermission",  mockCreateRolePermissionRequest).Return(mockPermission, nil).Once()
+		mockRolepermissionmanagementRepository.On("CreateRolePermission", mockCreateRolePermissionRequest).Return(mockPermission, nil).Once()
 		uc := adminUsecase.NewrolepermissionmanagementUsecase(mockRolepermissionmanagementRepository)
 		permission, err := uc.CreateRolePermission(mockCreateRolePermissionRequest)
 
@@ -41,10 +40,9 @@ func TestCreateRolePermission(t *testing.T){
 		mockRolepermissionmanagementRepository.AssertExpectations(t)
 	})
 
+	t.Run("fail", func(t *testing.T) {
 
-	t.Run("fail", func(t *testing.T){
-
-		mockRolepermissionmanagementRepository.On("CreateRolePermission",  mockCreateRolePermissionRequest).Return(adminmodels.Permissions{}, errors.New("unexpected")).Once()
+		mockRolepermissionmanagementRepository.On("CreateRolePermission", mockCreateRolePermissionRequest).Return(adminmodels.Permissions{}, errors.New("unexpected")).Once()
 		uc := adminUsecase.NewrolepermissionmanagementUsecase(mockRolepermissionmanagementRepository)
 		permission, err := uc.CreateRolePermission(mockCreateRolePermissionRequest)
 
@@ -55,34 +53,31 @@ func TestCreateRolePermission(t *testing.T){
 
 }
 
-
-func TestGetRolePermissions(t *testing.T){
+func TestGetRolePermissions(t *testing.T) {
 	mockRolepermissionmanagementRepository := mocks.NewRolepermissionmanagementRepository(t)
 
 	cc := &gin.Context{}
 	dbb := &gorm.DB{}
 
 	mockCreateRolePermissionRequest := &adminRepo.RolepermissionmanagementRequest{
-		Ctx : cc,
-		Gm : dbb,
+		Ctx: cc,
+		Gm:  dbb,
 	}
 
 	mockPermissions := []adminmodels.Permissions{
 		{
-		PermissionsName : "test",
-		Description  : "test", 
-	    },
-		{
-		PermissionsName : "test2",
-		Description  : "test2", 
+			PermissionsName: "test",
+			Description:     "test",
 		},
-
+		{
+			PermissionsName: "test2",
+			Description:     "test2",
+		},
 	}
 
-	
-	t.Run("success", func(t *testing.T){
+	t.Run("success", func(t *testing.T) {
 
-		mockRolepermissionmanagementRepository.On("GetRolePermissions",  mockCreateRolePermissionRequest).Return(mockPermissions, nil).Once()
+		mockRolepermissionmanagementRepository.On("GetRolePermissions", mockCreateRolePermissionRequest).Return(mockPermissions, nil).Once()
 		uc := adminUsecase.NewrolepermissionmanagementUsecase(mockRolepermissionmanagementRepository)
 		permissions, err := uc.GetRolePermissions(mockCreateRolePermissionRequest)
 
@@ -91,10 +86,9 @@ func TestGetRolePermissions(t *testing.T){
 		mockRolepermissionmanagementRepository.AssertExpectations(t)
 	})
 
+	t.Run("fail", func(t *testing.T) {
 
-	t.Run("fail", func(t *testing.T){
-
-		mockRolepermissionmanagementRepository.On("GetRolePermissions",  mockCreateRolePermissionRequest).Return([]adminmodels.Permissions{}, errors.New("unexpected")).Once()
+		mockRolepermissionmanagementRepository.On("GetRolePermissions", mockCreateRolePermissionRequest).Return([]adminmodels.Permissions{}, errors.New("unexpected")).Once()
 		uc := adminUsecase.NewrolepermissionmanagementUsecase(mockRolepermissionmanagementRepository)
 		permissions, err := uc.GetRolePermissions(mockCreateRolePermissionRequest)
 
@@ -106,26 +100,25 @@ func TestGetRolePermissions(t *testing.T){
 
 }
 
-func TestGetRolePermissionByRoleId(t *testing.T){
+func TestGetRolePermissionByRoleId(t *testing.T) {
 	mockRolepermissionmanagementRepository := mocks.NewRolepermissionmanagementRepository(t)
 
 	cc := &gin.Context{}
 	dbb := &gorm.DB{}
 
 	mockCreateRolePermissionRequest := &adminRepo.RolepermissionmanagementRequest{
-		Ctx : cc,
-		Gm : dbb,
+		Ctx: cc,
+		Gm:  dbb,
 	}
 
 	mockPermissions := adminmodels.Permissions{
-		PermissionsName : "test",
-		Description  : "test", 
+		PermissionsName: "test",
+		Description:     "test",
 	}
 
-	
-	t.Run("success", func(t *testing.T){
+	t.Run("success", func(t *testing.T) {
 
-		mockRolepermissionmanagementRepository.On("GetRolePermissionByRoleId",  mockCreateRolePermissionRequest).Return(mockPermissions, nil).Once()
+		mockRolepermissionmanagementRepository.On("GetRolePermissionByRoleId", mockCreateRolePermissionRequest).Return(mockPermissions, nil).Once()
 		uc := adminUsecase.NewrolepermissionmanagementUsecase(mockRolepermissionmanagementRepository)
 		permissions, err := uc.GetRolePermissionByRoleId(mockCreateRolePermissionRequest)
 
@@ -134,10 +127,9 @@ func TestGetRolePermissionByRoleId(t *testing.T){
 		mockRolepermissionmanagementRepository.AssertExpectations(t)
 	})
 
+	t.Run("fail", func(t *testing.T) {
 
-	t.Run("fail", func(t *testing.T){
-
-		mockRolepermissionmanagementRepository.On("GetRolePermissionByRoleId",  mockCreateRolePermissionRequest).Return(adminmodels.Permissions{}, errors.New("unexpected")).Once()
+		mockRolepermissionmanagementRepository.On("GetRolePermissionByRoleId", mockCreateRolePermissionRequest).Return(adminmodels.Permissions{}, errors.New("unexpected")).Once()
 		uc := adminUsecase.NewrolepermissionmanagementUsecase(mockRolepermissionmanagementRepository)
 		permissions, err := uc.GetRolePermissionByRoleId(mockCreateRolePermissionRequest)
 
@@ -148,27 +140,25 @@ func TestGetRolePermissionByRoleId(t *testing.T){
 
 }
 
-
-func TestDeleteRolePermissionById(t *testing.T){
+func TestDeleteRolePermissionById(t *testing.T) {
 	mockRolepermissionmanagementRepository := mocks.NewRolepermissionmanagementRepository(t)
 
 	cc := &gin.Context{}
 	dbb := &gorm.DB{}
 
 	mockCreateRolePermissionRequest := &adminRepo.RolepermissionmanagementRequest{
-		Ctx : cc,
-		Gm : dbb,
+		Ctx: cc,
+		Gm:  dbb,
 	}
 
 	mockPermissions := adminmodels.Permissions{
-		PermissionsName : "test",
-		Description  : "test", 
+		PermissionsName: "test",
+		Description:     "test",
 	}
 
-	
-	t.Run("success", func(t *testing.T){
+	t.Run("success", func(t *testing.T) {
 
-		mockRolepermissionmanagementRepository.On("DeleteRolePermissionById",  mockCreateRolePermissionRequest).Return(mockPermissions, nil).Once()
+		mockRolepermissionmanagementRepository.On("DeleteRolePermissionById", mockCreateRolePermissionRequest).Return(mockPermissions, nil).Once()
 		uc := adminUsecase.NewrolepermissionmanagementUsecase(mockRolepermissionmanagementRepository)
 		permissions, err := uc.DeleteRolePermissionById(mockCreateRolePermissionRequest)
 
@@ -177,10 +167,9 @@ func TestDeleteRolePermissionById(t *testing.T){
 		mockRolepermissionmanagementRepository.AssertExpectations(t)
 	})
 
+	t.Run("fail", func(t *testing.T) {
 
-	t.Run("fail", func(t *testing.T){
-
-		mockRolepermissionmanagementRepository.On("DeleteRolePermissionById",  mockCreateRolePermissionRequest).Return(adminmodels.Permissions{}, errors.New("unexpected")).Once()
+		mockRolepermissionmanagementRepository.On("DeleteRolePermissionById", mockCreateRolePermissionRequest).Return(adminmodels.Permissions{}, errors.New("unexpected")).Once()
 		uc := adminUsecase.NewrolepermissionmanagementUsecase(mockRolepermissionmanagementRepository)
 		permissions, err := uc.DeleteRolePermissionById(mockCreateRolePermissionRequest)
 
@@ -191,26 +180,25 @@ func TestDeleteRolePermissionById(t *testing.T){
 
 }
 
-func TestUpdateRolePermission(t *testing.T){
+func TestUpdateRolePermission(t *testing.T) {
 	mockRolepermissionmanagementRepository := mocks.NewRolepermissionmanagementRepository(t)
 
 	cc := &gin.Context{}
 	dbb := &gorm.DB{}
 
 	mockCreateRolePermissionRequest := &adminRepo.RolepermissionmanagementRequest{
-		Ctx : cc,
-		Gm : dbb,
+		Ctx: cc,
+		Gm:  dbb,
 	}
 
 	mockPermissions := adminmodels.Permissions{
-		PermissionsName : "test",
-		Description  : "test", 
+		PermissionsName: "test",
+		Description:     "test",
 	}
 
-	
-	t.Run("success", func(t *testing.T){
+	t.Run("success", func(t *testing.T) {
 
-		mockRolepermissionmanagementRepository.On("UpdateRolePermission",  mockCreateRolePermissionRequest).Return(mockPermissions, nil).Once()
+		mockRolepermissionmanagementRepository.On("UpdateRolePermission", mockCreateRolePermissionRequest).Return(mockPermissions, nil).Once()
 		uc := adminUsecase.NewrolepermissionmanagementUsecase(mockRolepermissionmanagementRepository)
 		permissions, err := uc.UpdateRolePermission(mockCreateRolePermissionRequest)
 
@@ -219,10 +207,9 @@ func TestUpdateRolePermission(t *testing.T){
 		mockRolepermissionmanagementRepository.AssertExpectations(t)
 	})
 
+	t.Run("fail", func(t *testing.T) {
 
-	t.Run("fail", func(t *testing.T){
-
-		mockRolepermissionmanagementRepository.On("UpdateRolePermission",  mockCreateRolePermissionRequest).Return(adminmodels.Permissions{}, errors.New("unexpected")).Once()
+		mockRolepermissionmanagementRepository.On("UpdateRolePermission", mockCreateRolePermissionRequest).Return(adminmodels.Permissions{}, errors.New("unexpected")).Once()
 		uc := adminUsecase.NewrolepermissionmanagementUsecase(mockRolepermissionmanagementRepository)
 		permissions, err := uc.UpdateRolePermission(mockCreateRolePermissionRequest)
 

@@ -1,8 +1,10 @@
 package admincontrollers
 
 import (
+	"log/slog"
 	"net/http"
 
+	"github.com/SolomonAHailu/one-card-system/controllers/registrarcontrollers"
 	"github.com/SolomonAHailu/one-card-system/models/adminmodels"
 	// "github.com/SolomonAHailu/one-card-system/models/cafeteriamodels"
 	// "github.com/SolomonAHailu/one-card-system/models/dormitorymodels"
@@ -13,14 +15,12 @@ import (
 	"gorm.io/gorm"
 )
 
-
-
 // create device with location type and ID
 func CreateDevice(c *gin.Context, db *gorm.DB) {
 	var device adminmodels.Devices
 	if err := c.ShouldBindJSON(&device); err != nil {
 		utils.ResponseWithError(c, http.StatusBadRequest, "Invalid input", err)
-		return 
+		return
 	}
 	if err := device.ValidateDevice(db); err != nil {
 		utils.ResponseWithError(c, http.StatusBadRequest, "Invalid input", err)
@@ -28,6 +28,11 @@ func CreateDevice(c *gin.Context, db *gorm.DB) {
 	}
 	if err := db.Create(&device).Error; err != nil {
 		utils.ResponseWithError(c, http.StatusInternalServerError, "Error creating device", err)
+		return
+	}
+	if err := registrarcontrollers.QueueDeviceBackfill(db, device); err != nil {
+		slog.Error("device_backfill_queue_failed", "device_id", device.ID, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Device created, but student sync could not be queued", "data": device})
 		return
 	}
 
@@ -83,6 +88,11 @@ func UpdateDeviceById(c *gin.Context, db *gorm.DB) {
 	// Use GORM's Updates method to update the device
 	if err := db.Model(&device).Updates(updatedDevice).Error; err != nil {
 		utils.ResponseWithError(c, http.StatusInternalServerError, "Error updating device", err)
+		return
+	}
+	if err := registrarcontrollers.QueueDeviceBackfill(db, device); err != nil {
+		slog.Error("device_backfill_queue_failed", "device_id", device.ID, "error", err)
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Device updated, but student sync could not be queued", "data": device})
 		return
 	}
 
@@ -253,6 +263,3 @@ func TestGetDeviceById(t *testing.T) {
   }
 
 */
-
-
-
