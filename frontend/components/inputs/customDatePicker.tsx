@@ -56,15 +56,14 @@ const CustomDatePicker: React.FC<CustomDatePickerProps> = ({
                 onSelect={field.onChange}
                 disabled={disabled}
                 captionLayout="dropdown"
-                toYear={2010}
-                fromYear={1900}
-                initialFocus
+                endMonth={new Date(2010, 11)}
+                startMonth={new Date(1900, 0)}
+                autoFocus
                 classNames={{
-                  day_hidden: "invisible",
+                  hidden: "invisible",
                   dropdown:
                     "px-2 py-1.5 rounded-md bg-popover text-popover-foreground text-sm  focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 ring-offset-background",
-                  caption_dropdowns: "flex gap-3",
-                  vhidden: "hidden",
+                  dropdowns: "flex gap-3",
                   caption_label: "hidden",
                 }}
               />
