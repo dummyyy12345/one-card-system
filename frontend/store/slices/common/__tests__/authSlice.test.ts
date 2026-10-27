@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
-import axios from "axios";
+import apiClient from "@/store/apiClient";
+import { reportError } from "@/lib/errorReporter";
 import { toast } from "sonner";
 import reducer, {
   clearAuthUser,
@@ -9,7 +10,11 @@ import reducer, {
   setLoading,
 } from "../authSlice";
 
-jest.mock("axios");
+jest.mock("@/store/apiClient", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+jest.mock("@/lib/errorReporter", () => ({ reportError: jest.fn() }));
 jest.mock("sonner", () => ({
   toast: { error: jest.fn(), success: jest.fn() },
 }));
@@ -19,7 +24,7 @@ const credentials = { email: "ada@example.com", password: "test-password" };
 beforeEach(() => jest.clearAllMocks());
 
 it("logs in, clears the user on logout, and routes to the login page", async () => {
-  (axios as jest.MockedFunction<typeof axios>).mockResolvedValueOnce({
+  (apiClient as jest.MockedFunction<typeof apiClient>).mockResolvedValueOnce({
     data: { data: user },
   });
   const router = { push: jest.fn() };
@@ -39,7 +44,7 @@ it("logs in, clears the user on logout, and routes to the login page", async () 
 });
 
 it("handles login failures and local state resets", async () => {
-  (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+  (apiClient as jest.MockedFunction<typeof apiClient>).mockRejectedValueOnce({
     response: { data: { error: "invalid credentials" } },
   });
   const store = configureStore({ reducer });
@@ -52,6 +57,13 @@ it("handles login failures and local state resets", async () => {
   );
   expect(handleLogin.rejected.match(action)).toBe(true);
   expect(store.getState().error).toBe("invalid credentials");
+  expect(toast.error).toHaveBeenCalledWith("invalid credentials");
+  expect(reportError).toHaveBeenCalledWith(
+    "auth.login",
+    expect.objectContaining({
+      response: { data: { error: "invalid credentials" } },
+    })
+  );
   store.dispatch(clearAuthUser());
   expect(store.getState().error).toBeNull();
 });

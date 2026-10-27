@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
-import axios from "axios";
+import apiClient from "@/store/apiClient";
+import { reportError } from "@/lib/errorReporter";
 import { toast } from "sonner";
 import reducer, {
   handleFetchPermissionForSpecificRole,
@@ -7,7 +8,11 @@ import reducer, {
   RolePermissionRecieved,
 } from "../rolepermission";
 
-jest.mock("axios");
+jest.mock("@/store/apiClient", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+jest.mock("@/lib/errorReporter", () => ({ reportError: jest.fn() }));
 jest.mock("sonner", () => ({
   toast: { error: jest.fn(), success: jest.fn() },
 }));
@@ -20,7 +25,7 @@ const permission = {
 beforeEach(() => jest.clearAllMocks());
 
 it("loads and updates the permissions for a role", async () => {
-  (axios as jest.MockedFunction<typeof axios>)
+  (apiClient as jest.MockedFunction<typeof apiClient>)
     .mockResolvedValueOnce({ data: { data: [permission] } })
     .mockResolvedValueOnce({ data: { data: [] } });
   const store = configureStore({ reducer });
@@ -38,7 +43,7 @@ it("loads and updates the permissions for a role", async () => {
     )
   ).toBe(true);
   expect(store.getState().rolePermissions).toEqual([]);
-  expect(axios).toHaveBeenLastCalledWith(
+  expect(apiClient).toHaveBeenLastCalledWith(
     expect.objectContaining({
       method: "PATCH",
       data: { role_id: 1, permission_ids: [] },
@@ -47,7 +52,7 @@ it("loads and updates the permissions for a role", async () => {
 });
 
 it("keeps a failed update visible", async () => {
-  (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+  (apiClient as jest.MockedFunction<typeof apiClient>).mockRejectedValueOnce({
     response: { data: { error: "forbidden" } },
   });
   const store = configureStore({ reducer });
@@ -58,4 +63,8 @@ it("keeps a failed update visible", async () => {
   expect(store.getState().isRolePermissionError).toBe("forbidden");
   expect(store.getState().isRolePermissionUpdateLoading).toBe(false);
   expect(toast.error).toHaveBeenCalledWith("forbidden");
+  expect(reportError).toHaveBeenCalledWith(
+    "rolePermission.update",
+    expect.objectContaining({ response: { data: { error: "forbidden" } } })
+  );
 });

@@ -1,5 +1,12 @@
 import { expect, test, type Page } from "@playwright/test";
 
+test("frontend health endpoint responds without login", async ({ request }) => {
+  const response = await request.get("/api/health");
+  expect(response.ok()).toBe(true);
+  expect(response.headers()["cache-control"]).toBe("no-store");
+  expect(await response.json()).toEqual({ status: "ok", service: "frontend" });
+});
+
 async function mockLogin(page: Page, roleName: string, roleID: number) {
   await page.route("**/api/v1/user/login", async (route) => {
     await route.fulfill({

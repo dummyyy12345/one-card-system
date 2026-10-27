@@ -25,7 +25,6 @@ const AddUser = ({ user }: Props) => {
   const { currentPageUserCreate } = useSelector(
     (state: RootState) => state.user
   );
-  console.log("currentPageUserCreate : " + currentPageUserCreate);
   return (
     <DialogContent className="max-h-[700px] min-w-[900px] overflow-y-auto">
       <DialogHeader>

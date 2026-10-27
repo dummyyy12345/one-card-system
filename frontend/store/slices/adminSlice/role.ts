@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { AxiosRequestConfig } from "axios";
 import apiClient from "@/store/apiClient";
-import { reportError } from "@/lib/errorReporter";
+import { reportRequestError } from "@/store/requestError";
 import { addAsyncCases } from "@/store/sliceHelpers";
 import { toast } from "sonner";
 
@@ -103,22 +103,6 @@ const roleSlice = createSlice({
   },
 });
 
-function roleRequestError(
-  context: string,
-  error: unknown,
-  fallback: string
-): never {
-  reportError(context, error);
-  const response =
-    error && typeof error === "object" && "response" in error
-      ? (error.response as { data?: { error?: unknown } } | undefined)
-      : undefined;
-  const message =
-    typeof response?.data?.error === "string" ? response.data.error : fallback;
-  toast.error(message);
-  throw new Error(message);
-}
-
 export const handleFetchRole = createAsyncThunk<DataRecievedWhileFecthRoles>(
   "role/fetchRole",
   async () => {
@@ -134,7 +118,9 @@ export const handleFetchRole = createAsyncThunk<DataRecievedWhileFecthRoles>(
       }
       throw new Error("Get role failed");
     } catch (error: unknown) {
-      return roleRequestError("role.fetch", error, "Get role failed");
+      throw new Error(
+        reportRequestError("role.fetch", error, "Get role failed")
+      );
     }
   }
 );
@@ -156,7 +142,9 @@ export const handleCreateRole = createAsyncThunk<RoleRecieved, RoleSend>(
       }
       throw new Error("Create role failed");
     } catch (error: unknown) {
-      return roleRequestError("role.create", error, "Create role failed");
+      throw new Error(
+        reportRequestError("role.create", error, "Create role failed")
+      );
     }
   }
 );
@@ -178,7 +166,9 @@ export const handleUpdateRole = createAsyncThunk<RoleRecieved, RoleSend>(
       }
       throw new Error("Update role failed");
     } catch (error: unknown) {
-      return roleRequestError("role.update", error, "Update role failed");
+      throw new Error(
+        reportRequestError("role.update", error, "Update role failed")
+      );
     }
   }
 );
@@ -198,7 +188,9 @@ export const handleDeleteRole = createAsyncThunk<RoleRecieved, { id: number }>(
       }
       throw new Error("Delete role failed");
     } catch (error: unknown) {
-      return roleRequestError("role.delete", error, "Delete role failed");
+      throw new Error(
+        reportRequestError("role.delete", error, "Delete role failed")
+      );
     }
   }
 );

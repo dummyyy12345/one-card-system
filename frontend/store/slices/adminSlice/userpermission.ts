@@ -1,6 +1,8 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios, { AxiosRequestConfig } from "axios";
-import { handleFetchUser, increareCurrentPage, UserRecieved } from "./user";
+import type { AxiosRequestConfig } from "axios";
+import apiClient from "@/store/apiClient";
+import { reportRequestError } from "@/store/requestError";
+import { increareCurrentPage, type UserRecieved } from "./user";
 import { toast } from "sonner";
 import { PermissionRecieved } from "./permission";
 
@@ -105,32 +107,27 @@ export const handleCreateUserPermission = createAsyncThunk<
 >(
   "userPermission/createUserPermission",
   async (data, { rejectWithValue, dispatch }) => {
-    const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/admin/createuserpermission`;
-
     const config: AxiosRequestConfig = {
-      url,
+      url: "/api/v1/admin/createuserpermission",
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       data,
-      withCredentials: true,
     };
 
     try {
-      const response = await axios(config);
+      const response = await apiClient(config);
       if (response.data) {
         dispatch<any>(increareCurrentPage());
         toast.success("User permission created successfully");
         return response.data;
-      } else {
-        toast.error("Create users failed");
-        throw new Error("Create users failed");
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Create users failed");
+      throw new Error("Create user permissions failed");
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data?.error || "Create users failed"
+        reportRequestError(
+          "userPermission.create",
+          error,
+          "Create user permissions failed"
+        )
       );
     }
   }
@@ -141,29 +138,24 @@ export const handleFetchUserPermission = createAsyncThunk<
   DataReceivedWhileFetchUserPermission,
   number
 >("userPermission/fetchUserPermission", async (user_id) => {
-  const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/admin/userpermission/${user_id}`;
-
   const config: AxiosRequestConfig = {
-    url,
+    url: `/api/v1/admin/userpermission/${user_id}`,
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    withCredentials: true,
   };
 
   try {
-    const response = await axios(config);
+    const response = await apiClient(config);
     if (response.data) {
       return response.data;
-    } else {
-      toast.error("Fetch user permission failed");
-      throw new Error("Fetch user permission failed");
     }
-  } catch (error: any) {
-    toast.error(error.response?.data?.error || "Fetch user permission failed");
+    throw new Error("Fetch user permissions failed");
+  } catch (error: unknown) {
     throw new Error(
-      error.response?.data?.error || "Fetch user permission failed"
+      reportRequestError(
+        "userPermission.fetch",
+        error,
+        "Fetch user permissions failed"
+      )
     );
   }
 });
@@ -175,32 +167,27 @@ export const handleUpdateUserPermission = createAsyncThunk<
 >(
   "userPermission/updateUserPermission",
   async (data, { rejectWithValue, dispatch }) => {
-    const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/admin/updateuserpermission`;
-
     const config: AxiosRequestConfig = {
-      url,
+      url: "/api/v1/admin/updateuserpermission",
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
       data,
-      withCredentials: true,
     };
 
     try {
-      const response = await axios(config);
+      const response = await apiClient(config);
       if (response.data) {
         dispatch<any>(increareCurrentPage());
         toast.success("User permission updated successfully");
         return response.data;
-      } else {
-        toast.error("Update users failed");
-        throw new Error("Update users failed");
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Update users failed");
+      throw new Error("Update user permissions failed");
+    } catch (error: unknown) {
       return rejectWithValue(
-        error.response?.data?.error || "Update users failed"
+        reportRequestError(
+          "userPermission.update",
+          error,
+          "Update user permissions failed"
+        )
       );
     }
   }

@@ -1,5 +1,7 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import axios, { AxiosRequestConfig } from "axios";
+import type { AxiosRequestConfig } from "axios";
+import apiClient from "@/store/apiClient";
+import { reportRequestError } from "@/store/requestError";
 import { toast } from "sonner";
 import { roleHomePath } from "@/lib/roleRoutes";
 
@@ -92,29 +94,24 @@ export const handleLogin = createAsyncThunk<
   DataRecievedWhileUserLogin,
   { data: LoginUserSendData; router: any; locale?: string }
 >("auth/login", async ({ data, router, locale = "en" }) => {
-  const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/user/login`;
   const config: AxiosRequestConfig = {
-    url,
+    url: "/api/v1/user/login",
     method: "POST",
     data: data,
-    withCredentials: true,
   };
 
   try {
-    const response = await axios(config);
-    if (response.data.data) {
+    const response = await apiClient(config);
+    if (response.data?.data) {
       router.push(
         roleHomePath(response.data.data.role?.role_name || "", locale)
       );
       toast.success("Logged in successfully");
       return response.data;
-    } else {
-      toast.error("Invalid login data");
-      throw new Error("Invalid login data");
     }
-  } catch (error: any) {
-    toast.error(`${error.response?.data?.error} || "Login failed"`);
-    throw new Error(error.response?.data?.error || "Login failed");
+    throw new Error("Invalid login data");
+  } catch (error: unknown) {
+    throw new Error(reportRequestError("auth.login", error, "Login failed"));
   }
 });
 

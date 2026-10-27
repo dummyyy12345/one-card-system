@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
-import axios from "axios";
+import apiClient from "@/store/apiClient";
+import { reportError } from "@/lib/errorReporter";
 import { toast } from "sonner";
 import reducer, {
   handleCreatePermission,
@@ -11,7 +12,11 @@ import reducer, {
   resetPermissionUpdateSuccess,
 } from "../permission";
 
-jest.mock("axios");
+jest.mock("@/store/apiClient", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+jest.mock("@/lib/errorReporter", () => ({ reportError: jest.fn() }));
 jest.mock("sonner", () => ({
   toast: { error: jest.fn(), success: jest.fn() },
 }));
@@ -28,8 +33,8 @@ const permission = {
 beforeEach(() => jest.clearAllMocks());
 
 it("fetches, creates, updates and deletes permissions", async () => {
-  const mockAxios = axios as jest.MockedFunction<typeof axios>;
-  mockAxios
+  const mockClient = apiClient as jest.MockedFunction<typeof apiClient>;
+  mockClient
     .mockResolvedValueOnce({ data: { data: [permission] } })
     .mockResolvedValueOnce({ data: { data: permission } })
     .mockResolvedValueOnce({
@@ -75,8 +80,11 @@ it("fetches, creates, updates and deletes permissions", async () => {
   ).toBe(true);
   expect(store.getState().permissions).toEqual([]);
   expect(store.getState().isPermissionDeleteSuceess).toBe(true);
-  expect(mockAxios).toHaveBeenCalledWith(
-    expect.objectContaining({ method: "DELETE", withCredentials: true })
+  expect(mockClient).toHaveBeenCalledWith(
+    expect.objectContaining({
+      method: "DELETE",
+      url: "/api/v1/admin/permissions/7",
+    })
   );
 });
 
@@ -92,7 +100,7 @@ it("uses update loading and shows the actual API error", async () => {
   expect(pending.isPermissionUpdateLoading).toBe(true);
   expect(pending.isPermissionCreateLoading).toBe(false);
 
-  (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+  (apiClient as jest.MockedFunction<typeof apiClient>).mockRejectedValueOnce({
     response: { data: { error: "permission in use" } },
   });
   const store = configureStore({ reducer });
@@ -100,4 +108,10 @@ it("uses update loading and shows the actual API error", async () => {
   expect(handleDeletePermission.rejected.match(action)).toBe(true);
   expect(store.getState().isPermissionError).toBe("permission in use");
   expect(toast.error).toHaveBeenCalledWith("permission in use");
+  expect(reportError).toHaveBeenCalledWith(
+    "permission.delete",
+    expect.objectContaining({
+      response: { data: { error: "permission in use" } },
+    })
+  );
 });

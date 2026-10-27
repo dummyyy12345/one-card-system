@@ -1,5 +1,8 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import axios, { AxiosRequestConfig } from "axios";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import type { AxiosRequestConfig } from "axios";
+import apiClient from "@/store/apiClient";
+import { addAsyncCases } from "@/store/sliceHelpers";
+import { reportRequestError } from "@/store/requestError";
 import { toast } from "sonner";
 
 export interface CreatePermissionDataSend {
@@ -62,72 +65,45 @@ const permissionSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder
-      .addCase(handleFetchPermissions.pending, (state) => {
-        state.isPermissionLoading = true;
-        state.isPermissionError = null;
-      })
-      .addCase(
-        handleFetchPermissions.fulfilled,
-        (state, action: PayloadAction<PermissionsRecievedData>) => {
-          state.permissions = action.payload.data;
-          state.isPermissionLoading = false;
-          state.isPermissionError = null;
-        }
-      )
-      .addCase(handleFetchPermissions.rejected, (state, action) => {
-        state.isPermissionLoading = false;
-        state.isPermissionError = action.error.message as string;
-      })
-      .addCase(handleCreatePermission.pending, (state) => {
-        state.isPermissionCreateLoading = true;
-        state.isPermissionError = null;
-      })
-      .addCase(handleCreatePermission.fulfilled, (state, action) => {
-        state.permissions.push(action.payload);
+    addAsyncCases(builder, handleFetchPermissions, {
+      loadingKey: "isPermissionLoading",
+      errorKey: "isPermissionError",
+      fallbackError: "Get permission failed",
+      onFulfilled: (state, payload) => {
+        state.permissions = payload.data;
+      },
+    });
+    addAsyncCases(builder, handleCreatePermission, {
+      loadingKey: "isPermissionCreateLoading",
+      errorKey: "isPermissionError",
+      fallbackError: "Create permission failed",
+      onFulfilled: (state, payload) => {
+        state.permissions.push(payload);
         state.isPermissionCreateSuccess = true;
-        state.isPermissionCreateLoading = false;
-        state.isPermissionError = null;
-      })
-      .addCase(handleCreatePermission.rejected, (state, action) => {
-        state.isPermissionCreateLoading = false;
-        state.isPermissionError = action.error.message as string;
-      })
-      .addCase(handleUpdatePermission.pending, (state, action) => {
-        state.isPermissionUpdateLoading = true;
-        state.isPermissionError = null;
-      })
-      .addCase(handleUpdatePermission.fulfilled, (state, action) => {
-        state.isPermissionUpdateLoading = false;
-        state.isPermissionError = null;
-        state.permissions = state.permissions.map((permission) => {
-          if (permission.ID === action.payload.ID) {
-            return action.payload;
-          }
-          return permission;
-        });
-        state.isPermissionUpdateSuccess = true;
-      })
-      .addCase(handleUpdatePermission.rejected, (state, action) => {
-        state.isPermissionUpdateLoading = false;
-        state.isPermissionError = action.error.message as string;
-      })
-      .addCase(handleDeletePermission.pending, (state, action) => {
-        state.isPermissionDeleteLoading = true;
-        state.isPermissionError = null;
-      })
-      .addCase(handleDeletePermission.fulfilled, (state, action) => {
-        state.isPermissionDeleteLoading = false;
-        state.isPermissionError = null;
-        state.isPermissionDeleteSuceess = true;
-        state.permissions = state.permissions.filter(
-          (permission) => permission.ID !== action.payload.ID
+      },
+    });
+    addAsyncCases(builder, handleUpdatePermission, {
+      loadingKey: "isPermissionUpdateLoading",
+      errorKey: "isPermissionError",
+      fallbackError: "Update permission failed",
+      onFulfilled: (state, payload) => {
+        state.permissions = state.permissions.map((permission) =>
+          permission.ID === payload.ID ? payload : permission
         );
-      })
-      .addCase(handleDeletePermission.rejected, (state, action) => {
-        state.isPermissionDeleteLoading = false;
-        state.isPermissionError = action.error.message as string;
-      });
+        state.isPermissionUpdateSuccess = true;
+      },
+    });
+    addAsyncCases(builder, handleDeletePermission, {
+      loadingKey: "isPermissionDeleteLoading",
+      errorKey: "isPermissionError",
+      fallbackError: "Delete permission failed",
+      onFulfilled: (state, payload) => {
+        state.permissions = state.permissions.filter(
+          (permission) => permission.ID !== payload.ID
+        );
+        state.isPermissionDeleteSuceess = true;
+      },
+    });
   },
 });
 
@@ -135,27 +111,21 @@ const permissionSlice = createSlice({
 export const handleFetchPermissions = createAsyncThunk<PermissionsRecievedData>(
   "permission/fetchPermission",
   async () => {
-    const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/admin/permissions`;
-
     const config: AxiosRequestConfig = {
-      url,
+      url: "/api/v1/admin/permissions",
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      withCredentials: true,
     };
 
     try {
-      const response = await axios(config);
+      const response = await apiClient(config);
       if (response.data) {
         return response.data;
-      } else {
-        throw new Error("Get permission Failed");
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Get permission Failed");
-      throw new Error(error.response?.data?.error || "Get permission Failed");
+      throw new Error("Get permission failed");
+    } catch (error: unknown) {
+      throw new Error(
+        reportRequestError("permission.fetch", error, "Get permission failed")
+      );
     }
   }
 );
@@ -164,29 +134,23 @@ export const handleCreatePermission = createAsyncThunk<
   PermissionRecieved,
   CreatePermissionDataSend
 >("permission/createPermission", async (data) => {
-  const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/admin/permissions`;
-
   const config: AxiosRequestConfig = {
-    url,
+    url: "/api/v1/admin/permissions",
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     data: data,
-    withCredentials: true,
   };
 
   try {
-    const response = await axios(config);
+    const response = await apiClient(config);
     if (response.data) {
       toast.success("Permission created successfully");
       return response.data.data;
-    } else {
-      throw new Error("Create permission Failed");
     }
-  } catch (error: any) {
-    toast.error(error.response?.data?.error || "Create permission Failed");
-    throw new Error(error.response?.data?.error || "Create permission Failed");
+    throw new Error("Create permission failed");
+  } catch (error: unknown) {
+    throw new Error(
+      reportRequestError("permission.create", error, "Create permission failed")
+    );
   }
 });
 
@@ -194,29 +158,23 @@ export const handleUpdatePermission = createAsyncThunk<
   PermissionRecieved,
   CreatePermissionDataSend
 >("permission/updatePermission", async (data) => {
-  const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/admin/permissions/${data.id}`;
-
   const config: AxiosRequestConfig = {
-    url,
+    url: `/api/v1/admin/permissions/${data.id}`,
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
     data: data,
-    withCredentials: true,
   };
 
   try {
-    const response = await axios(config);
+    const response = await apiClient(config);
     if (response.data) {
       toast.success("Permission updated successfully");
       return response.data.data;
-    } else {
-      throw new Error("Update permission Failed");
     }
-  } catch (error: any) {
-    toast.error(error.response?.data?.error || "Update permission Failed");
-    throw new Error(error.response?.data?.error || "Update permission Failed");
+    throw new Error("Update permission failed");
+  } catch (error: unknown) {
+    throw new Error(
+      reportRequestError("permission.update", error, "Update permission failed")
+    );
   }
 });
 
@@ -224,29 +182,22 @@ export const handleDeletePermission = createAsyncThunk<
   PermissionRecieved,
   { id: number }
 >("permission/deletePemission", async (data) => {
-  const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/admin/permissions/${data.id}`;
-
   const config: AxiosRequestConfig = {
-    url,
+    url: `/api/v1/admin/permissions/${data.id}`,
     method: "DELETE",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    withCredentials: true,
   };
 
   try {
-    const response = await axios(config);
+    const response = await apiClient(config);
     if (response.data) {
       toast.success("Permission deleted successfully");
       return response.data.data;
-    } else {
-      toast.error("Delete permission Failed");
-      throw new Error("Delete permission Failed");
     }
-  } catch (error: any) {
-    toast.error(error.response?.data?.error || "Delete permission Failed");
-    throw new Error(error.response?.data?.error || "Delete permission Failed");
+    throw new Error("Delete permission failed");
+  } catch (error: unknown) {
+    throw new Error(
+      reportRequestError("permission.delete", error, "Delete permission failed")
+    );
   }
 });
 

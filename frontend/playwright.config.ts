@@ -12,7 +12,7 @@ export default defineConfig({
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
     command: "npm run dev -- --hostname 127.0.0.1 --port 3100",
-    url: `${baseURL}/en/login`,
+    url: `${baseURL}/api/health`,
     env: { NEXT_PUBLIC_API_SERVER_URL: baseURL },
     reuseExistingServer: !process.env.CI,
     timeout: 120_000,

@@ -13,7 +13,7 @@ cp .env.example .env
 docker compose up --build
 ```
 
-Open <http://localhost:3000>. The API is at <http://localhost:8888>, its liveness endpoint is <http://localhost:8888/healthz>, its database readiness endpoint is <http://localhost:8888/readyz>, and metrics are at <http://localhost:8888/metrics>. Compose starts PostgreSQL, runs the database migration, and starts both applications. The Compose defaults are **development only**. Replace the `API_SECRET` and `DB_PASSWORD` placeholders before exposing the stack outside your machine. Restrict access to `/metrics` when deploying the API publicly.
+Open <http://localhost:3000>. The frontend liveness endpoint is <http://localhost:3000/api/health>. The API is at <http://localhost:8888>, its liveness endpoint is <http://localhost:8888/healthz>, its database readiness endpoint is <http://localhost:8888/readyz>, and metrics are at <http://localhost:8888/metrics>. Compose starts PostgreSQL, runs the database migration, and starts both applications. The Compose defaults are **development only**. Replace the `API_SECRET` and `DB_PASSWORD` placeholders before exposing the stack outside your machine. Restrict access to `/metrics` when deploying the API publicly.
 
 ## Local install
 
@@ -48,6 +48,8 @@ npm run dev
 The frontend expects `NEXT_PUBLIC_API_SERVER_URL=http://localhost:8888`. Visit <http://localhost:3000>. The API health route does not require authentication. Student synchronization runs only when `SERVICE` is configured with a reachable student-system URL. Connected access devices and SMTP need valid credentials and reachable services.
 
 ## Test and checks
+
+From a fresh clone, install Node.js 22 and the Go version in `backend/go.mod`, then run `sh scripts/verify.sh` at the repository root. It installs the locked frontend dependencies and runs frontend lint, format, type, coverage, and build checks plus Go vet, build, and unit tests. CI runs this same root command from a clean checkout on every push and pull request. Browser and PostgreSQL integration tests run in separate CI jobs.
 
 ```sh
 cd backend

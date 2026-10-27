@@ -12,8 +12,6 @@ import { useEffect, useState } from "react";
 import CustomInputWithLabel from "@/components/inputs/customInputWithLabel";
 
 const UserBasicInfo = ({ user }: { user: UserRecieved }) => {
-  console.log("UserBasicInfo", user);
-
   const t = useTranslations("adminusers");
   const { roles } = useSelector((state: RootState) => state.role);
 
