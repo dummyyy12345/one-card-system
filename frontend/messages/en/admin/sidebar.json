@@ -3,6 +3,7 @@
     "users": "Users",
     "roles": "Roles",
     "permissions": "Permissions",
-    "devices": "Devices"
+    "devices": "Devices",
+    "access": "Access rules"
   }
 }

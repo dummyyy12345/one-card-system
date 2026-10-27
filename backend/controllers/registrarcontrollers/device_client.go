@@ -35,7 +35,11 @@ func newDigestDeviceClient() DeviceClient {
 }
 
 func deviceURL(device adminmodels.Devices, path string, query url.Values) string {
-	return (&url.URL{Scheme: "http", Host: device.IPAddress, Path: path, RawQuery: query.Encode()}).String()
+	host := device.IPAddress
+	if device.Port > 0 && device.Port != 80 {
+		host += ":" + strconv.Itoa(device.Port)
+	}
+	return (&url.URL{Scheme: "http", Host: host, Path: path, RawQuery: query.Encode()}).String()
 }
 
 func (client *digestDeviceClient) send(ctx context.Context, method, endpoint string, payload any) error {
@@ -72,7 +76,22 @@ func (client *digestDeviceClient) Check(ctx context.Context, device adminmodels.
 }
 
 func (client *digestDeviceClient) UpdateCard(ctx context.Context, device adminmodels.Devices, student registrarmodels.Student, previous string) error {
+	removals := []string{}
 	if previous != "" {
+		removals = append(removals, previous)
+	}
+	return client.syncCards(ctx, device, student, removals)
+}
+
+func syncCardsToDevice(ctx context.Context, device adminmodels.Devices, student registrarmodels.Student, removals []string) error {
+	return newDigestDeviceClient().(*digestDeviceClient).syncCards(ctx, device, student, removals)
+}
+
+func (client *digestDeviceClient) syncCards(ctx context.Context, device adminmodels.Devices, student registrarmodels.Student, removals []string) error {
+	for _, previous := range removals {
+		if student.CardNumber != nil && previous == *student.CardNumber {
+			continue
+		}
 		query := url.Values{"action": {"removeMulti"}, "CardNoList[0]": {previous}}
 		if err := client.send(ctx, http.MethodDelete, deviceURL(device, "/cgi-bin/AccessCard.cgi", query), nil); err != nil {
 			return err

@@ -3,6 +3,7 @@
     "users": "ተጠቃሚዎች",
     "roles": "ሚናዎች",
     "permissions": "ፈቃዶች",
-    "devices": "መሳሪያዎች"
+    "devices": "መሳሪያዎች",
+    "access": "የመግቢያ ደንቦች"
   }
 }

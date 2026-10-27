@@ -5,7 +5,9 @@ import (
 	"math"
 	"net/http"
 	"strconv"
+	"time"
 
+	"github.com/SolomonAHailu/one-card-system/models/accessmodels"
 	"github.com/SolomonAHailu/one-card-system/models/adminmodels"
 	"github.com/SolomonAHailu/one-card-system/models/registrarmodels"
 	"github.com/SolomonAHailu/one-card-system/utils"
@@ -34,6 +36,9 @@ func GetStudents(c *gin.Context, db *gorm.DB) {
 	}
 
 	query := db.Model(&registrarmodels.Student{})
+	if actorID := c.GetUint("userId"); actorID != 0 {
+		query = query.Where("registered_by_id IS NULL OR registered_by_id = ?", actorID)
+	}
 
 	if name != "" {
 		query = query.Where("LOWER(first_name) LIKE LOWER(?) OR LOWER(father_name) LIKE LOWER(?) OR LOWER(grand_father_name) LIKE LOWER(?)", "%"+name+"%", "%"+name+"%", "%"+name+"%")
@@ -84,6 +89,16 @@ func GetStudentById(c *gin.Context, db *gorm.DB) {
 		}
 		utils.ResponseWithError(c, http.StatusInternalServerError, "Error fetching student", err)
 		return
+	}
+	if !registrarCanAccess(c, student) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Student record access denied"})
+		return
+	}
+	if actorID := c.GetUint("userId"); actorID != 0 {
+		if err := db.Create(&accessmodels.StudentViewAudit{StudentID: student.ID, ActorID: actorID, ViewedAt: time.Now().UTC()}).Error; err != nil {
+			c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to audit student detail view"})
+			return
+		}
 	}
 	c.JSON(http.StatusOK, gin.H{"data": student})
 }
@@ -144,6 +159,10 @@ func CreateStudentManually(c *gin.Context, db *gorm.DB) {
 		utils.ResponseWithError(c, http.StatusBadRequest, "Invalid JSON", err)
 		return
 	}
+	if actorID := c.GetUint("userId"); actorID != 0 {
+		owner := int(actorID)
+		student.RegisteredByID = &owner
+	}
 	if err := student.Validate(db); err != nil {
 		utils.ResponseWithError(c, http.StatusBadRequest, "Validation error", err)
 		return
@@ -159,13 +178,13 @@ func CreateStudentManually(c *gin.Context, db *gorm.DB) {
 		utils.ResponseWithError(c, http.StatusBadRequest, "Validation error", err)
 		return
 	}
-	//Create student
-	if err := db.Create(&student).Error; err != nil {
-		utils.ResponseWithError(c, http.StatusInternalServerError, "Error inserting new student", err)
-		return
-	}
-	if err := queueStudentSync(db, devices, student); err != nil {
-		utils.ResponseWithError(c, http.StatusInternalServerError, "Student saved but device sync could not be queued", err)
+	if err := db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Create(&student).Error; err != nil {
+			return err
+		}
+		return queueStudentSync(tx, devices, student)
+	}); err != nil {
+		utils.ResponseWithError(c, http.StatusInternalServerError, "Unable to create student and queue device sync", err)
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"message": "Student successfully created", "data": student})
@@ -184,6 +203,10 @@ func UpdateStudentManually(c *gin.Context, db *gorm.DB) {
 		utils.ResponseWithError(c, http.StatusNotFound, "Student not found", err)
 		return
 	}
+	if !registrarCanAccess(c, existingStudent) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Student record access denied"})
+		return
+	}
 
 	// Validate the updated student
 	if err := student.ValidateForUpdate(db, existingStudent.ID); err != nil {
@@ -191,20 +214,41 @@ func UpdateStudentManually(c *gin.Context, db *gorm.DB) {
 		return
 	}
 
-	// Use GORM's `Updates` method to update the specific fields
-	if err := db.Model(&existingStudent).Updates(student).Error; err != nil {
-		utils.ResponseWithError(c, http.StatusInternalServerError, "Error updating student", err)
-		return
-	}
-
-	// Fetch all devices to send the updated student information
 	var devices []adminmodels.Devices
 	if err := db.Find(&devices).Error; err != nil {
 		utils.ResponseWithError(c, http.StatusInternalServerError, "Error fetching devices", err)
 		return
 	}
-	if err := queueStudentSync(db, devices, existingStudent); err != nil {
-		utils.ResponseWithError(c, http.StatusInternalServerError, "Student saved but device sync could not be queued", err)
+	previousCard := ""
+	if existingStudent.CardNumber != nil {
+		previousCard = *existingStudent.CardNumber
+	}
+	hadPhoto := existingStudent.Photo != nil && *existingStudent.Photo != ""
+	cardChanged := student.CardNumber != nil && (existingStudent.CardNumber == nil || *student.CardNumber != *existingStudent.CardNumber)
+	photoChanged := student.Photo != nil && (existingStudent.Photo == nil || *student.Photo != *existingStudent.Photo)
+	student.ID = 0
+	student.RegisteredByID = existingStudent.RegisteredByID
+	if err := db.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&existingStudent).Updates(student).Error; err != nil {
+			return err
+		}
+		if err := tx.First(&existingStudent, existingStudent.ID).Error; err != nil {
+			return err
+		}
+		if err := queueStudentSync(tx, devices, existingStudent); err != nil {
+			return err
+		}
+		if cardChanged {
+			if err := queueMediaSync(tx, devices, existingStudent, "card", previousCard, false); err != nil {
+				return err
+			}
+		}
+		if photoChanged {
+			return queueMediaSync(tx, devices, existingStudent, "photo", "", hadPhoto)
+		}
+		return nil
+	}); err != nil {
+		utils.ResponseWithError(c, http.StatusInternalServerError, "Unable to update student and queue device sync", err)
 		return
 	}
 

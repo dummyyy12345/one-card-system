@@ -21,6 +21,9 @@ type fakeStudentUpdateStore struct {
 	studentErr error
 	saveErr    error
 	saved      *registrarmodels.Student
+	queuedKind string
+	previous   string
+	hadPhoto   bool
 }
 
 func (store *fakeStudentUpdateStore) devices(context.Context) ([]adminmodels.Devices, error) {
@@ -31,9 +34,10 @@ func (store *fakeStudentUpdateStore) student(context.Context, string) (registrar
 	return store.record, store.studentErr
 }
 
-func (store *fakeStudentUpdateStore) save(_ context.Context, student *registrarmodels.Student) error {
+func (store *fakeStudentUpdateStore) saveAndQueue(_ context.Context, student *registrarmodels.Student, _ []adminmodels.Devices, kind, previous string, hadPhoto bool) error {
 	copy := *student
 	store.saved = &copy
+	store.queuedKind, store.previous, store.hadPhoto = kind, previous, hadPhoto
 	return store.saveErr
 }
 
@@ -82,24 +86,20 @@ func TestUpdateStudentCardNumberOffline(t *testing.T) {
 	for _, test := range []struct {
 		name       string
 		body       string
-		checkErr   error
-		cardErr    error
 		wantStatus int
 		wantSaved  bool
 		wantCard   string
 	}{
-		{"updates card", `{"card_number":"87654321"}`, nil, nil, http.StatusOK, true, "87654321"},
-		{"clears card", `{"card_number":""}`, nil, nil, http.StatusOK, true, ""},
-		{"rejects invalid card", `{"card_number":"123"}`, nil, nil, http.StatusBadRequest, false, ""},
-		{"rejects unavailable device", `{"card_number":"87654321"}`, errors.New("offline"), nil, http.StatusBadGateway, false, ""},
-		{"reports failed sync", `{"card_number":"87654321"}`, nil, errors.New("offline"), http.StatusBadGateway, true, "87654321"},
+		{"updates card", `{"card_number":"87654321"}`, http.StatusAccepted, true, "87654321"},
+		{"clears card", `{"card_number":""}`, http.StatusAccepted, true, ""},
+		{"rejects invalid card", `{"card_number":"123"}`, http.StatusBadRequest, false, ""},
 	} {
 		t.Run(test.name, func(t *testing.T) {
 			store := &fakeStudentUpdateStore{
 				record:     registrarmodels.Student{Model: gorm.Model{ID: 7}, CardNumber: &oldCard},
 				deviceList: []adminmodels.Devices{device},
 			}
-			client := &fakeDeviceClient{checkErr: test.checkErr, cardErr: test.cardErr}
+			client := &fakeDeviceClient{checkErr: errors.New("offline")}
 			c, recorder := studentUpdateRequest(t, test.body)
 			updateStudentCardNumber(c, store, client)
 			if recorder.Code != test.wantStatus {
@@ -113,8 +113,8 @@ func TestUpdateStudentCardNumberOffline(t *testing.T) {
 				if store.saved.CardNumber != nil {
 					got = *store.saved.CardNumber
 				}
-				if got != test.wantCard || client.previous != oldCard || client.cards != 1 {
-					t.Fatalf("saved card = %q, previous = %q, card calls = %d", got, client.previous, client.cards)
+				if got != test.wantCard || store.previous != oldCard || store.queuedKind != "card" || client.cards != 0 || client.checks != 0 {
+					t.Fatalf("saved card = %q, queued previous = %q, kind = %q", got, store.previous, store.queuedKind)
 				}
 			}
 		})
@@ -126,22 +126,22 @@ func TestUpdateStudentPhotoOffline(t *testing.T) {
 		record:     registrarmodels.Student{Model: gorm.Model{ID: 7}},
 		deviceList: []adminmodels.Devices{{IPAddress: "unreachable-device"}},
 	}
-	client := &fakeDeviceClient{}
+	client := &fakeDeviceClient{checkErr: errors.New("offline")}
 	c, recorder := studentUpdateRequest(t, `{"photo":"base64-image"}`)
 	updateStudentPhoto(c, store, client)
-	if recorder.Code != http.StatusOK || store.saved == nil || store.saved.Photo == nil || *store.saved.Photo != "base64-image" {
+	if recorder.Code != http.StatusAccepted || store.saved == nil || store.saved.Photo == nil || *store.saved.Photo != "base64-image" {
 		t.Fatalf("photo update failed: status=%d saved=%+v", recorder.Code, store.saved)
 	}
-	if client.checks != 1 || client.photos != 1 || client.hadPhoto {
-		t.Fatalf("unexpected device calls: %+v", client)
+	if client.checks != 0 || client.photos != 0 || store.queuedKind != "photo" || store.hadPhoto {
+		t.Fatalf("unexpected queue or device calls: %+v", client)
 	}
 
 	store.saved = nil
-	client.photoErr = errors.New("offline")
+	store.saveErr = errors.New("database unavailable")
 	c, recorder = studentUpdateRequest(t, `{"photo":"base64-image"}`)
 	updateStudentPhoto(c, store, client)
-	if recorder.Code != http.StatusBadGateway || store.saved == nil {
-		t.Fatalf("sync failure should be visible after save: status=%d", recorder.Code)
+	if recorder.Code != http.StatusInternalServerError || store.saved == nil {
+		t.Fatalf("transaction failure should be visible: status=%d", recorder.Code)
 	}
 }
 

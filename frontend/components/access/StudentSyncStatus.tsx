@@ -15,8 +15,10 @@ import {
 type Job = {
   ID: number;
   device_id: number;
-  status: "pending" | "succeeded" | "failed" | "cancelled";
+  status: "pending" | "processing" | "succeeded" | "failed" | "cancelled";
   attempts: number;
+  sync_card: boolean;
+  sync_photo: boolean;
   synced_at: string | null;
   next_attempt_at: string;
 };
@@ -79,6 +81,8 @@ export default function StudentSyncStatus({
             {jobs.map((job) => (
               <li key={job.ID}>
                 Device {job.device_id}: {job.status} · {job.attempts} attempts
+                {job.sync_card ? " · card" : ""}
+                {job.sync_photo ? " · photo" : ""}
               </li>
             ))}
           </ul>

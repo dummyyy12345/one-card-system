@@ -15,6 +15,7 @@ import (
 	"github.com/SolomonAHailu/one-card-system/models/registrarmodels"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 )
 
 func validLocation(location string) bool {
@@ -55,60 +56,96 @@ func authorizeLocation(c *gin.Context, db *gorm.DB, location string) bool {
 }
 
 func CheckCard(c *gin.Context, db *gorm.DB) {
-	var input struct {
-		CardNumber string `json:"card_number" binding:"required"`
-		Location   string `json:"location" binding:"required"`
-		Station    string `json:"station" binding:"required"`
-	}
-	if err := c.ShouldBindJSON(&input); err != nil || len(input.CardNumber) > 128 || len(input.Station) > 64 || strings.TrimSpace(input.CardNumber) == "" || strings.TrimSpace(input.Station) == "" {
+	var input CardCheckInput
+	if err := c.ShouldBindJSON(&input); err != nil || !validCheckInput(input) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid card check request"})
 		return
 	}
 	if !authorizeLocation(c, db, input.Location) {
 		return
 	}
+	event, student, err := StoreAccessDecision(db, input, c.GetUint("userId"), "", nil)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to record access decision"})
+		return
+	}
+	response := gin.H{"decision": event.Decision, "reason": event.Reason, "event_id": event.ID, "policy_version": event.PolicyVersion}
+	if event.Decision == "allowed" && student != nil {
+		response["student"] = gin.H{"id": student.ID, "student_id": student.StudentID, "name": strings.TrimSpace(student.FirstName + " " + student.FatherName)}
+	}
+	c.JSON(http.StatusOK, response)
+}
+
+type CardCheckInput struct {
+	CardNumber string `json:"card_number" binding:"required"`
+	Location   string `json:"location" binding:"required"`
+	Station    string `json:"station" binding:"required"`
+}
+
+func validCheckInput(input CardCheckInput) bool {
+	return validLocation(input.Location) && len(input.CardNumber) <= 128 && len(input.Station) <= 64 && strings.TrimSpace(input.CardNumber) != "" && strings.TrimSpace(input.Station) != ""
+}
+
+var ErrReaderEventCollision = errors.New("reader event ID belongs to another reader")
+
+// StoreAccessDecision applies the current policy and records exactly one decision
+// for each external reader event ID. A repeated ID returns the original decision.
+func StoreAccessDecision(db *gorm.DB, input CardCheckInput, actorID uint, readerID string, readerEventID *string) (accessmodels.AccessEvent, *registrarmodels.Student, error) {
+	if readerEventID != nil {
+		var existing accessmodels.AccessEvent
+		if err := db.Where("reader_event_id = ?", *readerEventID).First(&existing).Error; err == nil {
+			if existing.ReaderID != readerID {
+				return accessmodels.AccessEvent{}, nil, ErrReaderEventCollision
+			}
+			return existing, nil, nil
+		} else if !errors.Is(err, gorm.ErrRecordNotFound) {
+			return accessmodels.AccessEvent{}, nil, err
+		}
+	}
 	secret := os.Getenv("API_SECRET")
 	if secret == "" {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Access service is not configured"})
-		return
+		return accessmodels.AccessEvent{}, nil, errors.New("API_SECRET is required")
 	}
 	mac := hmac.New(sha256.New, []byte(secret))
 	mac.Write([]byte("card:" + input.CardNumber))
 	event := accessmodels.AccessEvent{
 		CardFingerprint: hex.EncodeToString(mac.Sum(nil)), Location: input.Location,
 		Station: strings.TrimSpace(input.Station), Decision: "denied", Reason: "unknown_card",
-		ActorID: c.GetUint("userId"),
+		ActorID: actorID, ReaderID: readerID, ReaderEventID: readerEventID,
 	}
+	policy, err := loadPolicy(db, input.Location)
+	if err != nil {
+		return accessmodels.AccessEvent{}, nil, err
+	}
+	event.PolicyVersion = policy.Version
 	var student registrarmodels.Student
-	err := db.Where("card_number = ?", input.CardNumber).First(&student).Error
+	err = db.Where("card_number = ?", input.CardNumber).First(&student).Error
 	if err != nil && !errors.Is(err, gorm.ErrRecordNotFound) {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to check card"})
-		return
+		return accessmodels.AccessEvent{}, nil, err
 	}
+	var found *registrarmodels.Student
 	if err == nil {
+		found = &student
 		event.StudentID = &student.ID
-		event.Reason = "inactive_student"
-		if student.Status == registrarmodels.StatusActive {
-			event.Reason = "not_assigned"
-			assigned := input.Location == "gate" ||
-				(input.Location == "cafeteria" && student.CafeteriaID != nil) ||
-				(input.Location == "dormitory" && student.DormitoryID != nil) ||
-				(input.Location == "library" && student.LibraryID != nil)
-			if assigned {
-				event.Decision = "allowed"
-				event.Reason = "eligible"
-			}
+		event.Decision, event.Reason, err = evaluateStudent(db, student, policy, time.Now().UTC())
+		if err != nil {
+			return accessmodels.AccessEvent{}, nil, err
 		}
 	}
-	if err := db.Create(&event).Error; err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Unable to record access decision"})
-		return
+	result := db.Clauses(clause.OnConflict{DoNothing: true}).Create(&event)
+	if result.Error != nil {
+		return accessmodels.AccessEvent{}, nil, result.Error
 	}
-	response := gin.H{"decision": event.Decision, "reason": event.Reason, "event_id": event.ID}
-	if event.Decision == "allowed" {
-		response["student"] = gin.H{"id": student.ID, "student_id": student.StudentID, "name": strings.TrimSpace(student.FirstName + " " + student.FatherName)}
+	if result.RowsAffected == 0 && readerEventID != nil {
+		if err := db.Where("reader_event_id = ?", *readerEventID).First(&event).Error; err != nil {
+			return accessmodels.AccessEvent{}, nil, err
+		}
+		if event.ReaderID != readerID {
+			return accessmodels.AccessEvent{}, nil, ErrReaderEventCollision
+		}
+		found = nil
 	}
-	c.JSON(http.StatusOK, response)
+	return event, found, nil
 }
 
 func ListEvents(c *gin.Context, db *gorm.DB) {

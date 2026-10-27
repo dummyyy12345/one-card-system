@@ -1,10 +1,12 @@
 #!/bin/sh
 set -eu
 
+: "${INTEGRATION_DB_DSN:?Set INTEGRATION_DB_DSN to a disposable PostgreSQL database before checking registrar coverage}"
+
 coverage_file="$(mktemp)"
 trap 'rm -f "$coverage_file"' EXIT HUP INT TERM
 
-go test -coverprofile="$coverage_file" ./controllers/registrarcontrollers
+go test -tags=integration -coverprofile="$coverage_file" ./controllers/registrarcontrollers
 coverage="$(go tool cover -func="$coverage_file" | awk '$1 == "total:" { gsub(/%/, "", $3); print $3 }')"
 
 if [ -z "$coverage" ]; then

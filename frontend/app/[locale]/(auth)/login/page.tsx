@@ -59,7 +59,7 @@ const LoginPage = () => {
         <CardContent className="space-y-6">
           {error && <p className="text-red-500 text-center">{error}</p>}
           <div>
-            <Label htmlFor="username" className="block text-sm font-medium">
+            <Label htmlFor="email" className="block text-sm font-medium">
               {t("email")}
             </Label>
             <Input

@@ -3,7 +3,6 @@ package registrarcontrollers
 import (
 	"context"
 	"errors"
-	"log/slog"
 	"net/http"
 	"regexp"
 
@@ -17,7 +16,7 @@ import (
 type studentUpdateStore interface {
 	devices(context.Context) ([]adminmodels.Devices, error)
 	student(context.Context, string) (registrarmodels.Student, error)
-	save(context.Context, *registrarmodels.Student) error
+	saveAndQueue(context.Context, *registrarmodels.Student, []adminmodels.Devices, string, string, bool) error
 }
 
 type gormStudentUpdateStore struct{ db *gorm.DB }
@@ -37,8 +36,13 @@ func (store gormStudentUpdateStore) student(ctx context.Context, id string) (reg
 	return student, err
 }
 
-func (store gormStudentUpdateStore) save(ctx context.Context, student *registrarmodels.Student) error {
-	return store.db.WithContext(ctx).Save(student).Error
+func (store gormStudentUpdateStore) saveAndQueue(ctx context.Context, student *registrarmodels.Student, devices []adminmodels.Devices, kind, previous string, hadPhoto bool) error {
+	return store.db.WithContext(ctx).Transaction(func(tx *gorm.DB) error {
+		if err := tx.Save(student).Error; err != nil {
+			return err
+		}
+		return queueMediaSync(tx, devices, *student, kind, previous, hadPhoto)
+	})
 }
 
 func loadStudentForUpdate(c *gin.Context, store studentUpdateStore) (registrarmodels.Student, []adminmodels.Devices, bool) {
@@ -59,23 +63,16 @@ func loadStudentForUpdate(c *gin.Context, store studentUpdateStore) (registrarmo
 		utils.ResponseWithError(c, status, message, err)
 		return registrarmodels.Student{}, nil, false
 	}
-	return student, devices, true
-}
-
-func checkDevices(c *gin.Context, devices []adminmodels.Devices, client DeviceClient) bool {
-	for _, device := range devices {
-		if err := client.Check(c.Request.Context(), device); err != nil {
-			slog.Error("device_check_failed", "error", err)
-			c.JSON(http.StatusBadGateway, gin.H{"error": "Failed to check device status"})
-			return false
-		}
+	if !registrarCanAccess(c, student) {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Student record access denied"})
+		return registrarmodels.Student{}, nil, false
 	}
-	return true
+	return student, devices, true
 }
 
 var cardNumberPattern = regexp.MustCompile(`^[0-9]{8}$`)
 
-func updateStudentCardNumber(c *gin.Context, store studentUpdateStore, client DeviceClient) {
+func updateStudentCardNumber(c *gin.Context, store studentUpdateStore, _ DeviceClient) {
 	var input struct {
 		CardNumber string `json:"card_number"`
 	}
@@ -88,7 +85,7 @@ func updateStudentCardNumber(c *gin.Context, store studentUpdateStore, client De
 		return
 	}
 	student, devices, ok := loadStudentForUpdate(c, store)
-	if !ok || !checkDevices(c, devices, client) {
+	if !ok {
 		return
 	}
 	previous := ""
@@ -100,21 +97,14 @@ func updateStudentCardNumber(c *gin.Context, store studentUpdateStore, client De
 	} else {
 		student.CardNumber = &input.CardNumber
 	}
-	if err := store.save(c.Request.Context(), &student); err != nil {
+	if err := store.saveAndQueue(c.Request.Context(), &student, devices, "card", previous, false); err != nil {
 		utils.ResponseWithError(c, http.StatusInternalServerError, "Failed to update card number for student", err)
 		return
 	}
-	for _, device := range devices {
-		if err := client.UpdateCard(c.Request.Context(), device, student, previous); err != nil {
-			slog.Error("device_card_sync_failed", "error", err)
-			c.JSON(http.StatusBadGateway, gin.H{"error": "Card saved, but device synchronization failed"})
-			return
-		}
-	}
-	c.JSON(http.StatusOK, gin.H{"data": student})
+	c.JSON(http.StatusAccepted, gin.H{"data": student, "sync_status": "queued"})
 }
 
-func updateStudentPhoto(c *gin.Context, store studentUpdateStore, client DeviceClient) {
+func updateStudentPhoto(c *gin.Context, store studentUpdateStore, _ DeviceClient) {
 	var input struct {
 		Photo string `json:"photo"`
 	}
@@ -122,12 +112,12 @@ func updateStudentPhoto(c *gin.Context, store studentUpdateStore, client DeviceC
 		utils.ResponseWithError(c, http.StatusBadRequest, "Invalid JSON", err)
 		return
 	}
-	if input.Photo == "" {
+	if input.Photo == "" || len(input.Photo) > 8*1024*1024 {
 		c.JSON(http.StatusBadRequest, gin.H{"error": "Photo is required"})
 		return
 	}
 	student, devices, ok := loadStudentForUpdate(c, store)
-	if !ok || !checkDevices(c, devices, client) {
+	if !ok {
 		return
 	}
 	hadPhoto := student.Photo != nil && *student.Photo != ""
@@ -135,16 +125,9 @@ func updateStudentPhoto(c *gin.Context, store studentUpdateStore, client DeviceC
 	if student.CardNumber != nil && *student.CardNumber == "" {
 		student.CardNumber = nil
 	}
-	if err := store.save(c.Request.Context(), &student); err != nil {
+	if err := store.saveAndQueue(c.Request.Context(), &student, devices, "photo", "", hadPhoto); err != nil {
 		utils.ResponseWithError(c, http.StatusInternalServerError, "Failed to update photo of student", err)
 		return
 	}
-	for _, device := range devices {
-		if err := client.UpdatePhoto(c.Request.Context(), device, student, hadPhoto); err != nil {
-			slog.Error("device_photo_sync_failed", "error", err)
-			c.JSON(http.StatusBadGateway, gin.H{"error": "Photo saved, but device synchronization failed"})
-			return
-		}
-	}
-	c.JSON(http.StatusOK, gin.H{"data": student})
+	c.JSON(http.StatusAccepted, gin.H{"data": student, "sync_status": "queued"})
 }
