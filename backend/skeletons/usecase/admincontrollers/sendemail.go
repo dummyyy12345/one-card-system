@@ -8,14 +8,12 @@ type sendEmailUsecase struct {
 	sendEmailRespository adminRepo.SendEmailRepository
 }
 
-
 // NewUserUsecase will create new an userUsecase object representation of userUsecase.UserUsecase interface
 func NewSendEmailUsecase(sendEmailRespository adminRepo.SendEmailRepository) adminRepo.SendEmailUsecase {
 	return &sendEmailUsecase{
-	sendEmailRespository: sendEmailRespository,
+		sendEmailRespository: sendEmailRespository,
 	}
 }
-
 
 // CreatedUser implements usermanagement.UserUsecase.
 func (d *sendEmailUsecase) SendHTMLEmail(sendEmail *adminRepo.SendEmailRequest) (adminRepo.EmailRequest, error) {

@@ -5,7 +5,7 @@ import (
 	"testing"
 
 	"github.com/SolomonAHailu/one-card-system/skeletons/mocks"
-	user"github.com/SolomonAHailu/one-card-system/skeletons/repo/usercontrollers"
+	user "github.com/SolomonAHailu/one-card-system/skeletons/repo/usercontrollers"
 	"github.com/SolomonAHailu/one-card-system/skeletons/usecase/usercontrollers"
 	"github.com/gin-gonic/gin"
 	"github.com/stretchr/testify/assert"
@@ -28,7 +28,7 @@ func TestLoginUser(t *testing.T) {
 
 	// Mock response
 	mockUserTest := adminmodels.Users{
-		Email:           "123",
+		Email:            "123",
 		UnhashedPassword: "123",
 	}
 

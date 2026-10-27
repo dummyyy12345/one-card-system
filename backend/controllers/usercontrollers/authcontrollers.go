@@ -1,8 +1,6 @@
 package usercontrollers
 
 import (
-	// "fmt"
-	"fmt"
 	"net/http"
 
 	"github.com/SolomonAHailu/one-card-system/models/adminmodels"
@@ -67,6 +65,10 @@ func ResetPassword(c *gin.Context, db *gorm.DB) {
 		utils.ResponseWithError(c, http.StatusBadRequest, "Invalid input", err)
 		return
 	}
+	if c.GetUint("userId") != input.UserID {
+		c.JSON(http.StatusForbidden, gin.H{"error": "Cannot change another user's password"})
+		return
+	}
 
 	var user adminmodels.Users
 	if err := db.First(&user, input.UserID).Error; err != nil {
@@ -92,13 +94,9 @@ func ResetPassword(c *gin.Context, db *gorm.DB) {
 
 	// Save the updated user record, skipping hooks to avoid re-hashing
 	if err := db.Session(&gorm.Session{SkipHooks: true}).Save(&user).Error; err != nil {
-		fmt.Println("Error saving new password:", err)
 		utils.ResponseWithError(c, http.StatusInternalServerError, "Could not update password", err)
 		return
 	}
-
-	// Debugging logs
-	fmt.Println("Updated password in DB:", user.Password)
 
 	// Respond with success
 	c.JSON(http.StatusOK, gin.H{"message": "Password changed successfully"})

@@ -1,4 +1,3 @@
-
 package adminUsecase
 
 import (
@@ -10,14 +9,12 @@ type userUsecase struct {
 	userRespository adminRepo.UserRepository
 }
 
-
 // NewUserUsecase will create new an userUsecase object representation of userUsecase.UserUsecase interface
 func NewUserUsecase(userRespository adminRepo.UserRepository) adminRepo.UserUsecase {
 	return &userUsecase{
-	userRespository: userRespository,
+		userRespository: userRespository,
 	}
 }
-
 
 // CreatedUser implements usermanagement.UserUsecase.
 func (d *userUsecase) CreateUser(createUser *adminRepo.CreateUserRequest) (adminmodels.Users, error) {

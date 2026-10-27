@@ -1,6 +1,8 @@
 package security
 
 import (
+	"errors"
+	"fmt"
 	"os"
 	"time"
 
@@ -14,9 +16,20 @@ type Claims struct {
 	jwt.StandardClaims
 }
 
-var jwtKey = []byte(os.Getenv("API_SECRET"))
+func signingKey() ([]byte, error) {
+	secret := os.Getenv("API_SECRET")
+	if secret == "" {
+		return nil, errors.New("API_SECRET is required")
+	}
+	return []byte(secret), nil
+}
 
 func GenerateJwt(userId uint, userEmail string, userRole int) (string, error) {
+	key, err := signingKey()
+	if err != nil {
+		return "", err
+	}
+
 	expirationTime := time.Now().Add(24 * time.Hour)
 	claims := &Claims{
 		UserId:    userId,
@@ -27,7 +40,7 @@ func GenerateJwt(userId uint, userEmail string, userRole int) (string, error) {
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	tokenString, err := token.SignedString(jwtKey)
+	tokenString, err := token.SignedString(key)
 	if err != nil {
 		return "", err
 	}
@@ -35,13 +48,23 @@ func GenerateJwt(userId uint, userEmail string, userRole int) (string, error) {
 }
 
 func VerifyToken(tokenString string) (*Claims, error) {
-	claims := &Claims{}
-	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		return jwtKey, nil
-	})
-	if err != nil || !token.Valid {
+	key, err := signingKey()
+	if err != nil {
 		return nil, err
 	}
-	return claims, nil
 
+	claims := &Claims{}
+	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
+		if token.Method.Alg() != jwt.SigningMethodHS256.Alg() {
+			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
+		}
+		return key, nil
+	})
+	if err != nil {
+		return nil, err
+	}
+	if token == nil || !token.Valid {
+		return nil, errors.New("invalid token")
+	}
+	return claims, nil
 }

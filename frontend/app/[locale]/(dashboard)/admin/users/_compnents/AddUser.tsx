@@ -33,8 +33,8 @@ const AddUser = ({ user }: Props) => {
           {currentPageUserCreate == 1
             ? t("createuser")
             : currentPageUserCreate == 2
-            ? t("assignpermission")
-            : t("getpassword")}
+              ? t("assignpermission")
+              : t("getpassword")}
         </DialogTitle>
         <DialogDescription>
           {currentPageUserCreate === 3

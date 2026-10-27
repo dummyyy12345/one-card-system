@@ -1,3 +1,5 @@
-export default function HistoryPage() {
-  return <div>History page</div>;
+import AccessDashboard from "@/components/access/AccessDashboard";
+
+export default function GateHistoryPage() {
+  return <AccessDashboard location="gate" historyOnly />;
 }
