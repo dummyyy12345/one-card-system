@@ -1,14 +1,29 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import axios, { AxiosRequestConfig } from "axios";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import type { AxiosRequestConfig } from "axios";
+import apiClient from "@/store/apiClient";
+import { addAsyncCases } from "@/store/sliceHelpers";
 import { toast } from "sonner";
-import { StudentRecieved, SexType, StatusType, StudentState, DataForDashboard } from "./types";
-export type { StudentRecieved, LibraryRecieved, CafeRecieved, DormRecieved, StudentState, DataForDashboard } from "./types";
+import {
+  StudentRecieved,
+  SexType,
+  StatusType,
+  StudentState,
+  DataForDashboard,
+} from "./types";
+export type {
+  StudentRecieved,
+  LibraryRecieved,
+  CafeRecieved,
+  DormRecieved,
+  StudentState,
+  DataForDashboard,
+} from "./types";
 export { SexType, StatusType } from "./types";
 
 export interface DataRecievedWhileFetchStudents {
   currentPage: number;
   totalPages: number;
-  totalUsers: number;
+  totalStudents: number;
   data: StudentRecieved[];
 }
 interface DataSendToFetchStudents {
@@ -89,140 +104,80 @@ const studentSlice = createSlice({
   initialState,
   reducers: {},
   extraReducers(builder) {
-    builder
-      .addCase(handleCreateStudent.pending, (state) => {
+    addAsyncCases(builder, handleCreateStudent, {
+      loadingKey: "isCreateStudentLoading",
+      errorKey: "isCreateStudentError",
+      fallbackError: "Create Student Failed",
+      onPending: (state) => {
         state.student = null;
-        state.isCreateStudentLoading = true;
-        state.isCreateStudentError = null;
-      })
-      .addCase(
-        handleCreateStudent.fulfilled,
-        (state, action: PayloadAction<StudentRecieved>) => {
-          state.isCreateStudentLoading = false;
-          state.isCreateStudentError = null;
-          state.student = action.payload;
-        }
-      )
-      .addCase(handleCreateStudent.rejected, (state, action) => {
+      },
+      onFulfilled: (state, payload) => {
+        state.student = payload;
+      },
+      onRejected: (state) => {
         state.student = null;
-        state.isCreateStudentLoading = false;
-        state.isCreateStudentError =
-          action.error.message || "Create Student Failed";
-      })
-      .addCase(handleUpdateStudent.pending, (state) => {
-        state.isUpdateStudentLoading = true;
-        state.isUpdateStudentError = null;
-      })
-      .addCase(
-        handleUpdateStudent.fulfilled,
-        (state, action: PayloadAction<StudentRecieved>) => {
-          state.isUpdateStudentLoading = false;
-          state.isUpdateStudentError = null;
-          state.student = action.payload;
-        }
-      )
-      .addCase(handleUpdateStudent.rejected, (state, action) => {
-        state.isUpdateStudentLoading = false;
-        state.isUpdateStudentError =
-          action.error.message || "Create Student Failed";
-      })
-      .addCase(handleFetchStudents.pending, (state) => {
-        state.isGetStudentLoading = true;
-        state.isGetStudentError = null;
-      })
-      .addCase(
-        handleFetchStudents.fulfilled,
-        (state, action: PayloadAction<DataRecievedWhileFetchStudents>) => {
-          state.students = action.payload.data;
-          state.currentPage = action.payload.currentPage;
-          state.totalPages = action.payload.totalPages;
-          state.totalStudents = action.payload.totalUsers;
-          state.isGetStudentLoading = false;
-          state.isGetStudentError = null;
-        }
-      )
-      .addCase(handleFetchStudents.rejected, (state, action) => {
-        state.isGetStudentLoading = false;
-        state.isGetStudentError =
-          action.error.message || "Fetch students failed";
-      });
-    builder
-      .addCase(handleGetSingleStudent.pending, (state) => {
-        state.isGetStudentLoading = true;
-        state.isGetStudentError = null;
+      },
+    });
+    addAsyncCases(builder, handleUpdateStudent, {
+      loadingKey: "isUpdateStudentLoading",
+      errorKey: "isUpdateStudentError",
+      fallbackError: "Create Student Failed",
+      onFulfilled: (state, payload) => {
+        state.student = payload;
+      },
+    });
+    addAsyncCases(builder, handleFetchStudents, {
+      loadingKey: "isGetStudentLoading",
+      errorKey: "isGetStudentError",
+      fallbackError: "Fetch students failed",
+      onFulfilled: (state, payload) => {
+        state.students = payload.data;
+        state.currentPage = payload.currentPage;
+        state.totalPages = payload.totalPages;
+        state.totalStudents = payload.totalStudents;
+      },
+    });
+    addAsyncCases(builder, handleGetSingleStudent, {
+      loadingKey: "isGetStudentLoading",
+      errorKey: "isGetStudentError",
+      fallbackError: "Fetch students failed",
+      onPending: (state) => {
         state.student = null;
-      })
-      .addCase(
-        handleGetSingleStudent.fulfilled,
-        (state, action: PayloadAction<StudentRecieved>) => {
-          state.student = action.payload;
-          state.isGetStudentLoading = false;
-          state.isGetStudentError = null;
-        }
-      )
-      .addCase(handleGetSingleStudent.rejected, (state, action) => {
+      },
+      onFulfilled: (state, payload) => {
+        state.student = payload;
+      },
+      onRejected: (state) => {
         state.student = null;
-        state.isGetStudentLoading = false;
-        state.isGetStudentError =
-          action.error.message || "Fetch students failed";
-      });
-    builder
-      .addCase(handleUpdateStudentPhoto.pending, (state) => {
-        state.isUpdateStudentPhotoLoading = true;
-        state.isUpdateStudentError = null;
-      })
-      .addCase(
-        handleUpdateStudentPhoto.fulfilled,
-        (state, action: PayloadAction<StudentRecieved>) => {
-          state.student = action.payload;
-          state.isUpdateStudentPhotoLoading = false;
-          state.isUpdateStudentError = null;
-        }
-      )
-      .addCase(handleUpdateStudentPhoto.rejected, (state, action) => {
-        state.isUpdateStudentPhotoLoading = false;
-        state.isUpdateStudentError =
-          action.error.message || "Fetch students failed";
-      });
-
-    builder
-      .addCase(handleUpdateStudentCard.pending, (state) => {
-        state.isUpdateStudentCardLoading = true;
-        state.isUpdateStudentError = null;
-      })
-      .addCase(
-        handleUpdateStudentCard.fulfilled,
-        (state, action: PayloadAction<StudentRecieved>) => {
-          state.student = action.payload;
-          state.isUpdateStudentCardLoading = false;
-          state.isUpdateStudentError = null;
-        }
-      )
-      .addCase(handleUpdateStudentCard.rejected, (state, action) => {
-        state.isUpdateStudentCardLoading = false;
-        state.isUpdateStudentError =
-          action.error.message || "Fetch students failed";
-      })
-      .addCase(handleGetDashboardInformationForStudent.pending, (state) => {
-        state.isGetStudentForDashboardLoading = true;
-        state.isGetStudentForDashboardError = null;
-      })
-      .addCase(
-        handleGetDashboardInformationForStudent.fulfilled,
-        (state, action) => {
-          state.isGetStudentForDashboardLoading = false;
-          state.studentDataForDashboard = action.payload;
-        }
-      )
-      .addCase(
-        handleGetDashboardInformationForStudent.rejected,
-        (state, action) => {
-          state.studentDataForDashboard = null;
-          state.isGetStudentForDashboardLoading = false;
-          state.isGetStudentForDashboardError =
-            action.error.message || "Fetch users failed";
-        }
-      );
+      },
+    });
+    addAsyncCases(builder, handleUpdateStudentPhoto, {
+      loadingKey: "isUpdateStudentPhotoLoading",
+      errorKey: "isUpdateStudentError",
+      fallbackError: "Fetch students failed",
+      onFulfilled: (state, payload) => {
+        state.student = payload;
+      },
+    });
+    addAsyncCases(builder, handleUpdateStudentCard, {
+      loadingKey: "isUpdateStudentCardLoading",
+      errorKey: "isUpdateStudentError",
+      fallbackError: "Fetch students failed",
+      onFulfilled: (state, payload) => {
+        state.student = payload;
+      },
+    });
+    addAsyncCases(builder, handleGetDashboardInformationForStudent, {
+      loadingKey: "isGetStudentForDashboardLoading",
+      errorKey: "isGetStudentForDashboardError",
+      fallbackError: "Fetch users failed",
+      onFulfilled: (state, payload) => {
+        state.studentDataForDashboard = payload;
+      },
+      onRejected: (state) => {
+        state.studentDataForDashboard = null;
+      },
+    });
   },
 });
 
@@ -230,25 +185,21 @@ export const handleFetchStudents = createAsyncThunk<
   DataRecievedWhileFetchStudents,
   DataSendToFetchStudents
 >("student/fetchStudents", async (data) => {
-  const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/registrar/students`;
+  const url = `/api/v1/registrar/students`;
 
   const config: AxiosRequestConfig = {
     url,
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
     params: {
       page: data.page,
       limit: data.limit,
       name: data.name,
       status: data.status,
     },
-    withCredentials: true,
   };
 
   try {
-    const response = await axios(config);
+    const response = await apiClient(config);
     if (response.data) {
       return response.data;
     } else {
@@ -265,19 +216,15 @@ export const handleGetSingleStudent = createAsyncThunk<
   StudentRecieved,
   { id: number }
 >("student/getstudent", async (data) => {
-  const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/registrar/student/${data.id}`;
+  const url = `/api/v1/registrar/student/${data.id}`;
 
   const config: AxiosRequestConfig = {
     url,
     method: "GET",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    withCredentials: true,
   };
 
   try {
-    const response = await axios(config);
+    const response = await apiClient(config);
     if (response.data) {
       return response.data.data;
     } else {
@@ -294,18 +241,14 @@ export const handleCreateStudent = createAsyncThunk<
   StudentRecieved,
   DataSendToCreateStudent
 >("student/createStudent", async (data) => {
-  const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/registrar/student/create`;
+  const url = `/api/v1/registrar/student/create`;
   const config: AxiosRequestConfig = {
     url,
     method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
     data,
-    withCredentials: true,
   };
   try {
-    const response = await axios(config);
+    const response = await apiClient(config);
     if (response.data) {
       toast.success("Student created successfully");
       return response.data.data;
@@ -323,18 +266,14 @@ export const handleUpdateStudent = createAsyncThunk<
   StudentRecieved,
   DataSendToCreateStudent
 >("student/updateStudent", async (data) => {
-  const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/registrar/student/edit/${data.id}`;
+  const url = `/api/v1/registrar/student/edit/${data.id}`;
   const config: AxiosRequestConfig = {
     url,
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
     data,
-    withCredentials: true,
   };
   try {
-    const response = await axios(config);
+    const response = await apiClient(config);
     if (response.data) {
       toast.success("Student updated successfully");
       return response.data.data;
@@ -352,22 +291,16 @@ export const handleUpdateStudentPhoto = createAsyncThunk<
   StudentRecieved,
   DataSendToUpdateStudent
 >("student/updateStudentPhoto", async (data) => {
-  const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/registrar/student/photo/${data.ID}`;
+  const url = `/api/v1/registrar/student/photo/${data.ID}`;
 
   const config: AxiosRequestConfig = {
     url,
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
     data: data,
-    withCredentials: true,
   };
 
   try {
-    console.log("DATA SEND TO UPDATE STUDENT", data);
-
-    const response = await axios(config);
+    const response = await apiClient(config);
     if (response.data) {
       toast.success("Student updated successfully");
       return response.data.data;
@@ -385,22 +318,16 @@ export const handleUpdateStudentCard = createAsyncThunk<
   StudentRecieved,
   DataSendToUpdateStudent
 >("student/updateStudentCard", async (data) => {
-  const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/registrar/student/card/${data.ID}`;
+  const url = `/api/v1/registrar/student/card/${data.ID}`;
 
   const config: AxiosRequestConfig = {
     url,
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
     data: data,
-    withCredentials: true,
   };
 
   try {
-    console.log("DATA SEND TO UPDATE STUDENT", data);
-
-    const response = await axios(config);
+    const response = await apiClient(config);
     if (response.data) {
       toast.success("Student updated successfully");
       return response.data.data;
@@ -418,22 +345,16 @@ export const handleUpdateStudentStatus = createAsyncThunk<
   StudentRecieved,
   DataSendToUpdateStudent
 >("student/updateStudentStatus", async (data) => {
-  console.log("DATA SEND TO CHANGE THE STATUS", data.ID);
-
-  const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/registrar/student/status/${data.ID}`;
+  const url = `/api/v1/registrar/student/status/${data.ID}`;
 
   const config: AxiosRequestConfig = {
     url,
     method: "PATCH",
-    headers: {
-      "Content-Type": "application/json",
-    },
     data: data,
-    withCredentials: true,
   };
 
   try {
-    const response = await axios(config);
+    const response = await apiClient(config);
     if (response.data) {
       toast.success("Student updated successfully");
       return response.data;
@@ -449,19 +370,15 @@ export const handleUpdateStudentStatus = createAsyncThunk<
 
 export const handleGetDashboardInformationForStudent =
   createAsyncThunk<DataForDashboard>("user/dashboard", async () => {
-    const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/registrar/dashboard`;
+    const url = `/api/v1/registrar/dashboard`;
 
     const config: AxiosRequestConfig = {
       url,
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      withCredentials: true,
     };
 
     try {
-      const response = await axios(config);
+      const response = await apiClient(config);
       if (response.data) {
         return response.data;
       } else {

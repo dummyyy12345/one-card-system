@@ -1,18 +1,17 @@
 package adminRepo
 
-
 import (
+	"github.com/SolomonAHailu/one-card-system/models/adminmodels"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
-	"github.com/SolomonAHailu/one-card-system/models/adminmodels"
 )
 
-type CreateDeviceReques struct{
+type CreateDeviceReques struct {
 	Ctx *gin.Context
-	Gm *gorm.DB
+	Gm  *gorm.DB
 }
 
-type DeviceRepository interface{
+type DeviceRepository interface {
 	CreatedDevice(createDevice *CreateDeviceReques) (adminmodels.Devices, error)
 	GetAllDevices(createDevice *CreateDeviceReques) (adminmodels.Devices, error)
 	GetDeviceById(createDevice *CreateDeviceReques) (adminmodels.Devices, error)
@@ -20,7 +19,7 @@ type DeviceRepository interface{
 	DeleteDeviceById(createDevice *CreateDeviceReques) (adminmodels.Devices, error)
 }
 
-type DeviceUsecase interface{
+type DeviceUsecase interface {
 	CreatedDevice(createDevice *CreateDeviceReques) (adminmodels.Devices, error)
 	GetAllDevices(createDevice *CreateDeviceReques) (adminmodels.Devices, error)
 	GetDeviceById(createDevice *CreateDeviceReques) (adminmodels.Devices, error)

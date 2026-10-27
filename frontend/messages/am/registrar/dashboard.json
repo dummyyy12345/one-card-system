@@ -1,16 +1,15 @@
 {
-    "registrardashboard": {
-        "activestudents": "ፍቃድ ያላቸው ተማሪዎች",
-        "inctivestudents": "ፍቃድ የሌላቸው ተማሪዎች",
-        "studentswithcards": "ካርድ ያላቸው ተማሪዎች",
-        "studentswithoutcards": "ካርድ የሌላቸው ተማሪዎች",
-        "distributionofStudents": "የተማሪዎች ስርጭት",
-        "studentcategoriesoverview": "የተማሪ ምድቦች ራዳር እይታ",
-        "activestudentsdescription": "ፍቃድ ያላቸው ተማሪዎች ጠቅላላ ብዛት",
-        "inactivestudentsdescription": "ፍቃድ የሌላቸው ተማሪዎች ጠቅላላ ብዛት",
-        "studentswithcardsdescription": "ካርድ ያላቸው ተማሪዎች ጠቅላላ ብዛት",
-        "studentswithoutcardsdescription": "ካርድ የሌላቸው ተማሪዎች ጠቅላላ ብዛት",
-        "asof":"እ.ኤ.አ"
-    }  
+  "registrardashboard": {
+    "activestudents": "ፍቃድ ያላቸው ተማሪዎች",
+    "inctivestudents": "ፍቃድ የሌላቸው ተማሪዎች",
+    "studentswithcards": "ካርድ ያላቸው ተማሪዎች",
+    "studentswithoutcards": "ካርድ የሌላቸው ተማሪዎች",
+    "distributionofStudents": "የተማሪዎች ስርጭት",
+    "studentcategoriesoverview": "የተማሪ ምድቦች ራዳር እይታ",
+    "activestudentsdescription": "ፍቃድ ያላቸው ተማሪዎች ጠቅላላ ብዛት",
+    "inactivestudentsdescription": "ፍቃድ የሌላቸው ተማሪዎች ጠቅላላ ብዛት",
+    "studentswithcardsdescription": "ካርድ ያላቸው ተማሪዎች ጠቅላላ ብዛት",
+    "studentswithoutcardsdescription": "ካርድ የሌላቸው ተማሪዎች ጠቅላላ ብዛት",
+    "asof": "እ.ኤ.አ"
+  }
 }
-

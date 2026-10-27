@@ -1,7 +1,7 @@
 import { PayloadAction, createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import axios, { AxiosRequestConfig } from "axios";
-import { AppDispatch } from "../..";
 import { toast } from "sonner";
+import { roleHomePath } from "@/lib/roleRoutes";
 
 // Define your types
 export interface LoginUserSendData {
@@ -90,8 +90,8 @@ const authSlice = createSlice({
 // Thunk for handling login
 export const handleLogin = createAsyncThunk<
   DataRecievedWhileUserLogin,
-  { data: LoginUserSendData; router: any }
->("auth/login", async ({ data, router }) => {
+  { data: LoginUserSendData; router: any; locale?: string }
+>("auth/login", async ({ data, router, locale = "en" }) => {
   const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/user/login`;
   const config: AxiosRequestConfig = {
     url,
@@ -103,7 +103,9 @@ export const handleLogin = createAsyncThunk<
   try {
     const response = await axios(config);
     if (response.data.data) {
-      router.push(`${response.data.data.role?.role_name.toLowerCase().trim()}`);
+      router.push(
+        roleHomePath(response.data.data.role?.role_name || "", locale)
+      );
       toast.success("Logged in successfully");
       return response.data;
     } else {
@@ -121,7 +123,7 @@ export const handleLogout = createAsyncThunk(
   "auth/logout",
   async (
     { router, languagePrefix }: { router: any; languagePrefix: string },
-    { dispatch }: { dispatch: AppDispatch }
+    { dispatch }
   ) => {
     dispatch(clearAuthUser());
     toast.success("Logged out successfully");

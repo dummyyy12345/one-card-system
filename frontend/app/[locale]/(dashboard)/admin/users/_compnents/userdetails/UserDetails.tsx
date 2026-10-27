@@ -20,8 +20,8 @@ const UserDetails = ({ user }: { user: UserRecieved }) => {
           {page == 1
             ? t("userdetail")
             : page == 2
-            ? t("userpermissiondetails")
-            : ""}
+              ? t("userpermissiondetails")
+              : ""}
         </DialogTitle>
       </DialogHeader>
       {page === 1 ? (

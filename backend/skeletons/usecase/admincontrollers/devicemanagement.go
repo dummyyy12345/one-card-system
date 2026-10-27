@@ -11,13 +11,11 @@ type deviceUsecase struct {
 	deviceRespository adminRepo.DeviceRepository
 }
 
-
 func NewDeviceUsecase(deviceRespository adminRepo.DeviceRepository) adminRepo.DeviceUsecase {
 	return &deviceUsecase{
 		deviceRespository: deviceRespository,
 	}
 }
-
 
 // CreatedDevice implements repo.DeviceUsecase.
 func (d *deviceUsecase) CreatedDevice(createDevice *adminRepo.CreateDeviceReques) (adminmodels.Devices, error) {

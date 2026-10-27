@@ -29,5 +29,3 @@ func (u *userpermissionmanagementUsecase) GetUserPermission(userPermissionManage
 func (u *userpermissionmanagementUsecase) HandleUserPermissionUpdate(userPermissionManagementRequest *adminRepo.UserPermissionManagementRequest) ([]adminmodels.Permissions, error) {
 	return u.userpermissionmanagementRepository.HandleUserPermissionUpdate(userPermissionManagementRequest)
 }
-
-

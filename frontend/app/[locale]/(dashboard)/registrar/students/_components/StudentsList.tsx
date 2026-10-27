@@ -25,6 +25,7 @@ import { EditIcon, IdCard } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { handleFetchStudents } from "@/store/slices/registrarSlice/students";
 import StudentsDisplayLoading from "./StudentsDisplayLoading";
+import StudentSyncStatus from "@/components/access/StudentSyncStatus";
 
 const StudentsList = ({
   limit,
@@ -124,6 +125,7 @@ const StudentsList = ({
                 <TableHead>Section</TableHead>
                 <TableHead>Religion</TableHead>
                 <TableHead>Status</TableHead>
+                <TableHead>Device sync</TableHead>
                 <TableHead className="">{t("edit")}</TableHead>
               </TableRow>
             </TableHeader>
@@ -157,6 +159,9 @@ const StudentsList = ({
                   </TableCell>
                   <TableCell>{student.religion}</TableCell>
                   <TableCell>{student.status}</TableCell>
+                  <TableCell>
+                    <StudentSyncStatus studentId={student.ID} />
+                  </TableCell>
                   <TableCell
                     className="cursor-pointer text-center"
                     onClick={() =>
