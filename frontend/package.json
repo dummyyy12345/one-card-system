@@ -39,7 +39,7 @@
     "react-chartjs-2": "^5.2.0",
     "react-country-flag": "^3.1.0",
     "react-countup": "^6.5.3",
-    "react-day-picker": "^8.10.1",
+    "react-day-picker": "^10.0.2",
     "react-dom": "^18",
     "react-hook-form": "^7.54.2",
     "react-hot-toast": "^2.4.1",
