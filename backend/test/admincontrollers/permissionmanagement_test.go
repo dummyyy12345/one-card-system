@@ -13,27 +13,25 @@ import (
 	"gorm.io/gorm"
 )
 
-
-func TestCreatePermission(t *testing.T){
+func TestCreatePermission(t *testing.T) {
 	mockPermissionmanagementRepository := mocks.NewPermissionmanagementRepository(t)
-
 
 	cc := &gin.Context{}
 	dbb := &gorm.DB{}
 
 	mockCreatePermissionRequest := &adminRepo.CreatePermissionRequest{
-		Ctx : cc,
-		Gm : dbb,
+		Ctx: cc,
+		Gm:  dbb,
 	}
-	
+
 	mockPermission := adminmodels.Permissions{
-		PermissionsName : "test",
-    	Description  : "test",   
+		PermissionsName: "test",
+		Description:     "test",
 	}
 
-	t.Run("success", func(t *testing.T){
+	t.Run("success", func(t *testing.T) {
 
-		mockPermissionmanagementRepository.On("CreatePermission",  mockCreatePermissionRequest).Return(mockPermission, nil).Once()
+		mockPermissionmanagementRepository.On("CreatePermission", mockCreatePermissionRequest).Return(mockPermission, nil).Once()
 		uc := adminUsecase.NewpermissionmanagementUsecase(mockPermissionmanagementRepository)
 		permission, err := uc.CreatePermission(mockCreatePermissionRequest)
 
@@ -42,10 +40,9 @@ func TestCreatePermission(t *testing.T){
 		mockPermissionmanagementRepository.AssertExpectations(t)
 	})
 
+	t.Run("fail", func(t *testing.T) {
 
-	t.Run("fail", func(t *testing.T){
-
-		mockPermissionmanagementRepository.On("CreatePermission",  mockCreatePermissionRequest).Return(adminmodels.Permissions{}, errors.New("unexpected")).Once()
+		mockPermissionmanagementRepository.On("CreatePermission", mockCreatePermissionRequest).Return(adminmodels.Permissions{}, errors.New("unexpected")).Once()
 		uc := adminUsecase.NewpermissionmanagementUsecase(mockPermissionmanagementRepository)
 		permission, err := uc.CreatePermission(mockCreatePermissionRequest)
 
@@ -56,32 +53,31 @@ func TestCreatePermission(t *testing.T){
 
 }
 
-func TestGetPermissions(t *testing.T){
+func TestGetPermissions(t *testing.T) {
 	mockPermissionmanagementRepository := mocks.NewPermissionmanagementRepository(t)
-
 
 	cc := &gin.Context{}
 	dbb := &gorm.DB{}
 
 	mockCreatePermissionRequest := &adminRepo.CreatePermissionRequest{
-		Ctx : cc,
-		Gm : dbb,
+		Ctx: cc,
+		Gm:  dbb,
 	}
-	
+
 	mockPermissions := []adminmodels.Permissions{
 		{
-			PermissionsName : "test",
-    		Description  : "test", 
+			PermissionsName: "test",
+			Description:     "test",
 		},
 		{
-			PermissionsName : "test1",
-    		Description  : "test1", 
+			PermissionsName: "test1",
+			Description:     "test1",
 		},
 	}
 
-	t.Run("success", func(t *testing.T){
+	t.Run("success", func(t *testing.T) {
 
-		mockPermissionmanagementRepository.On("GetPermissions",  mockCreatePermissionRequest).Return(mockPermissions, nil).Once()
+		mockPermissionmanagementRepository.On("GetPermissions", mockCreatePermissionRequest).Return(mockPermissions, nil).Once()
 		uc := adminUsecase.NewpermissionmanagementUsecase(mockPermissionmanagementRepository)
 		permission, err := uc.GetPermissions(mockCreatePermissionRequest)
 
@@ -90,11 +86,9 @@ func TestGetPermissions(t *testing.T){
 		mockPermissionmanagementRepository.AssertExpectations(t)
 	})
 
+	t.Run("fail", func(t *testing.T) {
 
-	
-	t.Run("fail", func(t *testing.T){
-
-		mockPermissionmanagementRepository.On("GetPermissions",  mockCreatePermissionRequest).Return([]adminmodels.Permissions{}, errors.New("unexpected")).Once()
+		mockPermissionmanagementRepository.On("GetPermissions", mockCreatePermissionRequest).Return([]adminmodels.Permissions{}, errors.New("unexpected")).Once()
 		uc := adminUsecase.NewpermissionmanagementUsecase(mockPermissionmanagementRepository)
 		permission, err := uc.GetPermissions(mockCreatePermissionRequest)
 
@@ -106,27 +100,25 @@ func TestGetPermissions(t *testing.T){
 
 }
 
-
-func TestGetPermission(t *testing.T){
+func TestGetPermission(t *testing.T) {
 	mockPermissionmanagementRepository := mocks.NewPermissionmanagementRepository(t)
-
 
 	cc := &gin.Context{}
 	dbb := &gorm.DB{}
 
 	mockCreatePermissionRequest := &adminRepo.CreatePermissionRequest{
-		Ctx : cc,
-		Gm : dbb,
+		Ctx: cc,
+		Gm:  dbb,
 	}
-	
+
 	mockPermission := adminmodels.Permissions{
-		PermissionsName : "test",
-    	Description  : "test",   
+		PermissionsName: "test",
+		Description:     "test",
 	}
 
-	t.Run("success", func(t *testing.T){
+	t.Run("success", func(t *testing.T) {
 
-		mockPermissionmanagementRepository.On("GetPermission",  mockCreatePermissionRequest).Return(mockPermission, nil).Once()
+		mockPermissionmanagementRepository.On("GetPermission", mockCreatePermissionRequest).Return(mockPermission, nil).Once()
 		uc := adminUsecase.NewpermissionmanagementUsecase(mockPermissionmanagementRepository)
 		permission, err := uc.GetPermission(mockCreatePermissionRequest)
 
@@ -135,10 +127,9 @@ func TestGetPermission(t *testing.T){
 		mockPermissionmanagementRepository.AssertExpectations(t)
 	})
 
+	t.Run("fail", func(t *testing.T) {
 
-	t.Run("fail", func(t *testing.T){
-
-		mockPermissionmanagementRepository.On("GetPermission",  mockCreatePermissionRequest).Return(adminmodels.Permissions{}, errors.New("unexpected")).Once()
+		mockPermissionmanagementRepository.On("GetPermission", mockCreatePermissionRequest).Return(adminmodels.Permissions{}, errors.New("unexpected")).Once()
 		uc := adminUsecase.NewpermissionmanagementUsecase(mockPermissionmanagementRepository)
 		permission, err := uc.GetPermission(mockCreatePermissionRequest)
 
@@ -149,27 +140,25 @@ func TestGetPermission(t *testing.T){
 
 }
 
-
-func TestUpdatePermission(t *testing.T){
+func TestUpdatePermission(t *testing.T) {
 	mockPermissionmanagementRepository := mocks.NewPermissionmanagementRepository(t)
-
 
 	cc := &gin.Context{}
 	dbb := &gorm.DB{}
 
 	mockCreatePermissionRequest := &adminRepo.CreatePermissionRequest{
-		Ctx : cc,
-		Gm : dbb,
+		Ctx: cc,
+		Gm:  dbb,
 	}
-	
+
 	mockPermission := adminmodels.Permissions{
-		PermissionsName : "test",
-    	Description  : "test",   
+		PermissionsName: "test",
+		Description:     "test",
 	}
 
-	t.Run("success", func(t *testing.T){
+	t.Run("success", func(t *testing.T) {
 
-		mockPermissionmanagementRepository.On("UpdatePermission",  mockCreatePermissionRequest).Return(mockPermission, nil).Once()
+		mockPermissionmanagementRepository.On("UpdatePermission", mockCreatePermissionRequest).Return(mockPermission, nil).Once()
 		uc := adminUsecase.NewpermissionmanagementUsecase(mockPermissionmanagementRepository)
 		permission, err := uc.UpdatePermission(mockCreatePermissionRequest)
 
@@ -178,10 +167,9 @@ func TestUpdatePermission(t *testing.T){
 		mockPermissionmanagementRepository.AssertExpectations(t)
 	})
 
+	t.Run("fail", func(t *testing.T) {
 
-	t.Run("fail", func(t *testing.T){
-
-		mockPermissionmanagementRepository.On("UpdatePermission",  mockCreatePermissionRequest).Return(adminmodels.Permissions{}, errors.New("unexpected")).Once()
+		mockPermissionmanagementRepository.On("UpdatePermission", mockCreatePermissionRequest).Return(adminmodels.Permissions{}, errors.New("unexpected")).Once()
 		uc := adminUsecase.NewpermissionmanagementUsecase(mockPermissionmanagementRepository)
 		permission, err := uc.UpdatePermission(mockCreatePermissionRequest)
 
@@ -192,27 +180,25 @@ func TestUpdatePermission(t *testing.T){
 
 }
 
-
-func TestDeletePermission(t *testing.T){
+func TestDeletePermission(t *testing.T) {
 	mockPermissionmanagementRepository := mocks.NewPermissionmanagementRepository(t)
-
 
 	cc := &gin.Context{}
 	dbb := &gorm.DB{}
 
 	mockCreatePermissionRequest := &adminRepo.CreatePermissionRequest{
-		Ctx : cc,
-		Gm : dbb,
+		Ctx: cc,
+		Gm:  dbb,
 	}
-	
+
 	mockPermission := adminmodels.Permissions{
-		PermissionsName : "test",
-    	Description  : "test",   
+		PermissionsName: "test",
+		Description:     "test",
 	}
 
-	t.Run("success", func(t *testing.T){
+	t.Run("success", func(t *testing.T) {
 
-		mockPermissionmanagementRepository.On("DeletePermission",  mockCreatePermissionRequest).Return(mockPermission, nil).Once()
+		mockPermissionmanagementRepository.On("DeletePermission", mockCreatePermissionRequest).Return(mockPermission, nil).Once()
 		uc := adminUsecase.NewpermissionmanagementUsecase(mockPermissionmanagementRepository)
 		permission, err := uc.DeletePermission(mockCreatePermissionRequest)
 
@@ -221,10 +207,9 @@ func TestDeletePermission(t *testing.T){
 		mockPermissionmanagementRepository.AssertExpectations(t)
 	})
 
+	t.Run("fail", func(t *testing.T) {
 
-	t.Run("fail", func(t *testing.T){
-
-		mockPermissionmanagementRepository.On("DeletePermission",  mockCreatePermissionRequest).Return(adminmodels.Permissions{}, errors.New("unexpected")).Once()
+		mockPermissionmanagementRepository.On("DeletePermission", mockCreatePermissionRequest).Return(adminmodels.Permissions{}, errors.New("unexpected")).Once()
 		uc := adminUsecase.NewpermissionmanagementUsecase(mockPermissionmanagementRepository)
 		permission, err := uc.DeletePermission(mockCreatePermissionRequest)
 

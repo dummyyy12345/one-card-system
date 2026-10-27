@@ -11,14 +11,12 @@ type LoginUserUsecase struct {
 	loginUserRepository user.LoginUserRepository
 }
 
-
 // NewUserUsecase will create new an userUsecase object representation of userUsecase.UserUsecase interface
 func NewLoginUserUsecase(loginUserRepository user.LoginUserRepository) user.LoginUserUsecase {
 	return &LoginUserUsecase{
-	loginUserRepository: loginUserRepository,
+		loginUserRepository: loginUserRepository,
 	}
 }
-
 
 // CreatedUser implements usermanagement.UserUsecase.
 func (d *LoginUserUsecase) Login(loginUser *user.LoginUserRequest) (adminmodels.Users, error) {

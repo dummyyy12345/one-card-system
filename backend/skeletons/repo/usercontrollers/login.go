@@ -6,20 +6,14 @@ import (
 	"gorm.io/gorm"
 )
 
-type LoginUserRequest struct{
+type LoginUserRequest struct {
 	Ctx *gin.Context
-	Gm *gorm.DB
+	Gm  *gorm.DB
 }
 
-
-
-type LoginUserRepository interface{
+type LoginUserRepository interface {
 	Login(loginUser *LoginUserRequest) (adminmodels.Users, error)
-
 }
-type LoginUserUsecase interface{
-	
+type LoginUserUsecase interface {
 	Login(loginUser *LoginUserRequest) (adminmodels.Users, error)
-	
-	
 }

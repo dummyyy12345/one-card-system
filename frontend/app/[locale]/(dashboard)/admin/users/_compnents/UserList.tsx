@@ -36,6 +36,7 @@ import {
   DialogClose,
   DialogContent,
   DialogHeader,
+  DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { useTranslations } from "next-intl";
@@ -168,7 +169,9 @@ const UserList = ({
                         asChild
                         className="w-full cursor-pointer text-center"
                       >
-                        <FaListAlt size={20} className="text-green-600" />
+                        <button type="button" aria-label={t("details")}>
+                          <FaListAlt size={20} className="text-green-600" />
+                        </button>
                       </DialogTrigger>
                       <UserDetails user={user} />
                     </Dialog>
@@ -179,7 +182,9 @@ const UserList = ({
                         asChild
                         className="w-full cursor-pointer text-center"
                       >
-                        <EditIcon size={20} className="text-yellow-600" />
+                        <button type="button" aria-label={t("edit")}>
+                          <EditIcon size={20} className="text-yellow-600" />
+                        </button>
                       </DialogTrigger>
                       <AddUser user={user} />
                     </Dialog>
@@ -190,15 +195,20 @@ const UserList = ({
                         asChild
                         className="w-full cursor-pointer text-center"
                       >
-                        <MdDelete size={20} className="text-red-600" />
+                        <button type="button" aria-label={t("delete")}>
+                          <MdDelete size={20} className="text-red-600" />
+                        </button>
                       </DialogTrigger>
-                      <DialogContent className="max-w-sm text-center flex flex-col gap-y-8">
+                      <DialogContent
+                        aria-describedby={undefined}
+                        className="max-w-sm text-center flex flex-col gap-y-8"
+                      >
                         <DialogHeader className="mt-4 mx-2">
-                          <p className="text-center">
+                          <DialogTitle className="text-center">
                             {t("suretodelete")}
                             <span className="text-[#3A5DD9] italic underline">{` ${user.first_name}-${user.father_name} `}</span>
                             ?
-                          </p>
+                          </DialogTitle>
                         </DialogHeader>
                         <div className="flex items-center justify-evenly">
                           <DialogClose className="bg-red-700 hover:bg-red-800 px-7 py-2 rounded-sm text-white lowercase">

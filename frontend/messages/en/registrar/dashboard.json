@@ -1,15 +1,15 @@
 {
-    "registrardashboard": {
-        "activestudents": "Active Students",
-        "inctivestudents": "Inactive Students",
-        "studentswithcards": "Students with Cards",
-        "studentswithoutcards": "Students without Cards",
-        "distributionofStudents": "Distribution of Students",
-        "studentcategoriesoverview": "Students' Categories Radar View",
-        "activestudentsdescription": "Total number of active students",
-        "inactivestudentsdescription": "Total number of inactive students",
-        "studentswithcardsdescription": "Total number of students with cards",
-        "studentswithoutcardsdescription": "Total number of students without cards",
-        "asof":""
-    }  
+  "registrardashboard": {
+    "activestudents": "Active Students",
+    "inctivestudents": "Inactive Students",
+    "studentswithcards": "Students with Cards",
+    "studentswithoutcards": "Students without Cards",
+    "distributionofStudents": "Distribution of Students",
+    "studentcategoriesoverview": "Students' Categories Radar View",
+    "activestudentsdescription": "Total number of active students",
+    "inactivestudentsdescription": "Total number of inactive students",
+    "studentswithcardsdescription": "Total number of students with cards",
+    "studentswithoutcardsdescription": "Total number of students without cards",
+    "asof": ""
+  }
 }

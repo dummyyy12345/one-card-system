@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"log/slog"
 	"os"
 
 	"github.com/SolomonAHailu/one-card-system/initializers"
@@ -16,12 +17,14 @@ func init() {
 }
 
 func main() {
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
 	if initializers.DB == nil {
 		log.Fatal("Database connection is not initialized")
 	}
 
 	// Start the sync process in a separate goroutine
 	go services.StartSync()
+	go services.StartDeviceSync(initializers.DB)
 
 	s := server.NewServer()
 	s.Initialize()

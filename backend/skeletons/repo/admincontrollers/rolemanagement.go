@@ -6,12 +6,12 @@ import (
 	"gorm.io/gorm"
 )
 
-type CreateRoleRequest struct{
+type CreateRoleRequest struct {
 	Ctx *gin.Context
-	Gm *gorm.DB
+	Gm  *gorm.DB
 }
 
-type RoleRepository interface{
+type RoleRepository interface {
 	CreatedRole(createRole *CreateRoleRequest) (adminmodels.Roles, error)
 	GetRoles(createRole *CreateRoleRequest) (adminmodels.Roles, error)
 	GetRole(createRole *CreateRoleRequest) (adminmodels.Roles, error)
@@ -19,7 +19,7 @@ type RoleRepository interface{
 	DeleteRole(createRole *CreateRoleRequest) (adminmodels.Roles, error)
 }
 
-type RoleUsecase interface{
+type RoleUsecase interface {
 	CreatedRole(createRole *CreateRoleRequest) (adminmodels.Roles, error)
 	GetRoles(createRole *CreateRoleRequest) (adminmodels.Roles, error)
 	GetRole(createRole *CreateRoleRequest) (adminmodels.Roles, error)
