@@ -1,6 +1,8 @@
-import { createAsyncThunk, createSlice, PayloadAction } from "@reduxjs/toolkit";
-import axios, { AxiosRequestConfig } from "axios";
-import { DataSendToCreateUser } from "./user";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import type { AxiosRequestConfig } from "axios";
+import apiClient from "@/store/apiClient";
+import { reportError } from "@/lib/errorReporter";
+import { addAsyncCases } from "@/store/sliceHelpers";
 import { toast } from "sonner";
 
 export interface RoleSend {
@@ -61,103 +63,78 @@ const roleSlice = createSlice({
     },
   },
   extraReducers: (builder) => {
-    builder
-      .addCase(handleFetchRole.pending, (state) => {
-        state.isRoleLoading = true;
-        state.isRoleError = null;
-      })
-      .addCase(
-        handleFetchRole.fulfilled,
-        (state, action: PayloadAction<DataRecievedWhileFecthRoles>) => {
-          state.roles = action.payload.data;
-          state.isRoleLoading = false;
-          state.isRoleError = null;
-        }
-      )
-      .addCase(handleFetchRole.rejected, (state, action) => {
-        state.isRoleLoading = false;
-        state.isRoleError = action.error.message as string;
-      })
-      .addCase(handleCreateRole.pending, (state) => {
-        state.isRoleCreateLoading = true;
-        state.isRoleError = null;
-      })
-      .addCase(
-        handleCreateRole.fulfilled,
-        (state, action: PayloadAction<RoleRecieved>) => {
-          state.roles = [...state.roles, action.payload];
-          state.isRoleCreateSuccess = true;
-          state.isRoleCreateLoading = false;
-          state.isRoleError = null;
-        }
-      )
-      .addCase(handleCreateRole.rejected, (state, action) => {
-        state.isRoleCreateLoading = false;
-        state.isRoleError = action.error.message as string;
-      })
-      .addCase(handleUpdateRole.pending, (state, action) => {
-        state.isRoleUpdateLoading = true;
-        state.isRoleError = null;
-      })
-      .addCase(handleUpdateRole.fulfilled, (state, action) => {
-        state.isRoleUpdateLoading = false;
-        state.isRoleError = null;
-        state.roles = state.roles.map((role) => {
-          if (role.ID === action.payload.ID) {
-            return action.payload;
-          }
-          return role;
-        });
-        state.isRoleUpdateSuccess = true;
-      })
-      .addCase(handleUpdateRole.rejected, (state, action) => {
-        state.isRoleUpdateLoading = false;
-        state.isRoleError = action.error.message as string;
-      })
-      .addCase(handleDeleteRole.pending, (state, action) => {
-        state.isRoleDeleteLoading = true;
-        state.isRoleError = null;
-      })
-      .addCase(handleDeleteRole.fulfilled, (state, action) => {
-        state.isRoleDeleteLoading = false;
-        state.isRoleError = null;
-        state.isRoleDeleteSuccess = true;
-        state.roles = state.roles.filter(
-          (role) => role.ID !== action.payload.ID
+    addAsyncCases(builder, handleFetchRole, {
+      loadingKey: "isRoleLoading",
+      errorKey: "isRoleError",
+      fallbackError: "Get role failed",
+      onFulfilled: (state, payload) => {
+        state.roles = payload.data;
+      },
+    });
+    addAsyncCases(builder, handleCreateRole, {
+      loadingKey: "isRoleCreateLoading",
+      errorKey: "isRoleError",
+      fallbackError: "Create role failed",
+      onFulfilled: (state, payload) => {
+        state.roles.push(payload);
+        state.isRoleCreateSuccess = true;
+      },
+    });
+    addAsyncCases(builder, handleUpdateRole, {
+      loadingKey: "isRoleUpdateLoading",
+      errorKey: "isRoleError",
+      fallbackError: "Update role failed",
+      onFulfilled: (state, payload) => {
+        state.roles = state.roles.map((role) =>
+          role.ID === payload.ID ? payload : role
         );
-      })
-      .addCase(handleDeleteRole.rejected, (state, action) => {
-        state.isRoleDeleteLoading = false;
-        state.isRoleError = action.error.message as string;
-      });
+        state.isRoleUpdateSuccess = true;
+      },
+    });
+    addAsyncCases(builder, handleDeleteRole, {
+      loadingKey: "isRoleDeleteLoading",
+      errorKey: "isRoleError",
+      fallbackError: "Delete role failed",
+      onFulfilled: (state, payload) => {
+        state.roles = state.roles.filter((role) => role.ID !== payload.ID);
+        state.isRoleDeleteSuccess = true;
+      },
+    });
   },
 });
+
+function roleRequestError(
+  context: string,
+  error: unknown,
+  fallback: string
+): never {
+  reportError(context, error);
+  const response =
+    error && typeof error === "object" && "response" in error
+      ? (error.response as { data?: { error?: unknown } } | undefined)
+      : undefined;
+  const message =
+    typeof response?.data?.error === "string" ? response.data.error : fallback;
+  toast.error(message);
+  throw new Error(message);
+}
 
 export const handleFetchRole = createAsyncThunk<DataRecievedWhileFecthRoles>(
   "role/fetchRole",
   async () => {
-    const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/admin/roles`;
-
     const config: AxiosRequestConfig = {
-      url,
+      url: "/api/v1/admin/roles",
       method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      withCredentials: true,
     };
 
     try {
-      const response = await axios(config);
+      const response = await apiClient(config);
       if (response.data) {
         return response.data;
-      } else {
-        toast.error("Get role Failed");
-        throw new Error("Get role Failed");
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Get role Failed");
-      throw new Error(error.response?.data?.error || "Get role Failed");
+      throw new Error("Get role failed");
+    } catch (error: unknown) {
+      return roleRequestError("role.fetch", error, "Get role failed");
     }
   }
 );
@@ -165,30 +142,21 @@ export const handleFetchRole = createAsyncThunk<DataRecievedWhileFecthRoles>(
 export const handleCreateRole = createAsyncThunk<RoleRecieved, RoleSend>(
   "role/createRole",
   async (data) => {
-    const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/admin/roles`;
-
     const config: AxiosRequestConfig = {
-      url,
+      url: "/api/v1/admin/roles",
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
       data: data,
-      withCredentials: true,
     };
 
     try {
-      const response = await axios(config);
+      const response = await apiClient(config);
       if (response.data) {
         toast.success("Role created successfully");
         return response.data.data;
-      } else {
-        toast.error("Create role Failed");
-        throw new Error("Create role Failed");
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Create role Failed");
-      throw new Error(error.response?.data?.error || "Create role Failed");
+      throw new Error("Create role failed");
+    } catch (error: unknown) {
+      return roleRequestError("role.create", error, "Create role failed");
     }
   }
 );
@@ -196,59 +164,41 @@ export const handleCreateRole = createAsyncThunk<RoleRecieved, RoleSend>(
 export const handleUpdateRole = createAsyncThunk<RoleRecieved, RoleSend>(
   "role/updateRole",
   async (data) => {
-    const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/admin/roles/${data.id}`;
-
     const config: AxiosRequestConfig = {
-      url,
+      url: `/api/v1/admin/roles/${data.id}`,
       method: "PATCH",
-      headers: {
-        "Content-Type": "application/json",
-      },
       data: data,
-      withCredentials: true,
     };
 
     try {
-      const response = await axios(config);
+      const response = await apiClient(config);
       if (response.data) {
         toast.success("Role updated successfully");
         return response.data.data;
-      } else {
-        toast.error("Update role Failed");
-        throw new Error("Update role Failed");
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Update role Failed");
-      throw new Error(error.response?.data?.error || "Update role Failed");
+      throw new Error("Update role failed");
+    } catch (error: unknown) {
+      return roleRequestError("role.update", error, "Update role failed");
     }
   }
 );
 export const handleDeleteRole = createAsyncThunk<RoleRecieved, { id: number }>(
   "role/deleteRole",
   async (data) => {
-    const url = `${process.env.NEXT_PUBLIC_API_SERVER_URL}/api/v1/admin/roles/${data.id}`;
-
     const config: AxiosRequestConfig = {
-      url,
+      url: `/api/v1/admin/roles/${data.id}`,
       method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      withCredentials: true,
     };
 
     try {
-      const response = await axios(config);
+      const response = await apiClient(config);
       if (response.data) {
         toast.success("Role deleted successfully");
         return response.data.data;
-      } else {
-        toast.error("Delete role Failed");
-        throw new Error("Delete role Failed");
       }
-    } catch (error: any) {
-      toast.error(error.response?.data?.error || "Delete role Failed");
-      throw new Error(error.response?.data?.error || "Delete role Failed");
+      throw new Error("Delete role failed");
+    } catch (error: unknown) {
+      return roleRequestError("role.delete", error, "Delete role failed");
     }
   }
 );

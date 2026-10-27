@@ -70,7 +70,7 @@ npm run test:e2e
 npm run build
 ```
 
-CI runs these checks on pushes and pull requests, including a PostgreSQL-backed integration test, plus `npm audit --audit-level=high` and `govulncheck ./...`. The frontend requires at least 30% statement coverage across all TypeScript source files and 50% statement coverage across `frontend/components`. A separate core gate requires 50% statements, lines, and functions across key student, user, device, chart, and user-list flows. Role, permission, chart, and user-list files each also require 50% statements. The backend gate requires at least 50% statement coverage in `controllers/registrarcontrollers`; it does not set a threshold for the entire backend.
+CI runs these checks on pushes and pull requests, including a PostgreSQL-backed integration test, plus `npm audit --audit-level=high` and `govulncheck ./...`. The frontend requires at least 50% statement, line, and function coverage across application TypeScript files; Playwright specs and build configuration are excluded because they run through separate checks. It also requires 50% statement coverage across `frontend/components`. A separate core gate requires 50% statements, lines, and functions across key student, user, device, chart, and user-list flows. Role, permission, chart, and user-list files each also require 50% statements. The backend gate requires at least 50% statement coverage in `controllers/registrarcontrollers`; it does not set a threshold for the entire backend.
 
 The Playwright browser job starts Next.js on port 3100 and uses mocked API responses to exercise login, card checks, policy editing, and temporary exceptions without production credentials.
 
@@ -89,7 +89,7 @@ Copy the example files; never commit the resulting `.env` files. The root `.env.
 | `READER_HMAC_KEYS` | JSON map from registered reader serial number to its HMAC secret |
 | `ACCESS_EVENT_RETENTION_DAYS`, `STUDENT_VIEW_AUDIT_RETENTION_DAYS` | Automatic audit retention in days; `0` disables deletion |
 
-`frontend/.env.example` contains `NEXT_PUBLIC_API_SERVER_URL`, the API URL visible to the browser. It is embedded into the frontend build, so rebuild after changing it.
+`frontend/.env.example` contains `NEXT_PUBLIC_API_SERVER_URL`, the API URL visible to the browser. Optionally set `NEXT_PUBLIC_ERROR_REPORTING_URL` to an HTTPS collector that accepts a JSON `POST` with `context`, `message`, and `timestamp`. The frontend sends no cookies or original API response body to that collector, and reporting failures never block the user action. Both `NEXT_PUBLIC_` values are embedded into the frontend build, so rebuild after changing them. Do not put a secret in either URL.
 
 Credentials were previously committed to this repository. If they were real, rotate them in the database, devices, SMTP service, and any other affected system; removing the files now does not erase git history.
 

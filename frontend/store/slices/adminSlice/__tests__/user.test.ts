@@ -6,8 +6,10 @@ import reducer, {
   handleCreateUser,
   handleDeleteUser,
   handleFetchUser,
+  handleGetDashboardInformation,
   handleSendEmail,
   handleUpdateUser,
+  removeSendEmailSuccess,
   UserRecieved,
 } from "../user";
 
@@ -156,4 +158,54 @@ it("reports an email failure without logging the password", async () => {
   } finally {
     consoleLog.mockRestore();
   }
+});
+
+it("tracks successful email delivery and clears the success flag", async () => {
+  (apiClient as jest.MockedFunction<typeof apiClient>).mockResolvedValueOnce({
+    data: { message: "sent" },
+  });
+  const store = configureStore({ reducer });
+  const action = await store.dispatch(
+    handleSendEmail({
+      email: "ada@example.com",
+      subject: "Welcome",
+      password: "private-password",
+      role: "Admin",
+      roledescription: [],
+      name: "Ada",
+    })
+  );
+  expect(handleSendEmail.fulfilled.match(action)).toBe(true);
+  expect(store.getState().sendEmailSuccess).toBe(true);
+  expect(store.getState().sendEmailLoading).toBe(false);
+  store.dispatch(removeSendEmailSuccess());
+  expect(store.getState().sendEmailSuccess).toBe(false);
+});
+
+it("loads dashboard counts and clears them when a later request fails", async () => {
+  const dashboard = {
+    totalUsers: 12,
+    totalDevices: 2,
+    totalRoles: 3,
+    totalPermissions: 4,
+    usersByRole: [{ role_id: 1, role_name: "Admin", count: 2 }],
+  };
+  (apiClient as jest.MockedFunction<typeof apiClient>)
+    .mockResolvedValueOnce({ data: dashboard })
+    .mockRejectedValueOnce({ response: { data: { error: "offline" } } });
+  const store = configureStore({ reducer });
+
+  const loaded = await store.dispatch(handleGetDashboardInformation());
+  expect(handleGetDashboardInformation.fulfilled.match(loaded)).toBe(true);
+  expect(store.getState().userDashboardData).toEqual(dashboard);
+  expect(store.getState().isUserLoading).toBe(false);
+
+  const failed = await store.dispatch(handleGetDashboardInformation());
+  expect(handleGetDashboardInformation.rejected.match(failed)).toBe(true);
+  expect(store.getState().userDashboardData).toBeNull();
+  expect(store.getState().isUserError).toBe("offline");
+  expect(reportError).toHaveBeenCalledWith(
+    "user.dashboard",
+    expect.objectContaining({ response: { data: { error: "offline" } } })
+  );
 });

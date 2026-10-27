@@ -86,10 +86,6 @@ const AdditionalInformationForm = () => {
       });
     }
   }, [userPermissions, form, dispatch]);
-  console.log("USER PERMISSIONS", userPermissions);
-
-  console.log("SELECTED PERMISSION", form.watch("selectedPermissions"));
-
   const onSubmit = async (data: { selectedPermissions?: number[] }) => {
     if (user?.ID !== undefined) {
       dispatch<any>(

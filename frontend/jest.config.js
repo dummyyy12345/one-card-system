@@ -12,9 +12,12 @@ module.exports = createJestConfig({
     "!**/*.d.ts",
     "!**/node_modules/**",
     "!**/.next/**",
+    "!e2e/**",
+    "!playwright.config.ts",
+    "!tailwind.config.ts",
   ],
   coverageThreshold: {
-    global: { statements: 30 },
+    global: { statements: 50, lines: 50, functions: 50 },
     "./components/": { statements: 50 },
   },
 });

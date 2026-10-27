@@ -6,6 +6,18 @@ On 2026-10-25, the complete Git history was scanned with Gitleaks v8.30.1 using 
 
 Anyone responsible for credentials that were stored in that file should verify whether they were real and rotate or revoke affected API signing keys, database passwords, device credentials, and SMTP credentials in the systems that issued them. Repository changes cannot perform those external rotations. Review access logs where available. Avoid posting suspected values in issues or pull requests; contact a repository maintainer privately.
 
+The historical file contains these credential variable names. This inventory identifies fields that need owner review; the six scanner findings do not establish that every field held a live secret. No rotation has been verified in this repository.
+
+| Historical variable | System to check | Rotation status |
+| --- | --- | --- |
+| `API_SECRET` | API signing keys and existing sessions | Unverified |
+| `DB_PASSWORD`, `AIVEN_PASSWORD` | Database users and hosted database account | Unverified |
+| `DEVICE_PASSWORD` | Physical access devices | Unverified |
+| `SMTP_PASS` | Mail service account | Unverified |
+| `PGADMIN_DEFAULT_PASSWORD` | pgAdmin account, if used | Unverified |
+
+Record completed rotations and revocations in a private operational log, including the date and owner. Do not record replacement values in Git history. Historical commits and existing clones still contain the old file until a coordinated history cleanup is performed.
+
 CI scans newly introduced commits for secrets. It does not rescan the entire history on every pull request because the historical findings above would block unrelated changes. A redacted scan of the new commits through 2026-10-25 found no additional candidates.
 
 ## Dependency and runtime checks

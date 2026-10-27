@@ -162,15 +162,18 @@ const StudentsList = ({
                   <TableCell>
                     <StudentSyncStatus studentId={student.ID} />
                   </TableCell>
-                  <TableCell
-                    className="cursor-pointer text-center"
-                    onClick={() =>
-                      router.push(
-                        `/${locale}/registrar/students/form/?studentId=${student.ID}`
-                      )
-                    }
-                  >
-                    <EditIcon size={20} className="text-yellow-600" />
+                  <TableCell className="text-center">
+                    <button
+                      type="button"
+                      aria-label={`Edit ${student.student_id}`}
+                      onClick={() =>
+                        router.push(
+                          `/${locale}/registrar/students/form/?studentId=${student.ID}`
+                        )
+                      }
+                    >
+                      <EditIcon size={20} className="text-yellow-600" />
+                    </button>
                   </TableCell>
                 </TableRow>
               ))}

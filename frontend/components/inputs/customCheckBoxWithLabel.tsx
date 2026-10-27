@@ -32,36 +32,34 @@ export default function CustomCheckBoxWithLabel({
       control={form.control}
       name={nameInSchema}
       render={({ field }) => (
-        console.log("FIELD VALUES FOUND", field.value),
-        (
-          <FormItem
-            className={`flex flex-row items-center space-x-4 rounded-md border px-4 py-2 ${className}`}
-          >
-            <FormControl>
-              <Checkbox
-                id={nameInSchema}
-                checked={(field.value ?? []).includes(currentId)}
-                onCheckedChange={(checked) => {
-                  field.onChange(
-                    checked
-                      ? [...(field.value ?? []), currentId]
-                      : (field.value ?? []).filter(
-                          (id: number) => id !== currentId
-                        )
-                  );
-                  //   setUserTryToAssign(false);
-                }}
-                disabled={disabled}
-              />
-            </FormControl>
-            <div className="">
-              <FormLabel htmlFor={nameInSchema}>{fieldTitle}</FormLabel>
-              <p>{message}</p>
-            </div>
+        <FormItem
+          className={`flex flex-row items-center space-x-4 rounded-md border px-4 py-2 ${className}`}
+        >
+          <FormControl>
+            <Checkbox
+              id={`${nameInSchema}-${currentId}`}
+              checked={(field.value ?? []).includes(currentId)}
+              onCheckedChange={(checked) => {
+                field.onChange(
+                  checked
+                    ? [...(field.value ?? []), currentId]
+                    : (field.value ?? []).filter(
+                        (id: number) => id !== currentId
+                      )
+                );
+              }}
+              disabled={disabled}
+            />
+          </FormControl>
+          <div>
+            <FormLabel htmlFor={`${nameInSchema}-${currentId}`}>
+              {fieldTitle}
+            </FormLabel>
+            <p>{message}</p>
+          </div>
 
-            <FormMessage />
-          </FormItem>
-        )
+          <FormMessage />
+        </FormItem>
       )}
     />
   );

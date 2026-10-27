@@ -1,5 +1,6 @@
 import { configureStore } from "@reduxjs/toolkit";
-import axios from "axios";
+import apiClient from "@/store/apiClient";
+import { reportError } from "@/lib/errorReporter";
 import { toast } from "sonner";
 import reducer, {
   handleCreateRole,
@@ -12,7 +13,11 @@ import reducer, {
   RoleRecieved,
 } from "../role";
 
-jest.mock("axios");
+jest.mock("@/store/apiClient", () => ({
+  __esModule: true,
+  default: jest.fn(),
+}));
+jest.mock("@/lib/errorReporter", () => ({ reportError: jest.fn() }));
 jest.mock("sonner", () => ({
   toast: { error: jest.fn(), success: jest.fn() },
 }));
@@ -29,8 +34,8 @@ const role = {
 beforeEach(() => jest.clearAllMocks());
 
 it("tracks loading, records and success resets across role requests", async () => {
-  const mockAxios = axios as jest.MockedFunction<typeof axios>;
-  mockAxios
+  const mockClient = apiClient as jest.MockedFunction<typeof apiClient>;
+  mockClient
     .mockResolvedValueOnce({ data: { data: [role] } })
     .mockResolvedValueOnce({ data: { data: role } })
     .mockResolvedValueOnce({
@@ -74,8 +79,8 @@ it("tracks loading, records and success resets across role requests", async () =
   expect(store.getState().isRoleDeleteSuccess).toBe(true);
   store.dispatch(resetRoleDeleteSuccess());
   expect(store.getState().isRoleDeleteSuccess).toBe(false);
-  expect(mockAxios).toHaveBeenCalledWith(
-    expect.objectContaining({ method: "PATCH", withCredentials: true })
+  expect(mockClient).toHaveBeenCalledWith(
+    expect.objectContaining({ method: "PATCH", url: "/api/v1/admin/roles/3" })
   );
 });
 
@@ -91,7 +96,7 @@ it("uses update loading and keeps API failures visible", async () => {
   expect(pending.isRoleUpdateLoading).toBe(true);
   expect(pending.isRoleCreateLoading).toBe(false);
 
-  (axios as jest.MockedFunction<typeof axios>).mockRejectedValueOnce({
+  (apiClient as jest.MockedFunction<typeof apiClient>).mockRejectedValueOnce({
     response: { data: { error: "role in use" } },
   });
   const store = configureStore({ reducer });
@@ -99,4 +104,8 @@ it("uses update loading and keeps API failures visible", async () => {
   expect(handleDeleteRole.rejected.match(action)).toBe(true);
   expect(store.getState().isRoleError).toBe("role in use");
   expect(toast.error).toHaveBeenCalledWith("role in use");
+  expect(reportError).toHaveBeenCalledWith(
+    "role.delete",
+    expect.objectContaining({ response: { data: { error: "role in use" } } })
+  );
 });
