@@ -1,7 +1,6 @@
 package middlewares
 
 import (
-	"fmt"
 	"net/http"
 	"strings"
 
@@ -37,11 +36,14 @@ func AuthMiddleware() gin.HandlerFunc {
 		var tokenString string
 
 		if authHeader != "" {
-			parts := strings.Split(authHeader, "Bearer ")
-			if len(parts) == 2 {
-				tokenString = parts[1]
-			} else {
+			if !strings.HasPrefix(authHeader, "Bearer ") {
 				utils.ResponseWithError(c, http.StatusUnauthorized, "Authorization format must be Bearer <token>")
+				c.Abort()
+				return
+			}
+			tokenString = strings.TrimSpace(strings.TrimPrefix(authHeader, "Bearer "))
+			if tokenString == "" {
+				utils.ResponseWithError(c, http.StatusUnauthorized, "Authorization token required")
 				c.Abort()
 				return
 			}
@@ -73,45 +75,18 @@ func AuthMiddleware() gin.HandlerFunc {
 // middleware to check if the user is authorizied to access the route
 func RoleRequired(roles ...int) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		// Get the token from the request header
-		authHeader := c.GetHeader("Authorization")
-		var tokenString string
-
-		if authHeader != "" {
-			parts := strings.Split(authHeader, "Bearer ")
-			if len(parts) == 2 {
-				tokenString = parts[1]
-			} else {
-				utils.ResponseWithError(c, http.StatusUnauthorized, "Authorization format must be Bearer <token>")
-				c.Abort()
-				return
-			}
-		} else {
-			cookie, err := c.Cookie("token")
-			if err != nil {
-				utils.ResponseWithError(c, http.StatusUnauthorized, "Authorization token required")
-				c.Abort()
-				return
-			}
-			tokenString = cookie
-		}
-		// Verify the token and extract claims
-		claims, err := security.VerifyToken(strings.TrimSpace(strings.Replace(tokenString, "Bearer ", "", 1)))
-		if err != nil {
-			utils.ResponseWithError(c, http.StatusUnauthorized, "Invalid or expired token", err)
+		if _, authenticated := c.Get("userId"); !authenticated {
+			utils.ResponseWithError(c, http.StatusUnauthorized, "Authentication required")
 			c.Abort()
 			return
 		}
-		fmt.Println("ROLE OF THE USER", roles)
-		fmt.Println("ROLE OF THE USER TWO", claims)
-		// Check if the user role is allowed to access the route
+		userRole := c.GetInt("userRole")
 		for _, role := range roles {
-			if claims.UserRole == role {
-				c.Next() // User has access, continue to the next handler
+			if userRole == role {
+				c.Next()
 				return
 			}
 		}
-		// If the user doesn't have access, return a forbidden error
 		utils.ResponseWithError(c, http.StatusForbidden, "You do not have access to this resource")
 		c.Abort()
 	}

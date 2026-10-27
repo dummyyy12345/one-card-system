@@ -20,13 +20,16 @@ const formatBarChartData = (usersByRole: any[]) =>
 
 // Helper to generate bar chart config
 const generateBarChartConfig = (usersByRole: any[]) =>
-  usersByRole.reduce((config, item, index) => {
-    config[item.role_name.toLowerCase().replace(" ", "_")] = {
-      label: item.role_name,
-      color: `hsl(var(--chart-${index + 1}))`,
-    };
-    return config;
-  }, {} as Record<string, { label: string; color: string }>);
+  usersByRole.reduce(
+    (config, item, index) => {
+      config[item.role_name.toLowerCase().replace(" ", "_")] = {
+        label: item.role_name,
+        color: `hsl(var(--chart-${index + 1}))`,
+      };
+      return config;
+    },
+    {} as Record<string, { label: string; color: string }>
+  );
 
 // Utility function to get card data
 const getCardData = (userDashboardData: any, t: any): CardProps[] => {

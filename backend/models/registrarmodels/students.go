@@ -144,7 +144,7 @@ func (s *Student) Validate(db *gorm.DB) error {
 	return nil
 }
 
-func (s *Student) ValidateForUpdate(db *gorm.DB, currentID ...uint) error {
+func (s *Student) ValidateForUpdate(db *gorm.DB, currentID uint) error {
 	// Non-null validations
 	if s.StudentID == "" {
 		return errors.New("student id is required")

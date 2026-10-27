@@ -1,0 +1,38 @@
+groups:
+  - name: one-card-system
+    rules:
+      - alert: OneCardDatabaseUnavailable
+        expr: onecard_database_up == 0
+        for: 2m
+        labels:
+          severity: critical
+        annotations:
+          summary: One Card System cannot reach PostgreSQL
+      - alert: OneCardDeviceSyncFailures
+        expr: onecard_device_sync_jobs{status="failed"} > 0
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: Device deliveries have failed for at least 15 minutes
+      - alert: OneCardDeviceSyncBacklog
+        expr: onecard_device_sync_oldest_age_seconds > 3600
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: Oldest device delivery has waited over an hour
+      - alert: OneCardStudentSourceStale
+        expr: onecard_source_sync_last_success_timestamp_seconds > 0 and time() - onecard_source_sync_last_success_timestamp_seconds > 93600
+        for: 15m
+        labels:
+          severity: warning
+        annotations:
+          summary: Student source import has not succeeded in 26 hours
+      - alert: OneCardAccessDenialsHigh
+        expr: onecard_access_denials_1h > 100
+        for: 10m
+        labels:
+          severity: warning
+        annotations:
+          summary: More than 100 access denials occurred in the last hour
