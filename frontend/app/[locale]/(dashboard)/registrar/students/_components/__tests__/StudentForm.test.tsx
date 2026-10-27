@@ -1,7 +1,10 @@
 import { fireEvent, render, screen } from "@testing-library/react";
 import { toast } from "sonner";
 import StudentForm from "../StudentForm";
-import { StatusType, StudentRecieved } from "@/store/slices/registrarSlice/students";
+import {
+  StatusType,
+  StudentRecieved,
+} from "@/store/slices/registrarSlice/students";
 
 const mockDispatch = jest.fn();
 
@@ -18,7 +21,9 @@ jest.mock("react-redux", () => ({
     }),
 }));
 jest.mock("next-intl", () => ({ useTranslations: () => (key: string) => key }));
-jest.mock("sonner", () => ({ toast: { error: jest.fn(), success: jest.fn() } }));
+jest.mock("sonner", () => ({
+  toast: { error: jest.fn(), success: jest.fn() },
+}));
 jest.mock("@/components/inputs/customInputWithLabel", () => () => null);
 jest.mock("@/components/inputs/customSelectWithLabel", () => () => null);
 jest.mock("@/components/inputs/customDatePicker", () => () => null);

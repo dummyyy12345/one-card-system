@@ -37,16 +37,7 @@ func (p *permissionmanagementUsecase) UpdatePermission(updatePermission *adminRe
 	return p.permissionmanagementRepository.UpdatePermission(updatePermission)
 }
 
-
 // DeletePermission implements adminRepo.PermissionmanagementRepository.
 func (p *permissionmanagementUsecase) DeletePermission(deletePermission *adminRepo.CreatePermissionRequest) (adminmodels.Permissions, error) {
 	return p.permissionmanagementRepository.DeletePermission(deletePermission)
 }
-
-
-
-
-
-
-
-
