@@ -4,6 +4,7 @@ import apiClient from "@/store/apiClient";
 import { toast } from "sonner";
 import { reportError } from "@/lib/errorReporter";
 import { addAsyncCases } from "@/store/sliceHelpers";
+import { getRequestErrorMessage } from "@/store/requestError";
 
 export interface DataSendToCreateDevice {
   id?: number;
@@ -132,9 +133,9 @@ export const handleFetchDevice = createAsyncThunk<DataRecievedWhileFetchDevice>(
       } else {
         throw new Error("Fetch devices failed");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       reportError("device.fetch", error);
-      throw new Error(error.response?.data?.error || "Fetch devices failed");
+      throw new Error(getRequestErrorMessage(error, "Fetch devices failed"));
     }
   }
 );
@@ -160,10 +161,11 @@ export const handleCreateDevice = createAsyncThunk<
       toast.error("Create devices failed");
       throw new Error("Create devices failed");
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     reportError("device.create", error);
-    toast.error(error.response?.data?.error || "Create Devices failed");
-    throw new Error(error.response?.data?.error || "Create Devices failed");
+    const message = getRequestErrorMessage(error, "Create Devices failed");
+    toast.error(message);
+    throw new Error(message);
   }
 });
 export const handleUpdateDevice = createAsyncThunk<
@@ -187,10 +189,11 @@ export const handleUpdateDevice = createAsyncThunk<
       toast.error("Update device failed");
       throw new Error("Update device failed");
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     reportError("device.update", error);
-    toast.error(error.response?.data?.error || "Update device failed");
-    throw new Error(error.response?.data?.error || "Update device failed");
+    const message = getRequestErrorMessage(error, "Update device failed");
+    toast.error(message);
+    throw new Error(message);
   }
 });
 
@@ -215,10 +218,11 @@ export const handleDeleteDevice = createAsyncThunk<
       toast.error("Delete device failed");
       throw new Error("Delete device failed");
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     reportError("device.delete", error);
-    toast.error(error.response?.data?.error || "Delete device failed");
-    throw new Error(error.response?.data?.error || "Delete device failed");
+    const message = getRequestErrorMessage(error, "Delete device failed");
+    toast.error(message);
+    throw new Error(message);
   }
 });
 

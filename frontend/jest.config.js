@@ -17,7 +17,7 @@ module.exports = createJestConfig({
     "!tailwind.config.ts",
   ],
   coverageThreshold: {
-    global: { statements: 50, lines: 50, functions: 50 },
+    global: { statements: 52, lines: 52, functions: 53 },
     "./components/": { statements: 50 },
   },
 });

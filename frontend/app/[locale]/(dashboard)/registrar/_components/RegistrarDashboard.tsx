@@ -10,9 +10,15 @@ import Card from "@/components/registrarDashboard/Card";
 import { RadarGraph } from "@/components/registrarDashboard/RadarGraph";
 import { BarGraph } from "@/components/registrarDashboard/BarGraph";
 import { useTranslations } from "next-intl";
+import type { DataForDashboard } from "@/store/slices/registrarSlice/types";
 
 // Helper to extract student category data
-const getCardData = (studentsByCategory: any[], t: any) => [
+type Translate = (key: string) => string;
+
+const getCardData = (
+  studentsByCategory: DataForDashboard["studentsByCategory"],
+  t: Translate
+) => [
   {
     label: t("activestudents"),
     amount:
@@ -52,7 +58,9 @@ const getCardData = (studentsByCategory: any[], t: any) => [
 ];
 
 // Helper to format chart data
-const formatChartData = (studentsByCategory: any[]) =>
+const formatChartData = (
+  studentsByCategory: DataForDashboard["studentsByCategory"]
+) =>
   studentsByCategory.map((student, index) => ({
     name: student.category
       .replace("Active Students", "Active")
@@ -64,7 +72,9 @@ const formatChartData = (studentsByCategory: any[]) =>
   }));
 
 // Helper to generate chart configuration
-const generateChartConfig = (studentsByCategory: any[]) =>
+const generateChartConfig = (
+  studentsByCategory: DataForDashboard["studentsByCategory"]
+) =>
   studentsByCategory.reduce(
     (config, student, index) => {
       const name = student.category

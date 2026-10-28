@@ -18,6 +18,29 @@ The historical file contains these credential variable names. This inventory ide
 
 Record completed rotations and revocations in a private operational log, including the date and owner. Do not record replacement values in Git history. Historical commits and existing clones still contain the old file until a coordinated history cleanup is performed.
 
+### Manual remediation checklist
+
+1. Inventory the current owners of the API, database, device, SMTP, and pgAdmin accounts.
+2. Rotate `API_SECRET` first and invalidate existing sessions or signing keys.
+3. Rotate database passwords, device passwords, SMTP credentials, and any affected service tokens.
+4. Update the private deployment secret store and verify the backend can start without committing `.env` files.
+5. Review authentication, database, device, and SMTP access logs for unauthorized use.
+6. Record the owner, completion date, and affected system in a private operational log. Never record replacement values here.
+
+### History cleanup procedure
+
+History rewriting is intentionally not performed automatically. Coordinate a maintenance window, notify all contributors, and create a verified backup before proceeding:
+
+```sh
+git clone --mirror <repository-url> one-card-system.git
+cd one-card-system.git
+git filter-repo --path backend/.env --invert-paths
+git fsck --full
+git push --force --mirror <repository-url>
+```
+
+After the force-push, all contributors must reclone or hard-reset local branches to the cleaned remote. Run a full-history Gitleaks scan on the rewritten mirror, record the cleanup date and commit range in `CHANGELOG.md`, and revoke the old clone credentials if the repository was public.
+
 CI scans newly introduced commits for secrets. It does not rescan the entire history on every pull request because the historical findings above would block unrelated changes. A redacted scan of the new commits through 2026-10-25 found no additional candidates.
 
 ## Dependency and runtime checks

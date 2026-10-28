@@ -2,6 +2,7 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { AxiosRequestConfig } from "axios";
 import apiClient from "@/store/apiClient";
 import { addAsyncCases } from "@/store/sliceHelpers";
+import { getRequestErrorMessage } from "@/store/requestError";
 import { toast } from "sonner";
 import {
   StudentRecieved,
@@ -206,9 +207,10 @@ export const handleFetchStudents = createAsyncThunk<
       toast.error("Fetch students failed");
       throw new Error("Fetch students failed");
     }
-  } catch (error: any) {
-    toast.error(error.response?.data?.error || "Fetch students failed");
-    throw new Error(error.response?.data?.error || "Fetch students failed");
+  } catch (error: unknown) {
+    const message = getRequestErrorMessage(error, "Fetch students failed");
+    toast.error(message);
+    throw new Error(message);
   }
 });
 
@@ -231,9 +233,10 @@ export const handleGetSingleStudent = createAsyncThunk<
       toast.error("Fetch student failed");
       throw new Error("Fetch student failed");
     }
-  } catch (error: any) {
-    toast.error(error.response?.data?.error || "Fetch student failed");
-    throw new Error(error.response?.data?.error || "Fetch student failed");
+  } catch (error: unknown) {
+    const message = getRequestErrorMessage(error, "Fetch student failed");
+    toast.error(message);
+    throw new Error(message);
   }
 });
 
@@ -256,9 +259,10 @@ export const handleCreateStudent = createAsyncThunk<
       toast.error("Create Student failed");
       throw new Error("Create Student failed");
     }
-  } catch (error: any) {
-    toast.error(error.response?.data?.error || "Create Student failed");
-    throw new Error(error.response?.data?.error || "Create Student failed");
+  } catch (error: unknown) {
+    const message = getRequestErrorMessage(error, "Create Student failed");
+    toast.error(message);
+    throw new Error(message);
   }
 });
 
@@ -281,9 +285,10 @@ export const handleUpdateStudent = createAsyncThunk<
       toast.error("Update Student failed");
       throw new Error("Update Student failed");
     }
-  } catch (error: any) {
-    toast.error(error.response?.data?.error || "Update Student failed");
-    throw new Error(error.response?.data?.error || "Update Student failed");
+  } catch (error: unknown) {
+    const message = getRequestErrorMessage(error, "Update Student failed");
+    toast.error(message);
+    throw new Error(message);
   }
 });
 
@@ -308,9 +313,10 @@ export const handleUpdateStudentPhoto = createAsyncThunk<
       toast.error("Update Student failed");
       throw new Error("Update Student failed");
     }
-  } catch (error: any) {
-    toast.error(error.response?.data?.error || "Update Student failed");
-    throw new Error(error.response?.data?.error || "Update Student failed");
+  } catch (error: unknown) {
+    const message = getRequestErrorMessage(error, "Update Student failed");
+    toast.error(message);
+    throw new Error(message);
   }
 });
 
@@ -335,9 +341,10 @@ export const handleUpdateStudentCard = createAsyncThunk<
       toast.error("Update Student failed");
       throw new Error("Update Student failed");
     }
-  } catch (error: any) {
-    toast.error(error.response?.data?.error || "Update Student failed");
-    throw new Error(error.response?.data?.error || "Update Student failed");
+  } catch (error: unknown) {
+    const message = getRequestErrorMessage(error, "Update Student failed");
+    toast.error(message);
+    throw new Error(message);
   }
 });
 
@@ -362,9 +369,10 @@ export const handleUpdateStudentStatus = createAsyncThunk<
       toast.error("Update Student failed");
       throw new Error("Update Student failed");
     }
-  } catch (error: any) {
-    toast.error(error.response?.data?.error || "Update Student failed");
-    throw new Error(error.response?.data?.error || "Update Student failed");
+  } catch (error: unknown) {
+    const message = getRequestErrorMessage(error, "Update Student failed");
+    toast.error(message);
+    throw new Error(message);
   }
 });
 
@@ -384,13 +392,13 @@ export const handleGetDashboardInformationForStudent =
       } else {
         throw new Error("Fetch dashboard information failed");
       }
-    } catch (error: any) {
-      toast.error(
-        error.response?.data?.error || "Fetch dashboard information failed"
+    } catch (error: unknown) {
+      const message = getRequestErrorMessage(
+        error,
+        "Fetch dashboard information failed"
       );
-      throw new Error(
-        error.response?.data?.error || "Fetch dashboard information failed"
-      );
+      toast.error(message);
+      throw new Error(message);
     }
   });
 
