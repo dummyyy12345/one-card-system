@@ -28,10 +28,7 @@ import {
   StatusType,
   StudentRecieved,
 } from "@/store/slices/registrarSlice/students";
-import {
-  createStudentSchema,
-  createStudentSchemaType,
-} from "@/validators/registrar/edit-student";
+import { createStudentSchema } from "@/validators/registrar/edit-student";
 import { yupResolver } from "@hookform/resolvers/yup";
 import { User } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -130,7 +127,7 @@ export default function StudentForm({ student }: Props) {
 
   const form = useForm<DataSendToCreateStudent>({
     defaultValues,
-    resolver: yupResolver(createStudentSchema(t) as any),
+    resolver: yupResolver(createStudentSchema(t)),
   });
 
   const onSubmit = (data: DataSendToCreateStudent) => {

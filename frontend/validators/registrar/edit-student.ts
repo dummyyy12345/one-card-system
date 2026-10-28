@@ -1,5 +1,6 @@
-// validationSchemas.ts
 import * as yup from "yup";
+import type { DataSendToCreateStudent } from "@/store/slices/registrarSlice/students";
+import { SexType, StatusType } from "@/store/slices/registrarSlice/types";
 
 export const editStudentSchema = (t: (key: string) => string) =>
   yup.object({
@@ -12,7 +13,9 @@ export const editStudentSchema = (t: (key: string) => string) =>
     photo: yup.string().required("photorequired"),
   });
 
-export const createStudentSchema = (t: (key: string) => string) =>
+export const createStudentSchema = (
+  t: (key: string) => string
+): yup.ObjectSchema<DataSendToCreateStudent> =>
   yup.object({
     id: yup.number().optional(),
     first_name: yup.string().required(t("firstnamerequired")),
@@ -24,8 +27,8 @@ export const createStudentSchema = (t: (key: string) => string) =>
       .matches(/^0\d{9}$/, t("phoneinvalid"))
       .required(t("phonerequired")),
     sex: yup
-      .string()
-      .oneOf(["Male", "Female"], t("sexinvalid"))
+      .mixed<SexType>()
+      .oneOf(Object.values(SexType), t("sexinvalid"))
       .required(t("sexrequired")),
     date_of_birth: yup
       .date()
@@ -41,13 +44,26 @@ export const createStudentSchema = (t: (key: string) => string) =>
     religion: yup.string().required(t("religionrequired")),
     status: yup
       .string()
-      .oneOf(["Active", "Inactive"], t("statusinvalid"))
+      .oneOf(Object.values(StatusType), t("statusinvalid"))
       .required(t("statusrequired")),
+    is_manually_add: yup.boolean().required(),
     student_id: yup.string().required(t("studentidrequired")),
-    library_id: yup.number().min(1, t("libraryidinvalid")).nullable(),
-    cafeteria_id: yup.number().min(1, t("cafeteriaidinvalid")).nullable(),
-    dormitory_id: yup.number().min(1, t("dormitoryidinvalid")).nullable(),
-    registered_by_id: yup.number().min(1, t("registeredbyrequired")).nullable(),
+    library_id: yup.number().min(1, t("libraryidinvalid")).nullable().defined(),
+    cafeteria_id: yup
+      .number()
+      .min(1, t("cafeteriaidinvalid"))
+      .nullable()
+      .defined(),
+    dormitory_id: yup
+      .number()
+      .min(1, t("dormitoryidinvalid"))
+      .nullable()
+      .defined(),
+    registered_by_id: yup
+      .number()
+      .min(1, t("registeredbyrequired"))
+      .nullable()
+      .defined(),
   });
 
 export type createStudentSchemaType = yup.InferType<
