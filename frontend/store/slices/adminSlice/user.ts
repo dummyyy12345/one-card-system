@@ -40,7 +40,7 @@ export interface DataSendToCreateUser {
   role_id: number;
 }
 
-export interface RoleRecieved {
+export interface RoleReceived {
   ID: number;
   CreatedAt: Date;
   UpdatedAt: Date;
@@ -49,16 +49,16 @@ export interface RoleRecieved {
   description: string;
 }
 
-export interface DataRecievedWhileFetchUser {
+export interface DataReceivedWhileFetchUser {
   currentPage: number;
   totalPages: number;
   totalUsers: number;
-  data: UserRecieved[];
+  data: UserReceived[];
 }
-export interface DataRecievedWhileCreateUser {
-  data: UserRecieved;
+export interface DataReceivedWhileCreateUser {
+  data: UserReceived;
 }
-export interface UserRecieved {
+export interface UserReceived {
   ID: number;
   CreatedAt: Date;
   UpdatedAt: Date;
@@ -67,14 +67,14 @@ export interface UserRecieved {
   father_name: string;
   grand_father_name: string;
   email: string;
-  password: "";
+  password: string;
   role_id: number;
-  role: RoleRecieved;
+  role: RoleReceived;
 }
 
 export interface UserState {
-  users: UserRecieved[];
-  user: UserRecieved | null;
+  users: UserReceived[];
+  user: UserReceived | null;
   currentPageUserCreate: number;
   isUserLoading: boolean;
   isUserCreateLoading: boolean;
@@ -197,7 +197,7 @@ const userSlice = createSlice({
 });
 
 export const handleFetchUser = createAsyncThunk<
-  DataRecievedWhileFetchUser,
+  DataReceivedWhileFetchUser,
   DataSendToFetchUsers
 >("user/fetchUser", async (data) => {
   const url = `/api/v1/admin/users/${data.role_id}`;
@@ -224,7 +224,7 @@ export const handleFetchUser = createAsyncThunk<
 });
 
 export const handleCreateUser = createAsyncThunk<
-  DataRecievedWhileCreateUser,
+  DataReceivedWhileCreateUser,
   DataSendToCreateUser
 >("user/createUser", async (data) => {
   const url = `/api/v1/admin/createuser`;
@@ -251,7 +251,7 @@ export const handleCreateUser = createAsyncThunk<
 });
 
 export const handleUpdateUser = createAsyncThunk<
-  DataRecievedWhileCreateUser,
+  DataReceivedWhileCreateUser,
   DataSendToCreateUser
 >("user/updateUser", async (data) => {
   const url = `/api/v1/admin/user/${data.id}`;
@@ -278,7 +278,7 @@ export const handleUpdateUser = createAsyncThunk<
 });
 
 export const handleDeleteUser = createAsyncThunk<
-  DataRecievedWhileCreateUser,
+  DataReceivedWhileCreateUser,
   { id: number }
 >("user/deleteUser", async (data) => {
   const url = `/api/v1/admin/user/${data.id}`;

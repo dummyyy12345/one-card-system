@@ -2,8 +2,9 @@ package security
 
 import (
 	"testing"
+	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 func TestJwtUsesCurrentSecret(t *testing.T) {
@@ -45,5 +46,22 @@ func TestJwtRejectsUnexpectedSigningMethod(t *testing.T) {
 	}
 	if _, err := VerifyToken(token); err == nil {
 		t.Fatal("HS384 token should be rejected")
+	}
+}
+
+func TestJwtRejectsMissingOrExpiredExpiration(t *testing.T) {
+	secret := "secret-for-expiration-test"
+	t.Setenv("API_SECRET", secret)
+	for _, claims := range []*Claims{
+		{},
+		{RegisteredClaims: jwt.RegisteredClaims{ExpiresAt: jwt.NewNumericDate(time.Now().Add(-time.Hour))}},
+	} {
+		token, err := jwt.NewWithClaims(jwt.SigningMethodHS256, claims).SignedString([]byte(secret))
+		if err != nil {
+			t.Fatalf("sign test token: %v", err)
+		}
+		if _, err := VerifyToken(token); err == nil {
+			t.Fatal("token without a future expiration should be rejected")
+		}
 	}
 }

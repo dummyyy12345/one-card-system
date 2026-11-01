@@ -4,6 +4,10 @@ This file records user-visible changes from the current development line.
 
 ## Unreleased
 
+- Corrected misspelled frontend component paths and received-data type names.
+- Switched JWT signing and verification to the maintained library with stricter expiration validation.
+- Made startup and migration logs structured, removed student identifiers from sync logs, and limited frontend error reporting to safe metadata.
+- Published a frontend coverage summary artifact in CI and documented dependency maintenance status.
 - Added a reproducible Docker Compose development stack, CI checks, and environment templates.
 - Added frontend behavior tests, backend request metrics, structured logs, and offline student device tests.
 - Added clearer errors for failed student and device operations.

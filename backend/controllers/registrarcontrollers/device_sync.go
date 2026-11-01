@@ -190,7 +190,7 @@ func ProcessDeviceSyncJobs(ctx context.Context, db *gorm.DB) error {
 			updates["status"] = "failed"
 			updates["next_attempt_at"] = time.Now().Add(retryDelay(attempts))
 			updates["last_error"] = "device delivery failed"
-			slog.Warn("device_sync_failed", "student_id", job.StudentID, "device_id", job.DeviceID, "attempt", attempts, "error", err)
+			slog.Warn("device_sync_failed", "job_id", job.ID, "attempt", attempts, "error_type", fmt.Sprintf("%T", err))
 		}
 		updates["lease_until"] = nil
 		completion := db.Model(&job).Where("revision = ? AND status = ? AND lease_until = ?", job.Revision, "processing", lease).Updates(updates)

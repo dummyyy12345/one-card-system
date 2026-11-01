@@ -25,11 +25,11 @@ import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { useEffect, useState } from "react";
 import { Form } from "@/components/ui/form";
-import { RoleRecieved } from "@/store/slices/adminSlice/user";
+import { RoleReceived } from "@/store/slices/adminSlice/user";
 import CustomInputWithLabel from "@/components/inputs/customInputWithLabel";
 
 type Props = {
-  role?: RoleRecieved;
+  role?: RoleReceived;
 };
 
 const AddRole = ({ role }: Props) => {

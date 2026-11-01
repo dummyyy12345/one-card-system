@@ -11,7 +11,7 @@ export interface CreatePermissionDataSend {
   id?: number;
 }
 
-export interface PermissionRecieved {
+export interface PermissionReceived {
   ID: number;
   CreatedAt: Date;
   UpdatedAt: Date;
@@ -20,13 +20,13 @@ export interface PermissionRecieved {
   description: string;
 }
 
-export interface PermissionsRecievedData {
-  data: PermissionRecieved[];
+export interface PermissionsReceivedData {
+  data: PermissionReceived[];
 }
 
 interface PermissionState {
-  permissions: PermissionRecieved[];
-  permission: PermissionRecieved | null;
+  permissions: PermissionReceived[];
+  permission: PermissionReceived | null;
   isPermissionLoading: boolean;
   isPermissionCreateLoading: boolean;
   isPermissionUpdateLoading: boolean;
@@ -108,7 +108,7 @@ const permissionSlice = createSlice({
 });
 
 //handle fetch all permissions
-export const handleFetchPermissions = createAsyncThunk<PermissionsRecievedData>(
+export const handleFetchPermissions = createAsyncThunk<PermissionsReceivedData>(
   "permission/fetchPermission",
   async () => {
     const config: AxiosRequestConfig = {
@@ -131,7 +131,7 @@ export const handleFetchPermissions = createAsyncThunk<PermissionsRecievedData>(
 );
 
 export const handleCreatePermission = createAsyncThunk<
-  PermissionRecieved,
+  PermissionReceived,
   CreatePermissionDataSend
 >("permission/createPermission", async (data) => {
   const config: AxiosRequestConfig = {
@@ -155,7 +155,7 @@ export const handleCreatePermission = createAsyncThunk<
 });
 
 export const handleUpdatePermission = createAsyncThunk<
-  PermissionRecieved,
+  PermissionReceived,
   CreatePermissionDataSend
 >("permission/updatePermission", async (data) => {
   const config: AxiosRequestConfig = {
@@ -179,7 +179,7 @@ export const handleUpdatePermission = createAsyncThunk<
 });
 
 export const handleDeletePermission = createAsyncThunk<
-  PermissionRecieved,
+  PermissionReceived,
   { id: number }
 >("permission/deletePemission", async (data) => {
   const config: AxiosRequestConfig = {

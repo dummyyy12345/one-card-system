@@ -40,6 +40,7 @@
     "details": "ዝርዝር",
     "edit": "አስተካክል",
     "delete": "ሰርዝ",
-    "copypassword": "ፓስወርድ ኮፒ አውጥት"
+    "copypassword": "ፓስወርድ ኮፒ አውጥት",
+    "passwordcopyfailed": "የይለፍ ቃል መቅዳት አልተሳካም"
   }
 }

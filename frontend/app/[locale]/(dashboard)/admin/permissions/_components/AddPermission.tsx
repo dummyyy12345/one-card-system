@@ -19,7 +19,7 @@ import {
   resetPermissionUpdateSuccess,
   handleCreatePermission,
   handleUpdatePermission,
-  PermissionRecieved,
+  PermissionReceived,
 } from "@/store/slices/adminSlice/permission";
 import { useForm } from "react-hook-form";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -30,7 +30,7 @@ import CustomInputWithLabel from "@/components/inputs/customInputWithLabel";
 import { Form } from "@/components/ui/form";
 
 type Props = {
-  permission?: PermissionRecieved;
+  permission?: PermissionReceived;
 };
 
 const AddPermissions = ({ permission }: Props) => {

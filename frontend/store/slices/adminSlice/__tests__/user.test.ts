@@ -10,7 +10,7 @@ import reducer, {
   handleSendEmail,
   handleUpdateUser,
   removeSendEmailSuccess,
-  UserRecieved,
+  UserReceived,
 } from "../user";
 
 jest.mock("@/store/apiClient", () => ({
@@ -22,7 +22,7 @@ jest.mock("sonner", () => ({
   toast: { error: jest.fn(), success: jest.fn() },
 }));
 
-const user = { ID: 4, email: "admin@example.com" } as UserRecieved;
+const user = { ID: 4, email: "admin@example.com" } as UserReceived;
 const fetchRequest = { role_id: 2, page: 1, limit: 10 };
 
 beforeEach(() => jest.clearAllMocks());

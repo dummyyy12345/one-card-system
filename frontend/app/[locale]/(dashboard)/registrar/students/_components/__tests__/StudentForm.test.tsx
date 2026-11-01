@@ -3,7 +3,7 @@ import { toast } from "sonner";
 import StudentForm from "../StudentForm";
 import {
   StatusType,
-  StudentRecieved,
+  StudentReceived,
 } from "@/store/slices/registrarSlice/students";
 
 const mockDispatch = jest.fn();
@@ -39,7 +39,7 @@ const student = {
   status: StatusType.Active,
   photo: "",
   is_manually_add: true,
-} as StudentRecieved;
+} as StudentReceived;
 
 beforeEach(() => {
   jest.clearAllMocks();

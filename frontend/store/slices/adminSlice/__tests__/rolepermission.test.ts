@@ -5,7 +5,7 @@ import { toast } from "sonner";
 import reducer, {
   handleFetchPermissionForSpecificRole,
   handleUpdateRolePermissionByRoleId,
-  RolePermissionRecieved,
+  RolePermissionReceived,
 } from "../rolepermission";
 
 jest.mock("@/store/apiClient", () => ({
@@ -21,7 +21,7 @@ const permission = {
   ID: 2,
   role_id: 1,
   permission_id: 3,
-} as RolePermissionRecieved;
+} as RolePermissionReceived;
 beforeEach(() => jest.clearAllMocks());
 
 it("loads and updates the permissions for a role", async () => {

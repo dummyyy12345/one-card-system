@@ -15,13 +15,13 @@ export interface DataSendToCreateDevice {
   location: string;
 }
 
-export interface DataRecievedWhileFetchDevice {
-  data: DeviceRecieved[];
+export interface DataReceivedWhileFetchDevice {
+  data: DeviceReceived[];
 }
-export interface DataRecievedWhileCreateDevice {
-  data: DeviceRecieved;
+export interface DataReceivedWhileCreateDevice {
+  data: DeviceReceived;
 }
-export interface DeviceRecieved {
+export interface DeviceReceived {
   ID: number;
   CreatedAt: Date;
   UpdatedAt: Date;
@@ -34,7 +34,7 @@ export interface DeviceRecieved {
 }
 
 export interface DeviceState {
-  devices: DeviceRecieved[];
+  devices: DeviceReceived[];
   isDeviceLoading: boolean;
   isDeviceCreateLoading: boolean;
   isDeviceCreateSuccess: boolean;
@@ -116,7 +116,7 @@ const deviceSlice = createSlice({
   },
 });
 
-export const handleFetchDevice = createAsyncThunk<DataRecievedWhileFetchDevice>(
+export const handleFetchDevice = createAsyncThunk<DataReceivedWhileFetchDevice>(
   "device/fetchDevice",
   async (data) => {
     const url = `/api/v1/admin/devices`;
@@ -141,7 +141,7 @@ export const handleFetchDevice = createAsyncThunk<DataRecievedWhileFetchDevice>(
 );
 
 export const handleCreateDevice = createAsyncThunk<
-  DataRecievedWhileCreateDevice,
+  DataReceivedWhileCreateDevice,
   DataSendToCreateDevice
 >("device/createDevice", async (data) => {
   const url = `/api/v1/admin/createdevice`;
@@ -169,7 +169,7 @@ export const handleCreateDevice = createAsyncThunk<
   }
 });
 export const handleUpdateDevice = createAsyncThunk<
-  DataRecievedWhileCreateDevice,
+  DataReceivedWhileCreateDevice,
   DataSendToCreateDevice
 >("device/updateDevice", async (data) => {
   const url = `/api/v1/admin/device/${data.id}`;
@@ -198,7 +198,7 @@ export const handleUpdateDevice = createAsyncThunk<
 });
 
 export const handleDeleteDevice = createAsyncThunk<
-  DataRecievedWhileCreateDevice,
+  DataReceivedWhileCreateDevice,
   { id: number }
 >("device/deleteDevice", async (data) => {
   const url = `/api/v1/admin/device/${data.id}`;

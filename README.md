@@ -2,7 +2,7 @@
 
 Campus access control application with a Next.js/Redux frontend and a Go/Gin API. PostgreSQL stores users, devices, and student records. Device synchronization and SMTP need real external services when those features are used; the development setup starts without them.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for change and test guidance, [CHANGELOG.md](CHANGELOG.md) for the current development changes, and [SECURITY.md](SECURITY.md) for the historical credential audit.
+See [CONTRIBUTING.md](CONTRIBUTING.md) for change and test guidance, [CHANGELOG.md](CHANGELOG.md) for the current development changes, [DEPENDENCIES.md](DEPENDENCIES.md) for dependency maintenance, and [SECURITY.md](SECURITY.md) for the historical credential audit.
 
 ## Quick start with Docker
 
@@ -72,7 +72,7 @@ npm run test:e2e
 npm run build
 ```
 
-CI runs these checks on pushes and pull requests, including a PostgreSQL-backed integration test and a fresh migration smoke test, plus `npm audit --audit-level=high` and `govulncheck ./...`. The frontend requires at least 59% statements and lines plus 58% functions across application TypeScript files; Playwright specs and build configuration are excluded because they run through separate checks. It also requires 50% statement coverage across `frontend/components`. A separate core gate requires 75% statements and lines plus 80% functions across key student, user, device, chart, and user-list flows. Role, permission, chart, and user-list files each also require 50% statements. The backend requires at least 40% statement coverage for middleware, 75% for server wiring, and 50% across route packages, plus 50% integration coverage in `controllers/registrarcontrollers`.
+CI runs these checks on pushes and pull requests, including a PostgreSQL-backed integration test and a fresh migration smoke test, plus `npm audit --audit-level=high` and `govulncheck ./...`. The frontend CI job uploads its machine-readable coverage summary as a build artifact. The frontend requires at least 59% statements and lines plus 58% functions across application TypeScript files; Playwright specs and build configuration are excluded because they run through separate checks. It also requires 50% statement coverage across `frontend/components`. A separate core gate requires 75% statements and lines plus 80% functions across key student, user, device, chart, and user-list flows. Role, permission, chart, and user-list files each also require 50% statements. The backend requires at least 40% statement coverage for middleware, 75% for server wiring, and 50% across route packages, plus 50% integration coverage in `controllers/registrarcontrollers`.
 
 The Playwright browser job starts Next.js on port 3100 and uses mocked API responses to exercise login, card checks, policy editing, and temporary exceptions without production credentials.
 
@@ -92,7 +92,7 @@ Copy the example files; never commit the resulting `.env` files. The root `.env.
 | `READER_HMAC_KEYS` | JSON map from registered reader serial number to its HMAC secret |
 | `ACCESS_EVENT_RETENTION_DAYS`, `STUDENT_VIEW_AUDIT_RETENTION_DAYS` | Automatic audit retention in days; `0` disables deletion |
 
-`frontend/.env.example` contains `NEXT_PUBLIC_API_SERVER_URL`, the API URL visible to the browser. Optionally set `NEXT_PUBLIC_ERROR_REPORTING_URL` to an HTTPS collector that accepts a JSON `POST` with `context`, `message`, and `timestamp`. The frontend sends no cookies or original API response body to that collector, and reporting failures never block the user action. Both `NEXT_PUBLIC_` values are embedded into the frontend build, so rebuild after changing them. Do not put a secret in either URL.
+`frontend/.env.example` contains `NEXT_PUBLIC_API_SERVER_URL`, the API URL visible to the browser. Optionally set `NEXT_PUBLIC_ERROR_REPORTING_URL` to an HTTPS collector that accepts a JSON `POST` with `context`, `kind`, `timestamp`, and optional HTTP `status` and `requestId`. The frontend sends no cookies, exception messages, or API response text to that collector, and reporting failures never block the user action. Both `NEXT_PUBLIC_` values are embedded into the frontend build, so rebuild after changing them. Do not put a secret in either URL.
 
 Credentials were previously committed to this repository. If they were real, rotate them in the database, devices, SMTP service, and any other affected system; removing the files now does not erase git history.
 
@@ -115,7 +115,7 @@ The admin access screen also shows per-device delivery gaps, a manual reconcilia
 ## Architecture
 
 - `backend/controllers` handles HTTP requests; `backend/routes` registers Gin routes and middleware.
-- The backend writes structured JSON request logs with method, route template, status, and duration; URL identifiers and query values are omitted.
+- The backend writes structured JSON startup, migration, worker, and request logs. Request logs include a generated request ID, method, route template, status, and duration; URL identifiers, query values, and student identifiers are omitted.
 - `backend/models` defines persisted records; `backend/migrate` creates tables; `backend/skeletons` contains repository/use case interfaces and mocks used by tests in `backend/test`.
 - `frontend/app` contains Next.js routes and page components; `frontend/store/slices` holds Redux Toolkit state and async API actions; `frontend/components` contains shared UI.
 - `docker-compose.yml` builds both applications and starts PostgreSQL for local development.

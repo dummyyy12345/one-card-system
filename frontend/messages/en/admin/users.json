@@ -61,6 +61,7 @@
     "copypassword": "Copy Password",
     "useraccountupdated": "Account Updated Successfully!",
     "passwordcopied": "Password copied to clipboard",
+    "passwordcopyfailed": "Could not copy the password",
     "sendemail": "Send Email"
   }
 }

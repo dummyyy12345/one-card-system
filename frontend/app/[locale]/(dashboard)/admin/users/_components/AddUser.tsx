@@ -15,10 +15,10 @@ import BasicInformationForm from "./createuser/BasicInformationForm";
 import AdditionalInformationForm from "./createuser/AdditionalInformationForm";
 import CreateUserSuccess from "./createuser/CreateUserSuccess";
 import { useTranslations } from "next-intl";
-import { UserRecieved } from "@/store/slices/adminSlice/user";
+import { UserReceived } from "@/store/slices/adminSlice/user";
 
 type Props = {
-  user?: UserRecieved;
+  user?: UserReceived;
 };
 const AddUser = ({ user }: Props) => {
   const t = useTranslations("adminusers");

@@ -3,7 +3,6 @@ package services
 
 import (
 	"context"
-	"log"
 	"log/slog"
 	"os"
 	"time"
@@ -38,7 +37,7 @@ func StartSync() {
 		}
 
 		sleepDuration := sixPM.Sub(now)
-		log.Printf("Next sync scheduled for: %s", sixPM)
+		slog.Info("student_source_sync_scheduled", "next_run", sixPM.UTC().Format(time.RFC3339))
 
 		time.Sleep(sleepDuration)
 	}

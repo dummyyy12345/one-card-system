@@ -26,7 +26,7 @@ import {
   SexType,
   SexType as SexTypeEnum,
   StatusType,
-  StudentRecieved,
+  StudentReceived,
 } from "@/store/slices/registrarSlice/students";
 import { createStudentSchema } from "@/validators/registrar/edit-student";
 import { yupResolver } from "@hookform/resolvers/yup";
@@ -41,7 +41,7 @@ import Webcam from "react-webcam";
 import { toast } from "sonner";
 
 type Props = {
-  student?: StudentRecieved;
+  student?: StudentReceived;
 };
 export default function StudentForm({ student }: Props) {
   const t = useTranslations("addStudent");
@@ -50,7 +50,7 @@ export default function StudentForm({ student }: Props) {
   const [image, setImage] = useState<string | null>(null);
   const [cardNumber, setCardNumber] = useState<string | null>(null);
   const [newStudentCreated, setNewStudentCreated] =
-    useState<StudentRecieved | null>(null);
+    useState<StudentReceived | null>(null);
 
   const {
     isUpdateStudentCardLoading,

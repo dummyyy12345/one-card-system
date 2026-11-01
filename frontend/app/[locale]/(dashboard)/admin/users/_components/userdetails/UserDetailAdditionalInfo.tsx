@@ -15,9 +15,9 @@ import { Skeleton } from "@/components/ui/skeleton";
 import CustomCheckBoxWithLabel from "@/components/inputs/customCheckBoxWithLabel";
 import { handleFetchUserPermission } from "@/store/slices/adminSlice/userpermission";
 import { useTranslations } from "next-intl";
-import { UserRecieved } from "@/store/slices/adminSlice/user";
+import { UserReceived } from "@/store/slices/adminSlice/user";
 
-const AdditionalInformationForm = ({ user }: { user: UserRecieved }) => {
+const AdditionalInformationForm = ({ user }: { user: UserReceived }) => {
   const t = useTranslations("adminusers");
   const dispatch = useDispatch();
   // const { user } = useSelector((state: RootState) => state.user);

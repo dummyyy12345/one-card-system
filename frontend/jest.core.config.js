@@ -22,7 +22,7 @@ module.exports = createJestConfig({
     "./store/slices/adminSlice/role.ts": { statements: 50 },
     "./store/slices/adminSlice/permission.ts": { statements: 50 },
     "./components/ui/chart.tsx": { statements: 50 },
-    "./app/[locale]/(dashboard)/admin/users/_compnents/UserList.tsx": {
+    "./app/[locale]/(dashboard)/admin/users/_components/UserList.tsx": {
       statements: 50,
     },
   },

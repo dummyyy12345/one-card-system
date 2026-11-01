@@ -10,7 +10,7 @@ import reducer, {
   resetRoleCreateSuccess,
   resetRoleDeleteSuccess,
   resetRoleUpdateSuccess,
-  RoleRecieved,
+  RoleReceived,
 } from "../role";
 
 jest.mock("@/store/apiClient", () => ({
@@ -29,7 +29,7 @@ const role = {
   CreatedAt: "2026-01-01",
   UpdatedAt: "2026-01-01",
   DeletedAt: null,
-} as unknown as RoleRecieved;
+} as unknown as RoleReceived;
 
 beforeEach(() => jest.clearAllMocks());
 

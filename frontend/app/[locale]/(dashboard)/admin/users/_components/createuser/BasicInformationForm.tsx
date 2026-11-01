@@ -6,7 +6,7 @@ import {
   DataSendToCreateUser,
   handleCreateUser,
   handleUpdateUser,
-  UserRecieved,
+  UserReceived,
 } from "@/store/slices/adminSlice/user";
 import { useForm } from "react-hook-form";
 import { createUserSchema } from "@/validators/admin/create-user-validator";
@@ -37,7 +37,7 @@ import { Form } from "@/components/ui/form";
 import CustomSelectWithLabel from "@/components/inputs/customSelectWithLabel";
 
 type Props = {
-  user?: UserRecieved;
+  user?: UserReceived;
 };
 const BasicInformationForm = ({ user }: Props) => {
   const t = useTranslations("adminusers");

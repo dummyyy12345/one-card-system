@@ -1,4 +1,4 @@
-import type { UserRecieved } from "../adminSlice/user";
+import type { UserReceived } from "../adminSlice/user";
 
 export enum SexType {
   Male = "Male",
@@ -10,7 +10,7 @@ export enum StatusType {
   Inactive = "Inactive",
 }
 
-export interface StudentRecieved {
+export interface StudentReceived {
   ID: number;
   CreatedAt: Date;
   UpdatedAt: Date;
@@ -31,19 +31,19 @@ export interface StudentRecieved {
   religion: string;
   photo: string;
   library_id: number;
-  library_assigned: LibraryRecieved;
+  library_assigned: LibraryReceived;
   cafeteria_id: number;
-  cafeteria_assigned: CafeRecieved;
+  cafeteria_assigned: CafeReceived;
   dormitory_id: number;
-  dormitory_assigned: DormRecieved;
+  dormitory_assigned: DormReceived;
   registered_by_id: number;
-  registered_by: UserRecieved;
+  registered_by: UserReceived;
   registered_date: Date;
   status: StatusType;
   is_manually_add: boolean;
 }
 
-export interface LibraryRecieved {
+export interface LibraryReceived {
   ID: number;
   CreatedAt: Date;
   UpdatedAt: Date;
@@ -54,7 +54,7 @@ export interface LibraryRecieved {
   registered_by: number;
 }
 
-export interface CafeRecieved {
+export interface CafeReceived {
   ID: number;
   CreatedAt: Date;
   UpdatedAt: Date;
@@ -64,7 +64,7 @@ export interface CafeRecieved {
   block_number: string;
   registered_by: number;
 }
-export interface DormRecieved {
+export interface DormReceived {
   ID: number;
   CreatedAt: Date;
   UpdatedAt: Date;
@@ -87,8 +87,8 @@ export interface DataForDashboard {
 }
 
 export interface StudentState {
-  students: StudentRecieved[];
-  student: StudentRecieved | null;
+  students: StudentReceived[];
+  student: StudentReceived | null;
   isCreateStudentLoading: boolean;
   isCreateStudentError: string | null;
   isUpdateStudentLoading: boolean;

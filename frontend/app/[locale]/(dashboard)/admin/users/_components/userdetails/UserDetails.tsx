@@ -1,4 +1,4 @@
-import { UserRecieved } from "@/store/slices/adminSlice/user";
+import { UserReceived } from "@/store/slices/adminSlice/user";
 import { useState } from "react";
 import UserBasicInfo from "./UserBasicInfo";
 import {
@@ -10,7 +10,7 @@ import AdditionalInformationForm from "./UserDetailAdditionalInfo";
 import UserDetailFooter from "./UserDetailFooter";
 import { useTranslations } from "next-intl";
 
-const UserDetails = ({ user }: { user: UserRecieved }) => {
+const UserDetails = ({ user }: { user: UserReceived }) => {
   const t = useTranslations("adminusers");
   const [page, setPage] = useState<number>(1);
   return (

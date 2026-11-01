@@ -22,7 +22,7 @@ import { Button } from "@/components/ui/button";
 import {
   handleDeleteRole,
   resetRoleUpdateSuccess,
-  RoleRecieved,
+  RoleReceived,
 } from "@/store/slices/adminSlice/role";
 import { FaListAlt, FaSpinner } from "react-icons/fa";
 import { EditIcon } from "lucide-react";
@@ -43,7 +43,7 @@ const RoleList = ({ searchTerm }: { searchTerm: string }) => {
     isRoleDeleteLoading,
     isRoleDeleteSuccess,
   } = useSelector((state: RootState) => state.role);
-  const [rolesToDisplay, setRolesToDisplay] = useState<RoleRecieved[]>(roles);
+  const [rolesToDisplay, setRolesToDisplay] = useState<RoleReceived[]>(roles);
 
   useEffect(() => {
     if (searchTerm) {

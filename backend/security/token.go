@@ -2,18 +2,17 @@ package security
 
 import (
 	"errors"
-	"fmt"
 	"os"
 	"time"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/golang-jwt/jwt/v5"
 )
 
 type Claims struct {
 	UserId    uint   `json:"id"`
 	UserEmail string `json:"email"`
 	UserRole  int    `json:"role_id"`
-	jwt.StandardClaims
+	jwt.RegisteredClaims
 }
 
 func signingKey() ([]byte, error) {
@@ -35,8 +34,8 @@ func GenerateJwt(userId uint, userEmail string, userRole int) (string, error) {
 		UserId:    userId,
 		UserEmail: userEmail,
 		UserRole:  userRole,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: expirationTime.Unix(),
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(expirationTime),
 		},
 	}
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
@@ -55,11 +54,8 @@ func VerifyToken(tokenString string) (*Claims, error) {
 
 	claims := &Claims{}
 	token, err := jwt.ParseWithClaims(tokenString, claims, func(token *jwt.Token) (interface{}, error) {
-		if token.Method.Alg() != jwt.SigningMethodHS256.Alg() {
-			return nil, fmt.Errorf("unexpected signing method: %v", token.Header["alg"])
-		}
 		return key, nil
-	})
+	}, jwt.WithValidMethods([]string{jwt.SigningMethodHS256.Alg()}), jwt.WithExpirationRequired())
 	if err != nil {
 		return nil, err
 	}

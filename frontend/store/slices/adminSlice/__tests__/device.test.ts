@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import apiClient from "@/store/apiClient";
 import { reportError } from "@/lib/errorReporter";
 import reducer, {
-  DeviceRecieved,
+  DeviceReceived,
   handleCreateDevice,
   handleDeleteDevice,
   handleFetchDevice,
@@ -21,7 +21,7 @@ jest.mock("sonner", () => ({
   toast: { success: jest.fn(), error: jest.fn() },
 }));
 
-const device: DeviceRecieved = {
+const device: DeviceReceived = {
   ID: 4,
   CreatedAt: "2026-01-01T00:00:00Z" as unknown as Date,
   UpdatedAt: "2026-01-01T00:00:00Z" as unknown as Date,

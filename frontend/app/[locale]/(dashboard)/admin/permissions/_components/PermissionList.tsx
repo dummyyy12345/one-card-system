@@ -18,7 +18,7 @@ import { cn } from "@/lib/utils";
 import { RootState } from "@/store";
 import {
   handleDeletePermission,
-  PermissionRecieved,
+  PermissionReceived,
   resetPermissionUpdateSuccess,
 } from "@/store/slices/adminSlice/permission";
 import { DialogTrigger } from "@radix-ui/react-dialog";
@@ -37,7 +37,7 @@ const PermissionList = ({ searchTerm }: { searchTerm: string }) => {
   const { permissions, isPermissionLoading, isPermissionDeleteLoading } =
     useSelector((state: RootState) => state.permission);
   const [permissionToDisplay, setPermissionToDisplay] =
-    useState<PermissionRecieved[]>(permissions);
+    useState<PermissionReceived[]>(permissions);
   useEffect(() => {
     if (searchTerm) {
       setPermissionToDisplay(

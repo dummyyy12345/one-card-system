@@ -11,24 +11,24 @@ export interface LoginUserSendData {
   password: string;
 }
 
-export interface DataRecievedWhileUserLogin {
-  data: UserRecieved;
+export interface DataReceivedWhileUserLogin {
+  data: UserReceived;
 }
-interface UserRecieved {
+interface UserReceived {
   ID: number;
   first_name: string;
   father_name: string;
   grand_father_name: string;
   email: string;
   role_id: number;
-  role: RoleRecieved;
+  role: RoleReceived;
   CreatedAt: Date;
   UpdatedAt: Date;
   DeletedAt: Date | null;
   password: null;
 }
 
-interface RoleRecieved {
+interface RoleReceived {
   ID: number;
   CreatedAt: Date;
   UpdatedAt: Date;
@@ -38,7 +38,7 @@ interface RoleRecieved {
 }
 
 interface AuthState {
-  user: UserRecieved | null;
+  user: UserReceived | null;
   isAuthenticated: boolean;
   isLoading: boolean;
   error: string | null;
@@ -77,7 +77,7 @@ const authSlice = createSlice({
         state.error = null;
       })
       .addCase(handleLogin.fulfilled, (state, action) => {
-        state.user = (action.payload as DataRecievedWhileUserLogin).data;
+        state.user = (action.payload as DataReceivedWhileUserLogin).data;
         state.isAuthenticated = true;
         state.isLoading = false;
         state.error = null;
@@ -91,7 +91,7 @@ const authSlice = createSlice({
 
 // Thunk for handling login
 export const handleLogin = createAsyncThunk<
-  DataRecievedWhileUserLogin,
+  DataReceivedWhileUserLogin,
   { data: LoginUserSendData; router: any; locale?: string }
 >("auth/login", async ({ data, router, locale = "en" }) => {
   const config: AxiosRequestConfig = {

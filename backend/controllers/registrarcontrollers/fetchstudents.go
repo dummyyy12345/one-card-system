@@ -24,7 +24,7 @@ func SyncDataFromSMS(db *gorm.DB) error {
 	}
 
 	// Synchronize student data
-	for _, student := range students {
+	for index, student := range students {
 		var existingStudent registrarmodels.Student
 		result := db.Where("student_id = ?", student.StudentID).First(&existingStudent)
 
@@ -32,34 +32,34 @@ func SyncDataFromSMS(db *gorm.DB) error {
 			if errors.Is(result.Error, gorm.ErrRecordNotFound) {
 				// New student, validate and insert
 				if err := student.Validate(db); err != nil {
-					slog.Error("student_validation_failed", "student_id", student.StudentID, "error", err)
+					slog.Error("student_validation_failed", "record_index", index, "error_type", fmt.Sprintf("%T", err))
 					continue
 				}
 				if err := db.Create(&student).Error; err != nil {
-					slog.Error("student_insert_failed", "student_id", student.StudentID, "error", err)
+					slog.Error("student_insert_failed", "record_index", index, "error_type", fmt.Sprintf("%T", err))
 					continue
 				}
 				if err := queueStudentSync(db, devices, student); err != nil {
-					slog.Error("device_sync_queue_failed", "student_id", student.StudentID, "error", err)
+					slog.Error("device_sync_queue_failed", "record_index", index, "error_type", fmt.Sprintf("%T", err))
 				}
 			} else {
-				slog.Error("student_fetch_failed", "student_id", student.StudentID, "error", result.Error)
+				slog.Error("student_fetch_failed", "record_index", index, "error_type", fmt.Sprintf("%T", result.Error))
 				continue
 			}
 		} else {
 			// Existing student, check for updates
 			if shouldUpdateStudent(existingStudent, student) {
 				if err := student.ValidateForUpdate(db, existingStudent.ID); err != nil {
-					slog.Error("student_validation_failed", "student_id", student.StudentID, "error", err)
+					slog.Error("student_validation_failed", "record_index", index, "error_type", fmt.Sprintf("%T", err))
 					continue
 				}
 				if err := db.Model(&existingStudent).Updates(student).Error; err != nil {
-					slog.Error("student_update_failed", "student_id", student.StudentID, "error", err)
+					slog.Error("student_update_failed", "record_index", index, "error_type", fmt.Sprintf("%T", err))
 					continue
 				}
 				student.ID = existingStudent.ID
 				if err := queueStudentSync(db, devices, student); err != nil {
-					slog.Error("device_sync_queue_failed", "student_id", student.StudentID, "error", err)
+					slog.Error("device_sync_queue_failed", "record_index", index, "error_type", fmt.Sprintf("%T", err))
 				}
 			}
 		}

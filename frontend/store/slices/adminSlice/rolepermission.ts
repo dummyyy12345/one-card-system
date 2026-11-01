@@ -1,6 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
-import { PermissionRecieved } from "./permission";
-import { RoleRecieved } from "./role";
+import { PermissionReceived } from "./permission";
+import { RoleReceived } from "./role";
 import type { AxiosRequestConfig } from "axios";
 import apiClient from "@/store/apiClient";
 import { addAsyncCases } from "@/store/sliceHelpers";
@@ -11,24 +11,24 @@ export interface RolePermissionSend {
   role_id: number;
 }
 
-export interface RolePermissionRecieved {
+export interface RolePermissionReceived {
   ID: number;
   CreatedAt: Date;
   UpdatedAt: Date;
   DeletedAt: Date | null;
   role_id: number;
   permission_id: number;
-  role: RoleRecieved;
-  permission: PermissionRecieved;
+  role: RoleReceived;
+  permission: PermissionReceived;
 }
 
-export interface RolePermissionRecievedData {
-  data: RolePermissionRecieved[];
+export interface RolePermissionReceivedData {
+  data: RolePermissionReceived[];
 }
 
 export interface RolePermissionState {
-  rolePermissions: RolePermissionRecieved[];
-  rolePermission: RolePermissionRecieved | null;
+  rolePermissions: RolePermissionReceived[];
+  rolePermission: RolePermissionReceived | null;
   isRolePermissionLoading: boolean;
   isRolePermissionUpdateLoading: boolean;
   isRolePermissionError: string | null;
@@ -67,7 +67,7 @@ const rolePermissionSlice = createSlice({
 });
 
 export const handleFetchPermissionForSpecificRole = createAsyncThunk<
-  RolePermissionRecievedData,
+  RolePermissionReceivedData,
   RolePermissionSend
 >("rolepermission/fetchpermissionsforrole", async ({ role_id }) => {
   const config: AxiosRequestConfig = {
@@ -93,7 +93,7 @@ export const handleFetchPermissionForSpecificRole = createAsyncThunk<
 });
 
 export const handleUpdateRolePermissionByRoleId = createAsyncThunk<
-  RolePermissionRecievedData,
+  RolePermissionReceivedData,
   { role_id: number; permission_ids: number[] }
 >(
   "rolepermission/updaterolepermission",

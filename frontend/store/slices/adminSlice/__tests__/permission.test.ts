@@ -7,7 +7,7 @@ import reducer, {
   handleDeletePermission,
   handleFetchPermissions,
   handleUpdatePermission,
-  PermissionRecieved,
+  PermissionReceived,
   resetPermissionCreateSuccess,
   resetPermissionUpdateSuccess,
 } from "../permission";
@@ -28,7 +28,7 @@ const permission = {
   CreatedAt: "2026-01-01",
   UpdatedAt: "2026-01-01",
   DeletedAt: null,
-} as unknown as PermissionRecieved;
+} as unknown as PermissionReceived;
 
 beforeEach(() => jest.clearAllMocks());
 

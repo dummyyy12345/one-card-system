@@ -27,7 +27,7 @@ import {
 } from "@/store/slices/adminSlice/userpermission";
 import {
   increareCurrentPage,
-  UserRecieved,
+  UserReceived,
 } from "@/store/slices/adminSlice/user";
 import { useTranslations } from "next-intl";
 import { handleFetchDevice } from "@/store/slices/adminSlice/device";

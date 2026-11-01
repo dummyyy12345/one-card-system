@@ -1,7 +1,7 @@
 import CreateUserFooter from "./CreateUserFooter";
 import { toast } from "sonner";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/store";
+import { AppDispatch, RootState } from "@/store";
 import {
   handleFetchUser,
   handleSendEmail,
@@ -22,7 +22,7 @@ import { FaSpinner } from "react-icons/fa";
 
 const CreateUserSuccess = () => {
   const t = useTranslations("adminusers");
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const { user, sendEmailLoading, sendEmailSuccess, sendEmailError } =
     useSelector((state: RootState) => state.user);
   const { userPermissions } = useSelector(
@@ -32,36 +32,39 @@ const CreateUserSuccess = () => {
     (permission) => permission.permission.description
   );
   const handleConfirmClick = () => {
-    dispatch<any>(removeCurrentUser());
-    dispatch<any>(resetUserPermissionState());
-    dispatch<any>(removeSendEmailSuccess());
-    dispatch<any>(
-      handleFetchUser({
-        role_id: user?.role_id!,
-        page: 1,
-        limit: 10,
-        name: "",
-      })
-    );
+    dispatch(removeCurrentUser());
+    dispatch(resetUserPermissionState());
+    dispatch(removeSendEmailSuccess());
+    if (user) {
+      dispatch(
+        handleFetchUser({ role_id: user.role_id, page: 1, limit: 10, name: "" })
+      );
+    }
     toast.success(t("thankyouproceed"));
   };
 
   const handleSendEmailForUser = () => {
-    dispatch<any>(
+    if (!user?.email || !user.password) return;
+    dispatch(
       handleSendEmail({
-        name: `${user?.first_name} ${user?.father_name} ${user?.grand_father_name}`,
-        email: user?.email || "",
+        name: `${user.first_name} ${user.father_name} ${user.grand_father_name}`,
+        email: user.email,
         subject: "Password for your account",
-        password: user?.password || "",
-        role: user?.role.role_name || "",
-        roledescription: userCanDo || [],
+        password: user.password,
+        role: user.role.role_name,
+        roledescription: userCanDo,
       })
     );
   };
 
-  const handlePasswordClick = () => {
-    navigator.clipboard.writeText(`${user?.password}`);
-    toast.success(t("passwordcopied"));
+  const handlePasswordClick = async () => {
+    if (!user?.password) return;
+    try {
+      await navigator.clipboard.writeText(user.password);
+      toast.success(t("passwordcopied"));
+    } catch {
+      toast.error(t("passwordcopyfailed"));
+    }
   };
 
   return (
@@ -77,7 +80,10 @@ const CreateUserSuccess = () => {
           </p>
           <TooltipProvider>
             <Tooltip>
-              <TooltipTrigger onClick={handlePasswordClick}>
+              <TooltipTrigger
+                onClick={handlePasswordClick}
+                disabled={!user?.password}
+              >
                 <span className="text-lg font-medium text-green-600 py-3 px-3 rounded-md">
                   {user?.password}
                 </span>
@@ -88,6 +94,7 @@ const CreateUserSuccess = () => {
             </Tooltip>
           </TooltipProvider>
           <p className="text-center mt-2">{t("pleasechangepassword")}</p>
+          {sendEmailError && <p role="alert">{sendEmailError}</p>}
         </div>
         {sendEmailSuccess ? (
           <>
@@ -103,7 +110,7 @@ const CreateUserSuccess = () => {
           <Button
             className="bg-green-600 hover:bg-green-700 w-1/2 mx-auto h-fit py-3 px-4 rounded mt-2 text-white text-sm"
             onClick={handleSendEmailForUser}
-            disabled={sendEmailLoading}
+            disabled={sendEmailLoading || !user?.email || !user.password}
           >
             {t("sendemail")}
             {sendEmailLoading && (

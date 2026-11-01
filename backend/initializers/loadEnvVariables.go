@@ -1,7 +1,8 @@
 package initializers
 
 import (
-	"log"
+	"fmt"
+	"log/slog"
 	"os"
 	"path/filepath"
 
@@ -11,20 +12,21 @@ import (
 func LoadEnvVariables() {
 	currentDir, err := os.Getwd()
 	if err != nil {
-		log.Fatalf("Error getting current working directory: %v", err)
+		slog.Error("working_directory_unavailable", "error_type", fmt.Sprintf("%T", err))
+		os.Exit(1)
 	}
 	envPath := filepath.Join(currentDir, ".env")
 
 	if _, err := os.Stat(envPath); os.IsNotExist(err) {
 		defaultPath := filepath.Join("../", ".env")
-		log.Printf("Defaulting to .env file at %s", defaultPath)
+		slog.Info("environment_file_fallback", "location", "parent")
 		envPath = defaultPath
 	}
 
 	// Containers and CI supply environment variables directly. A local .env is optional.
 	if _, err := os.Stat(envPath); err == nil {
 		if err := godotenv.Load(envPath); err != nil {
-			log.Printf("Could not load %s: %v", envPath, err)
+			slog.Warn("environment_file_load_failed", "error_type", fmt.Sprintf("%T", err))
 		}
 	}
 }

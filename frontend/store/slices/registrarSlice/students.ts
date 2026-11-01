@@ -5,27 +5,27 @@ import { addAsyncCases } from "@/store/sliceHelpers";
 import { getRequestErrorMessage } from "@/store/requestError";
 import { toast } from "sonner";
 import {
-  StudentRecieved,
+  StudentReceived,
   SexType,
   StatusType,
   StudentState,
   DataForDashboard,
 } from "./types";
 export type {
-  StudentRecieved,
-  LibraryRecieved,
-  CafeRecieved,
-  DormRecieved,
+  StudentReceived,
+  LibraryReceived,
+  CafeReceived,
+  DormReceived,
   StudentState,
   DataForDashboard,
 } from "./types";
 export { SexType, StatusType } from "./types";
 
-export interface DataRecievedWhileFetchStudents {
+export interface DataReceivedWhileFetchStudents {
   currentPage: number;
   totalPages: number;
   totalStudents: number;
-  data: StudentRecieved[];
+  data: StudentReceived[];
 }
 interface DataSendToFetchStudents {
   page: number;
@@ -183,7 +183,7 @@ const studentSlice = createSlice({
 });
 
 export const handleFetchStudents = createAsyncThunk<
-  DataRecievedWhileFetchStudents,
+  DataReceivedWhileFetchStudents,
   DataSendToFetchStudents
 >("student/fetchStudents", async (data) => {
   const url = `/api/v1/registrar/students`;
@@ -215,7 +215,7 @@ export const handleFetchStudents = createAsyncThunk<
 });
 
 export const handleGetSingleStudent = createAsyncThunk<
-  StudentRecieved,
+  StudentReceived,
   { id: number }
 >("student/getstudent", async (data) => {
   const url = `/api/v1/registrar/student/${data.id}`;
@@ -241,7 +241,7 @@ export const handleGetSingleStudent = createAsyncThunk<
 });
 
 export const handleCreateStudent = createAsyncThunk<
-  StudentRecieved,
+  StudentReceived,
   DataSendToCreateStudent
 >("student/createStudent", async (data) => {
   const url = `/api/v1/registrar/student/create`;
@@ -267,7 +267,7 @@ export const handleCreateStudent = createAsyncThunk<
 });
 
 export const handleUpdateStudent = createAsyncThunk<
-  StudentRecieved,
+  StudentReceived,
   DataSendToCreateStudent
 >("student/updateStudent", async (data) => {
   const url = `/api/v1/registrar/student/edit/${data.id}`;
@@ -293,7 +293,7 @@ export const handleUpdateStudent = createAsyncThunk<
 });
 
 export const handleUpdateStudentPhoto = createAsyncThunk<
-  StudentRecieved,
+  StudentReceived,
   DataSendToUpdateStudent
 >("student/updateStudentPhoto", async (data) => {
   const url = `/api/v1/registrar/student/photo/${data.ID}`;
@@ -321,7 +321,7 @@ export const handleUpdateStudentPhoto = createAsyncThunk<
 });
 
 export const handleUpdateStudentCard = createAsyncThunk<
-  StudentRecieved,
+  StudentReceived,
   DataSendToUpdateStudent
 >("student/updateStudentCard", async (data) => {
   const url = `/api/v1/registrar/student/card/${data.ID}`;
@@ -349,7 +349,7 @@ export const handleUpdateStudentCard = createAsyncThunk<
 });
 
 export const handleUpdateStudentStatus = createAsyncThunk<
-  StudentRecieved,
+  StudentReceived,
   DataSendToUpdateStudent
 >("student/updateStudentStatus", async (data) => {
   const url = `/api/v1/registrar/student/status/${data.ID}`;

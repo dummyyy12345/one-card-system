@@ -18,14 +18,14 @@ jest.mock("@/store/slices/adminSlice/user", () => ({
   handleFetchUser: jest.fn((payload) => ({ type: "user/fetch", payload })),
 }));
 jest.mock(
-  "@/app/[locale]/(dashboard)/admin/users/_compnents/AddUser",
+  "@/app/[locale]/(dashboard)/admin/users/_components/AddUser",
   () =>
     function MockAddUser() {
       return <div>Add user dialog</div>;
     }
 );
 jest.mock(
-  "@/app/[locale]/(dashboard)/admin/users/_compnents/UserList",
+  "@/app/[locale]/(dashboard)/admin/users/_components/UserList",
   () =>
     function MockUserList({ name, limit }: { name: string; limit: number }) {
       return <div data-testid="user-list">{`${name}:${limit}`}</div>;

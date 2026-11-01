@@ -2,7 +2,7 @@ import { configureStore } from "@reduxjs/toolkit";
 import apiClient from "@/store/apiClient";
 import { toast } from "sonner";
 import reducer, {
-  DataRecievedWhileFetchStudents,
+  DataReceivedWhileFetchStudents,
   DataSendToCreateStudent,
   handleCreateStudent,
   handleFetchStudents,
@@ -13,7 +13,7 @@ import reducer, {
   handleUpdateStudentPhoto,
   SexType,
   StatusType,
-  StudentRecieved,
+  StudentReceived,
 } from "../students";
 
 jest.mock("@/store/apiClient", () => ({
@@ -24,9 +24,9 @@ jest.mock("sonner", () => ({
   toast: { error: jest.fn(), success: jest.fn() },
 }));
 
-const student = { ID: 9, student_id: "ST9" } as StudentRecieved;
+const student = { ID: 9, student_id: "ST9" } as StudentReceived;
 const request = { page: 2, limit: 10, status: "Active" };
-const response: DataRecievedWhileFetchStudents = {
+const response: DataReceivedWhileFetchStudents = {
   currentPage: 2,
   totalPages: 3,
   totalStudents: 21,

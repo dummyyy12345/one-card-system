@@ -2,7 +2,6 @@ package main
 
 import (
 	"fmt"
-	"log"
 	"log/slog"
 	"os"
 
@@ -12,14 +11,15 @@ import (
 )
 
 func init() {
+	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
 	initializers.LoadEnvVariables()
 	initializers.ConnectToDB(os.Getenv("DB_DRIVER"), os.Getenv("DB_USER"), os.Getenv("DB_PASSWORD"), os.Getenv("DB_PORT"), os.Getenv("DB_HOST"), os.Getenv("DB_NAME"))
 }
 
 func main() {
-	slog.SetDefault(slog.New(slog.NewJSONHandler(os.Stdout, nil)))
 	if initializers.DB == nil {
-		log.Fatal("Database connection is not initialized")
+		slog.Error("database_unavailable")
+		os.Exit(1)
 	}
 
 	// Start the sync process in a separate goroutine

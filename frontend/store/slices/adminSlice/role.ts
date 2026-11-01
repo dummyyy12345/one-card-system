@@ -10,10 +10,10 @@ export interface RoleSend {
   description: string;
   id?: number;
 }
-export interface DataRecievedWhileFecthRoles {
-  data: RoleRecieved[];
+export interface DataReceivedWhileFetchRoles {
+  data: RoleReceived[];
 }
-export interface RoleRecieved {
+export interface RoleReceived {
   ID: number;
   CreatedAt: Date;
   UpdatedAt: Date;
@@ -23,8 +23,8 @@ export interface RoleRecieved {
 }
 
 export interface RoleState {
-  roles: RoleRecieved[];
-  role: RoleRecieved | null;
+  roles: RoleReceived[];
+  role: RoleReceived | null;
   isRoleLoading: boolean;
   isRoleCreateSuccess: boolean;
   isRoleUpdateSuccess: boolean;
@@ -103,7 +103,7 @@ const roleSlice = createSlice({
   },
 });
 
-export const handleFetchRole = createAsyncThunk<DataRecievedWhileFecthRoles>(
+export const handleFetchRole = createAsyncThunk<DataReceivedWhileFetchRoles>(
   "role/fetchRole",
   async () => {
     const config: AxiosRequestConfig = {
@@ -125,7 +125,7 @@ export const handleFetchRole = createAsyncThunk<DataRecievedWhileFecthRoles>(
   }
 );
 
-export const handleCreateRole = createAsyncThunk<RoleRecieved, RoleSend>(
+export const handleCreateRole = createAsyncThunk<RoleReceived, RoleSend>(
   "role/createRole",
   async (data) => {
     const config: AxiosRequestConfig = {
@@ -149,7 +149,7 @@ export const handleCreateRole = createAsyncThunk<RoleRecieved, RoleSend>(
   }
 );
 
-export const handleUpdateRole = createAsyncThunk<RoleRecieved, RoleSend>(
+export const handleUpdateRole = createAsyncThunk<RoleReceived, RoleSend>(
   "role/updateRole",
   async (data) => {
     const config: AxiosRequestConfig = {
@@ -172,7 +172,7 @@ export const handleUpdateRole = createAsyncThunk<RoleRecieved, RoleSend>(
     }
   }
 );
-export const handleDeleteRole = createAsyncThunk<RoleRecieved, { id: number }>(
+export const handleDeleteRole = createAsyncThunk<RoleReceived, { id: number }>(
   "role/deleteRole",
   async (data) => {
     const config: AxiosRequestConfig = {

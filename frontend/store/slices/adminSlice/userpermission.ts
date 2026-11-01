@@ -2,9 +2,9 @@ import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { AxiosRequestConfig } from "axios";
 import apiClient from "@/store/apiClient";
 import { reportRequestError } from "@/store/requestError";
-import { increareCurrentPage, type UserRecieved } from "./user";
+import { increareCurrentPage, type UserReceived } from "./user";
 import { toast } from "sonner";
-import { PermissionRecieved } from "./permission";
+import { PermissionReceived } from "./permission";
 
 export interface DataSendToCreateUserPermission {
   user_id: number;
@@ -22,8 +22,8 @@ export interface ReceivedWhileFetchUserPermission {
   DeletedAt: Date | null;
   user_id: number;
   permission_id: number;
-  user: UserRecieved;
-  permission: PermissionRecieved;
+  user: UserReceived;
+  permission: PermissionReceived;
 }
 export interface DataReceivedWhileFetchUserPermission {
   data: ReceivedWhileFetchUserPermission[];

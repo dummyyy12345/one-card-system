@@ -10,7 +10,7 @@ import { FaSpinner } from "react-icons/fa";
 import { useDispatch } from "react-redux";
 import {
   DataSendToCreateDevice,
-  DeviceRecieved,
+  DeviceReceived,
   handleCreateDevice,
   handleUpdateDevice,
   resetDeviceCreateSuccess,
@@ -29,7 +29,7 @@ import { Form } from "@/components/ui/form";
 import CustomInputWithLabel from "@/components/inputs/customInputWithLabel";
 
 type Props = {
-  device?: DeviceRecieved;
+  device?: DeviceReceived;
 };
 const CreateDevice = ({ device }: Props) => {
   const t = useTranslations("adminDevice");

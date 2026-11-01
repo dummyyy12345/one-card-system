@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import {
   DataSendToCreateUser,
-  UserRecieved,
+  UserReceived,
 } from "@/store/slices/adminSlice/user";
 import { useForm, FormProvider } from "react-hook-form";
 import { createUserSchema } from "@/validators/admin/create-user-validator";
@@ -11,7 +11,7 @@ import { useSelector } from "react-redux";
 import { useEffect, useState } from "react";
 import CustomInputWithLabel from "@/components/inputs/customInputWithLabel";
 
-const UserBasicInfo = ({ user }: { user: UserRecieved }) => {
+const UserBasicInfo = ({ user }: { user: UserReceived }) => {
   const t = useTranslations("adminusers");
   const { roles } = useSelector((state: RootState) => state.role);
 
