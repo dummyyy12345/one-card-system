@@ -72,7 +72,7 @@ npm run test:e2e
 npm run build
 ```
 
-CI runs these checks on pushes and pull requests, including a PostgreSQL-backed integration test, plus `npm audit --audit-level=high` and `govulncheck ./...`. The frontend requires at least 52% statements and lines plus 53% functions across application TypeScript files; Playwright specs and build configuration are excluded because they run through separate checks. It also requires 50% statement coverage across `frontend/components`. A separate core gate requires 50% statements, lines, and functions across key student, user, device, chart, and user-list flows. Role, permission, chart, and user-list files each also require 50% statements. The backend gate requires at least 50% statement coverage in `controllers/registrarcontrollers`; it does not set a threshold for the entire backend.
+CI runs these checks on pushes and pull requests, including a PostgreSQL-backed integration test and a fresh migration smoke test, plus `npm audit --audit-level=high` and `govulncheck ./...`. The frontend requires at least 59% statements and lines plus 58% functions across application TypeScript files; Playwright specs and build configuration are excluded because they run through separate checks. It also requires 50% statement coverage across `frontend/components`. A separate core gate requires 75% statements and lines plus 80% functions across key student, user, device, chart, and user-list flows. Role, permission, chart, and user-list files each also require 50% statements. The backend requires at least 40% statement coverage for middleware, 75% for server wiring, and 50% across route packages, plus 50% integration coverage in `controllers/registrarcontrollers`.
 
 The Playwright browser job starts Next.js on port 3100 and uses mocked API responses to exercise login, card checks, policy editing, and temporary exceptions without production credentials.
 
@@ -83,6 +83,7 @@ Copy the example files; never commit the resulting `.env` files. The root `.env.
 | Variable | Purpose |
 | --- | --- |
 | `API_PORT`, `API_SECRET` | API listener port and token signing secret |
+| `CORS_ALLOWED_ORIGINS` | Comma-separated browser origins allowed to send credentialed API requests; defaults to the local frontend |
 | `DB_DRIVER`, `DB_HOST`, `DB_PORT`, `DB_USER`, `DB_PASSWORD`, `DB_NAME`, `DB_SSLMODE` | Database connection and PostgreSQL TLS mode |
 | `DEVICE_USERNAME`, `DEVICE_PASSWORD` | Credentials for access control devices |
 | `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS` | Outbound email settings |

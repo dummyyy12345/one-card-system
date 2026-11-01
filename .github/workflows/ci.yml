@@ -96,6 +96,7 @@ jobs:
       - run: go vet ./...
       - run: go build ./...
       - run: go test -cover ./...
+      - run: sh scripts/check-unit-coverage.sh
       - run: go install golang.org/x/vuln/cmd/govulncheck@v1.1.4
       - run: govulncheck ./...
 
@@ -141,6 +142,16 @@ jobs:
           go-version-file: backend/go.mod
           cache: true
           cache-dependency-path: backend/go.sum
+      - name: Apply production migrations to fresh PostgreSQL
+        run: go run ./migrate
+        env:
+          DB_DRIVER: postgres
+          DB_HOST: localhost
+          DB_PORT: "5432"
+          DB_USER: onecard
+          DB_PASSWORD: integration-only-password
+          DB_NAME: onecard_integration
+          DB_SSLMODE: disable
       - run: sh scripts/check-coverage.sh
         env:
           INTEGRATION_DB_DSN: postgres://onecard:integration-only-password@localhost:5432/onecard_integration?sslmode=disable

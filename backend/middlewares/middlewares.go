@@ -2,6 +2,8 @@ package middlewares
 
 import (
 	"net/http"
+	"net/url"
+	"os"
 	"strings"
 
 	"github.com/SolomonAHailu/one-card-system/security"
@@ -9,19 +11,37 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// This enables us interact with the React Frontend
+// CORSMiddleware permits credentialed browser requests only from configured,
+// exact origins. An empty setting defaults to the local development frontend.
 func CORSMiddleware() gin.HandlerFunc {
+	configured := os.Getenv("CORS_ALLOWED_ORIGINS")
+	if strings.TrimSpace(configured) == "" {
+		configured = "http://localhost:3000"
+	}
+	allowed := make(map[string]struct{})
+	for _, value := range strings.Split(configured, ",") {
+		origin := strings.TrimSpace(value)
+		parsed, err := url.Parse(origin)
+		if err == nil && (parsed.Scheme == "http" || parsed.Scheme == "https") && parsed.Host != "" && parsed.User == nil && parsed.Path == "" && parsed.RawQuery == "" && parsed.Fragment == "" {
+			allowed[origin] = struct{}{}
+		}
+	}
 	return func(c *gin.Context) {
 		origin := c.Request.Header.Get("Origin")
-		if origin == "http://localhost:3000" {
+		if _, ok := allowed[origin]; ok {
 			c.Writer.Header().Set("Access-Control-Allow-Origin", origin)
+			c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
+			c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
+			c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
+			c.Writer.Header().Set("Vary", "Origin")
 		}
-		// c.Writer.Header().Set("Access-Control-Allow-Origin", "*")
-		c.Writer.Header().Set("Access-Control-Allow-Credentials", "true")
-		c.Writer.Header().Set("Access-Control-Allow-Headers", "Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization, accept, origin, Cache-Control, X-Requested-With")
-		c.Writer.Header().Set("Access-Control-Allow-Methods", "POST, OPTIONS, GET, PUT, PATCH, DELETE")
-
 		if c.Request.Method == "OPTIONS" {
+			if origin != "" {
+				if _, ok := allowed[origin]; !ok {
+					c.AbortWithStatus(http.StatusForbidden)
+					return
+				}
+			}
 			c.AbortWithStatus(204)
 			return
 		}

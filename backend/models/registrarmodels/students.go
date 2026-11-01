@@ -115,7 +115,6 @@ func (s *Student) Validate(db *gorm.DB) error {
 	}
 
 	// Unique constraints (considering soft deletes)
-	fmt.Printf("Validating StudentID: %s, ID: %d\n", s.StudentID, s.ID)
 	var count int64
 	if err := db.Model(&Student{}).Where("student_id = ? AND deleted_at IS NULL", s.StudentID).Count(&count).Error; err != nil {
 		return fmt.Errorf("error checking student id uniqueness: %v", err)

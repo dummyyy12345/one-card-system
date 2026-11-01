@@ -14,6 +14,9 @@ This file records user-visible changes from the current development line.
 - Added signed reader decisions, versioned location policies, temporary exceptions, and registrar record scope.
 - Added configurable audit retention, student detail view auditing, readiness and operational metrics, alert examples, and Playwright browser tests.
 - Raised frontend coverage enforcement above the original 50% baseline, added shared UI and request-error tests, and replaced high-impact untyped request error handling.
+- Added request IDs and privacy-conscious structured panic logging, configurable browser origins, and backend unit coverage gates.
+- Added login, user, and device behavior tests and improved their keyboard and screen-reader controls.
+- Applied production migrations before PostgreSQL integration checks in CI.
 
 When publishing a release, move relevant entries to a dated version section and create a matching Git tag.
 

@@ -16,11 +16,12 @@ type Server struct {
 
 func NewServer() *Server {
 	router := gin.New()
+	logger := slog.New(slog.NewJSONHandler(os.Stdout, nil))
 	metrics := middlewares.NewRequestMetrics()
 	if initializers.DB != nil {
 		metrics.AttachDatabase(initializers.DB)
 	}
-	router.Use(gin.Recovery(), middlewares.RequestLogger(slog.New(slog.NewJSONHandler(os.Stdout, nil))), metrics.Middleware())
+	router.Use(middlewares.RequestID(), middlewares.RequestLogger(logger), metrics.Middleware(), middlewares.StructuredRecovery(logger))
 	router.GET("/metrics", gin.WrapH(metrics.Handler()))
 	return &Server{
 		Router: router,

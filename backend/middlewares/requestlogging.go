@@ -19,6 +19,7 @@ func RequestLogger(logger *slog.Logger) gin.HandlerFunc {
 			path = "(unmatched)"
 		}
 		logger.Info("http_request",
+			"request_id", requestID(c),
 			"method", c.Request.Method,
 			"route", path,
 			"status", c.Writer.Status(),
