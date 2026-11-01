@@ -21,6 +21,7 @@ This file records user-visible changes from the current development line.
 - Added request IDs and privacy-conscious structured panic logging, configurable browser origins, and backend unit coverage gates.
 - Added login, user, and device behavior tests and improved their keyboard and screen-reader controls.
 - Applied production migrations before PostgreSQL integration checks in CI.
+- Documented the committed frontend quality configurations, dependency manifests, and current coverage baseline so fresh-clone verification and external repository scans can discover the enforced gates.
 
 When publishing a release, move relevant entries to a dated version section and create a matching Git tag.
 

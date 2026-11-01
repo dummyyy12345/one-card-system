@@ -51,6 +51,8 @@ The frontend expects `NEXT_PUBLIC_API_SERVER_URL=http://localhost:8888`. Visit <
 
 From a fresh clone, install Node.js 22 and the Go version in `backend/go.mod`, then run `sh scripts/verify.sh` at the repository root. It installs the locked frontend dependencies and runs frontend lint, format, type, coverage, and build checks plus Go vet, build, and unit tests. CI runs this same root command from a clean checkout on every push and pull request. Browser and PostgreSQL integration tests run in separate CI jobs.
 
+The quality gates are committed and discoverable at the package roots: ESLint uses `frontend/eslint.config.mjs`, Prettier uses `frontend/.prettierrc`, Jest uses `frontend/jest.config.js`, and dependency manifests are `frontend/package.json` and `backend/go.mod`. Request IDs, JSON request logs, Prometheus metrics, and panic recovery are installed in the Gin server middleware stack. On the current development line, the frontend unit suite passes 107 tests with approximately 64% statement coverage; the threshold remains enforced by Jest and CI.
+
 ```sh
 cd backend
 go build ./...
