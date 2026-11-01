@@ -6,7 +6,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import AddUser from "@/app/[locale]/(dashboard)/admin/users/_compnents/AddUser";
 import SelectLimit from "@/app/[locale]/(dashboard)/admin/_components/SelectLimit";
 import UserList from "@/app/[locale]/(dashboard)/admin/users/_compnents/UserList";
-import { RootState } from "@/store";
+import { AppDispatch, RootState } from "@/store";
 import { handleFetchRole } from "@/store/slices/adminSlice/role";
 import { handleFetchUser } from "@/store/slices/adminSlice/user";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
@@ -14,9 +14,11 @@ import { MdOutlinePersonAddAlt1 } from "react-icons/md";
 import { useForm, FormProvider } from "react-hook-form";
 import CustomSelectWithOutLabel from "@/components/inputs/customSelectWithOutLable";
 import CustomDebounceSearch from "@/components/inputs/CustomDebounceSearch";
+import { useTranslations } from "next-intl";
 
 const UsersPage = () => {
-  const dispatch = useDispatch();
+  const t = useTranslations("adminusers");
+  const dispatch = useDispatch<AppDispatch>();
   const [limit, setLimit] = useState<number>(10);
   const [name, setName] = useState<string>("");
   const [page, setPage] = useState<number>(1);
@@ -46,7 +48,7 @@ const UsersPage = () => {
     setTimeout(() => {
       setRefetchUser(false);
     }, 500);
-    dispatch<any>(
+    dispatch(
       handleFetchUser({
         role_id: selectedRoleId,
         page,
@@ -57,7 +59,7 @@ const UsersPage = () => {
   };
 
   useEffect(() => {
-    dispatch<any>(handleFetchRole());
+    dispatch(handleFetchRole());
   }, [dispatch]);
 
   return (
@@ -73,7 +75,9 @@ const UsersPage = () => {
           <FormProvider {...formMethods}>
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-x-6">
-                <div
+                <button
+                  type="button"
+                  aria-label={t("refreshusers")}
                   className="h-8 w-8 px-2 py-4 bg-[#3A5DD9] hover:bg-[#2a4bc6] flex items-center justify-center rounded-sm cursor-pointer"
                   onClick={refetchUsers}
                 >
@@ -82,7 +86,7 @@ const UsersPage = () => {
                       refetchUser ? "animate-spin" : ""
                     }`}
                   />
-                </div>
+                </button>
                 <CustomSelectWithOutLabel
                   nameInSchema="role_id"
                   data={roleForSelect}
@@ -93,12 +97,15 @@ const UsersPage = () => {
                 <CustomDebounceSearch
                   value={name}
                   onChange={setName}
-                  placeholder="Search by name..."
+                  placeholder={t("searchbyname")}
                   className="min-w-[350px]"
                   delay={1000}
                 />
                 <Dialog>
-                  <DialogTrigger className="h-8 w-8 bg-[#3A5DD9] hover:bg-[#2a4bc6] flex items-center justify-center rounded-sm">
+                  <DialogTrigger
+                    aria-label={t("createuser")}
+                    className="h-8 w-8 bg-[#3A5DD9] hover:bg-[#2a4bc6] flex items-center justify-center rounded-sm"
+                  >
                     <MdOutlinePersonAddAlt1 className="text-xl text-white" />
                   </DialogTrigger>
                   <AddUser />

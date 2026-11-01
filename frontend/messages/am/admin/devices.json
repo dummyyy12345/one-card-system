@@ -23,6 +23,8 @@
     "cancel": "ሰርዝ",
     "confirm": "አረጋግጥ",
     "suretodelete": "እርግጠኛ ነህ ይሄን መሣሪያ ሰርዝ እንዴት ነህ",
-    "close": "ዝጋ"
+    "close": "ዝጋ",
+    "searchbylocation": "በቦታ ፈልግ",
+    "refreshdevices": "መሣሪያዎችን አድስ"
   }
 }

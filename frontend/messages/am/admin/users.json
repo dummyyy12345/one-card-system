@@ -1,6 +1,7 @@
 {
   "adminusers": {
     "searchbyname": "በስም መፈለግ",
+    "refreshusers": "ተጠቃሚዎችን አድስ",
     "searchbynamerequired": "ስሙን ኣላስገቡም",
     "createuser": "ተጠቃሚ ማስገባት",
     "becarefull": "እባክዎትን በጥንቃቄ ይሙሉ",

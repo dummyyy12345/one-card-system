@@ -18,7 +18,7 @@ module.exports = createJestConfig({
     "**/UserList.tsx",
   ],
   coverageThreshold: {
-    global: { statements: 50, lines: 50, functions: 50 },
+    global: { statements: 75, lines: 75, functions: 80 },
     "./store/slices/adminSlice/role.ts": { statements: 50 },
     "./store/slices/adminSlice/permission.ts": { statements: 50 },
     "./components/ui/chart.tsx": { statements: 50 },

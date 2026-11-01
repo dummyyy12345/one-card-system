@@ -1,7 +1,7 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import type { AxiosRequestConfig } from "axios";
 import apiClient from "@/store/apiClient";
-import { reportError } from "@/lib/errorReporter";
+import { reportRequestError } from "@/store/requestError";
 import { addAsyncCases } from "@/store/sliceHelpers";
 import { toast } from "sonner";
 
@@ -78,6 +78,7 @@ export interface UserState {
   currentPageUserCreate: number;
   isUserLoading: boolean;
   isUserCreateLoading: boolean;
+  isUserDeleteLoading: boolean;
   isUserError: string | null;
   isUserCreateError: string | null;
   sendEmailLoading: boolean;
@@ -96,6 +97,7 @@ const initialState: UserState = {
   isUserLoading: false,
   isUserError: null,
   isUserCreateLoading: false,
+  isUserDeleteLoading: false,
   isUserCreateError: null,
   sendEmailLoading: false,
   sendEmailError: null,
@@ -155,7 +157,7 @@ const userSlice = createSlice({
       },
     });
     addAsyncCases(builder, handleDeleteUser, {
-      loadingKey: "isUserCreateLoading",
+      loadingKey: "isUserDeleteLoading",
       errorKey: "isUserError",
       fallbackError: "Delete user failed",
       onFulfilled: (state, payload) => {
@@ -212,13 +214,12 @@ export const handleFetchUser = createAsyncThunk<
     if (response.data) {
       return response.data;
     } else {
-      toast.error("Fetch users failed");
       throw new Error("Fetch users failed");
     }
-  } catch (error: any) {
-    reportError("user.fetch", error);
-    toast.error(error.response?.data?.error || "Fetch users failed");
-    throw new Error(error.response?.data?.error || "Fetch users failed");
+  } catch (error: unknown) {
+    throw new Error(
+      reportRequestError("user.fetch", error, "Fetch users failed")
+    );
   }
 });
 
@@ -240,13 +241,12 @@ export const handleCreateUser = createAsyncThunk<
       toast.success("User created successfully");
       return response.data;
     } else {
-      toast.error("Create users failed");
       throw new Error("Create users failed");
     }
-  } catch (error: any) {
-    reportError("user.create", error);
-    toast.error(error.response?.data?.error || "Create users failed");
-    throw new Error(error.response?.data?.error || "Create users failed");
+  } catch (error: unknown) {
+    throw new Error(
+      reportRequestError("user.create", error, "Create users failed")
+    );
   }
 });
 
@@ -268,13 +268,12 @@ export const handleUpdateUser = createAsyncThunk<
       toast.success("User updated successfully");
       return response.data;
     } else {
-      toast.error("Update user failed");
       throw new Error("Update user failed");
     }
-  } catch (error: any) {
-    reportError("user.update", error);
-    toast.error(error.response?.data?.error || "Update user failed");
-    throw new Error(error.response?.data?.error || "Update user failed");
+  } catch (error: unknown) {
+    throw new Error(
+      reportRequestError("user.update", error, "Update user failed")
+    );
   }
 });
 
@@ -296,13 +295,12 @@ export const handleDeleteUser = createAsyncThunk<
       toast.success("User deleted successfully");
       return response.data;
     } else {
-      toast.error("Delete user failed");
       throw new Error("Delete user failed");
     }
-  } catch (error: any) {
-    reportError("user.delete", error);
-    toast.error(error.response?.data?.error || "Delete user failed");
-    throw new Error(error.response?.data?.error || "Delete user failed");
+  } catch (error: unknown) {
+    throw new Error(
+      reportRequestError("user.delete", error, "Delete user failed")
+    );
   }
 });
 
@@ -323,13 +321,12 @@ export const handleSendEmail = createAsyncThunk<string, DataSendToSendEmail>(
         toast.success("Email sent successfully");
         return response.data.message;
       } else {
-        toast.error("Send email failed");
         throw new Error("Send email failed");
       }
-    } catch (error: any) {
-      reportError("user.sendEmail", error);
-      toast.error(error.response?.data?.error || "Send email failed");
-      throw new Error(error.response?.data?.error || "Send email failed");
+    } catch (error: unknown) {
+      throw new Error(
+        reportRequestError("user.sendEmail", error, "Send email failed")
+      );
     }
   }
 );
@@ -351,13 +348,13 @@ export const handleGetDashboardInformation = createAsyncThunk<DataForDashboard>(
       } else {
         throw new Error("Fetch dashboard information failed");
       }
-    } catch (error: any) {
-      reportError("user.dashboard", error);
-      toast.error(
-        error.response?.data?.error || "Fetch dashboard information failed"
-      );
+    } catch (error: unknown) {
       throw new Error(
-        error.response?.data?.error || "Fetch dashboard information failed"
+        reportRequestError(
+          "user.dashboard",
+          error,
+          "Fetch dashboard information failed"
+        )
       );
     }
   }

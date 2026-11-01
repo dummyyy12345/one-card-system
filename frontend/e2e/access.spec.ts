@@ -22,7 +22,7 @@ async function mockLogin(page: Page, roleName: string, roleID: number) {
   });
   await page.goto("/en/login");
   await page.getByLabel("Email").fill("ada@example.com");
-  await page.getByLabel("Password").fill("example-password");
+  await page.getByLabel("Password", { exact: true }).fill("example-password");
   await page.getByRole("button", { name: /log in|login/i }).click();
 }
 

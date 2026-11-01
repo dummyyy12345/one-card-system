@@ -1,6 +1,7 @@
 {
   "adminusers": {
     "searchbyname": "Search by name",
+    "refreshusers": "Refresh users",
     "searchbynamerequired": "Name is required",
     "createuser": "Create User",
     "becarefull": "Be carefull when you fill the information",

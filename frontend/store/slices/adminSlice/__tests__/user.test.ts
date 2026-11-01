@@ -66,6 +66,8 @@ it("keeps delete errors visible and removes a user only on success", () => {
     withUser,
     handleDeleteUser.pending("delete", { id: 4 })
   );
+  expect(pending.isUserDeleteLoading).toBe(true);
+  expect(pending.isUserCreateLoading).toBe(false);
   const rejected = reducer(
     pending,
     handleDeleteUser.rejected(new Error("permission denied"), "delete", {
@@ -74,7 +76,7 @@ it("keeps delete errors visible and removes a user only on success", () => {
   );
   expect(rejected.users).toEqual([user]);
   expect(rejected.isUserError).toBe("permission denied");
-  expect(rejected.isUserCreateLoading).toBe(false);
+  expect(rejected.isUserDeleteLoading).toBe(false);
 
   const fulfilled = reducer(
     pending,
@@ -94,12 +96,26 @@ it("reports a failed delete request to the page", async () => {
   expect(handleDeleteUser.rejected.match(action)).toBe(true);
   expect(store.getState().isUserError).toBe("permission denied");
   expect(toast.error).toHaveBeenCalledWith("permission denied");
+  expect(toast.error).toHaveBeenCalledTimes(1);
   expect(reportError).toHaveBeenCalledWith(
     "user.delete",
     expect.objectContaining({
       response: { data: { error: "permission denied" } },
     })
   );
+});
+
+it("uses a single safe fallback message for an untyped delete error", async () => {
+  (apiClient as jest.MockedFunction<typeof apiClient>).mockRejectedValueOnce(
+    new Error("internal connection details")
+  );
+  const store = configureStore({ reducer });
+  const action = await store.dispatch(handleDeleteUser({ id: 4 }));
+
+  expect(handleDeleteUser.rejected.match(action)).toBe(true);
+  expect(store.getState().isUserError).toBe("Delete user failed");
+  expect(toast.error).toHaveBeenCalledTimes(1);
+  expect(toast.error).toHaveBeenCalledWith("Delete user failed");
 });
 
 it("creates and updates a user in the visible list", async () => {

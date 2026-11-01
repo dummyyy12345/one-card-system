@@ -5,6 +5,8 @@
     "enteremail": "Enter your email",
     "password": "Password",
     "enterpassword": "Enter your password",
+    "showpassword": "Show password",
+    "hidepassword": "Hide password",
     "login": "Login",
     "emailrequired": "Email is required",
     "passwordrerequired": "Password is required",

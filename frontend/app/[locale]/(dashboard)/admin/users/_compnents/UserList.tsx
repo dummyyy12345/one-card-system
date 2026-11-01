@@ -1,4 +1,4 @@
-import { RootState } from "@/store";
+import { AppDispatch, RootState } from "@/store";
 import { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 
@@ -25,10 +25,9 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { cn } from "@/lib/utils";
-import { usePathname, useRouter } from "next/navigation";
 import UserDetails from "./userdetails/UserDetails";
-import { DeleteIcon, EditIcon } from "lucide-react";
-import { MdDelete, MdDetails } from "react-icons/md";
+import { EditIcon } from "lucide-react";
+import { MdDelete } from "react-icons/md";
 import { FaListAlt, FaSpinner } from "react-icons/fa";
 import {
   Dialog,
@@ -56,21 +55,18 @@ const UserList = ({
   name?: string;
 }) => {
   const t = useTranslations("adminusers");
-  const dispatch = useDispatch();
-  const router = useRouter();
-  const locale = usePathname().split("/")[1];
+  const dispatch = useDispatch<AppDispatch>();
   const {
     users,
     isUserError,
     isUserLoading,
     currentPage,
     totalPages,
-    totalUsers,
-    isUserCreateLoading,
+    isUserDeleteLoading,
   } = useSelector((state: RootState) => state.user);
 
   useEffect(() => {
-    dispatch<any>(handleFetchUser({ role_id, page, limit, name: name ?? "" }));
+    dispatch(handleFetchUser({ role_id, page, limit, name: name ?? "" }));
   }, [dispatch, role_id, page, limit, name]);
 
   const renderPageNumbers = () => {
@@ -97,7 +93,10 @@ const UserList = ({
                 ? "rounded-sm border-2 border-primary m-2 text-xs h-10 w-10 flex items-center justify-center"
                 : "bg-transparent rounded-sm hover:bg-background/90 hover:rounded-sm hover:h-8 hover:w-8"
             }
-            onClick={() => setPage(i)}
+            onClick={(event) => {
+              event.preventDefault();
+              setPage(i);
+            }}
           >
             {i}
           </PaginationLink>
@@ -131,11 +130,14 @@ const UserList = ({
         </div>
       </div>
     );
+  } else if (isUserError && users?.length === 0) {
+    return <div role="alert">{isUserError}</div>;
   } else if (users?.length === 0) {
     return <div className="text-[#3A5DD9]">{t("nouser")}</div>;
   } else {
     return (
       <div className="relative rounded-xl p-0 h-[calc(100vh-120px)] flex flex-col gap-y-2">
+        {isUserError && <p role="alert">{isUserError}</p>}
         <div className="h-5/6 flex-1 rounded-xl rounded-bl-none rounded-br-none overflow-y-auto">
           <Table>
             <TableHeader>
@@ -216,12 +218,13 @@ const UserList = ({
                           </DialogClose>
                           <Button
                             className="bg-green-700 hover:bg-green-800 px-7 text-white lowercase"
+                            disabled={isUserDeleteLoading}
                             onClick={() =>
-                              dispatch<any>(handleDeleteUser({ id: user.ID }))
+                              dispatch(handleDeleteUser({ id: user.ID }))
                             }
                           >
                             {t("confirm")}
-                            {isUserCreateLoading && (
+                            {isUserDeleteLoading && (
                               <FaSpinner className="animate-spin ml-2 text-white text-xs" />
                             )}
                           </Button>
@@ -244,7 +247,10 @@ const UserList = ({
                     currentPage === 1 ? "opacity-35 cursor-default" : ""
                   } bg-secondary-foreground/15 hover:bg-secondary-foreground/25 text-xs`
                 )}
-                onClick={() => setPage(Math.max(currentPage - 1, 1))}
+                onClick={(event) => {
+                  event.preventDefault();
+                  setPage(Math.max(currentPage - 1, 1));
+                }}
               />
             </PaginationItem>
 
@@ -260,7 +266,10 @@ const UserList = ({
                       : ""
                   } bg-secondary-foreground/15 hover:bg-secondary-foreground/25 text-xs`
                 )}
-                onClick={() => setPage(Math.min(currentPage + 1, totalPages))}
+                onClick={(event) => {
+                  event.preventDefault();
+                  setPage(Math.min(currentPage + 1, totalPages));
+                }}
               />
             </PaginationItem>
           </PaginationContent>

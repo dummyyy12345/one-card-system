@@ -77,26 +77,27 @@ const LoginPage = () => {
             )}
           </div>
           <div className="grid gap-2 py-2">
-            {/* <Label htmlFor="password">Password</Label> */}
             <Label htmlFor="password" className="block text-sm font-medium">
               {t("password")}
             </Label>
             <div className="flex items-center justify-center gap-2 relative">
-              <div className="absolute right-2.5 top-1/2 transform -translate-y-1/2">
+              <button
+                type="button"
+                aria-label={visible ? t("hidepassword") : t("showpassword")}
+                aria-pressed={visible}
+                className="absolute right-2.5 top-1/2 transform -translate-y-1/2"
+                onClick={() => setVisible(!visible)}
+              >
                 {visible ? (
                   <EyeClosed
                     size={22}
-                    className="cursor-pointer text-primary"
-                    onClick={() => setVisible(!visible)}
+                    aria-hidden="true"
+                    className="text-primary"
                   />
                 ) : (
-                  <Eye
-                    size={22}
-                    className="cursor-pointer text-primary"
-                    onClick={() => setVisible(!visible)}
-                  />
+                  <Eye size={22} aria-hidden="true" className="text-primary" />
                 )}
-              </div>
+              </button>
               <Input
                 id="password"
                 type={visible ? "text" : "password"}

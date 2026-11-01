@@ -26,6 +26,7 @@
     "confirm": "Confirm",
     "close": "Close",
     "nodevice": "No Device Found",
-    "searchbylocation": "Search by location"
+    "searchbylocation": "Search by location",
+    "refreshdevices": "Refresh devices"
   }
 }

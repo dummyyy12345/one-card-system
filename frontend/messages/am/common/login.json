@@ -6,6 +6,8 @@
     "enteremail": "ኢሜሎን ያስገቡ",
     "password": "የተጠቃሚው የይለፍ ቃል",
     "enterpassword": "የይለፍ ቃልዎን ያስገቡ",
+    "showpassword": "የይለፍ ቃል አሳይ",
+    "hidepassword": "የይለፍ ቃል ደብቅ",
     "login": "ይግቡ",
     "emailrequired": "የተጠቃሚ ኢሜል ያስፈልጋል",
     "passwordrerequired": "የተጠቃሚ የይለፍ ቃል ያስፈልጋል",

@@ -10,10 +10,11 @@ import { TbDeviceDesktopPlus } from "react-icons/tb";
 import { Search } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { useTranslations } from "next-intl";
+import type { AppDispatch } from "@/store";
 
 const DevicesPage = () => {
   const t = useTranslations("adminDevice");
-  const dispatch = useDispatch();
+  const dispatch = useDispatch<AppDispatch>();
   const [refetchDevice, setRefetchDevice] = useState<boolean>(false);
   const [searchTerm, setSearchTerm] = useState<string>("");
 
@@ -22,12 +23,14 @@ const DevicesPage = () => {
     setTimeout(() => {
       setRefetchDevice(false);
     }, 500);
-    dispatch<any>(handleFetchDevice());
+    dispatch(handleFetchDevice());
   };
   return (
     <div className="flex flex-col">
       <div className="flex items-baseline justify-between gap-x-4">
-        <div
+        <button
+          type="button"
+          aria-label={t("refreshdevices")}
           className="h-8 w-8 bg-[#3A5DD9] hover:bg-[#2a4bc6] flex items-center justify-center rounded-sm cursor-pointer"
           onClick={refetchDevices}
         >
@@ -36,7 +39,7 @@ const DevicesPage = () => {
               refetchDevice ? "animate-spin" : ""
             }`}
           />
-        </div>
+        </button>
         <div className="flex items-center justify-end gap-x-4">
           <div className="flex items-center justify-center gap-2 relative">
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500">
@@ -44,6 +47,7 @@ const DevicesPage = () => {
             </div>
             <Input
               id="search-by-name"
+              aria-label={t("searchbylocation")}
               type="text"
               placeholder={t("searchbylocation")}
               className="pl-10 ring-0 border-2 focus-visible:ring-offset-0 focus-visible:ring-1 min-w-96"
@@ -53,7 +57,10 @@ const DevicesPage = () => {
           </div>
 
           <Dialog>
-            <DialogTrigger className="h-8 w-8 bg-[#3A5DD9] hover:bg-[#2a4bc6] flex items-center justify-center rounded-sm">
+            <DialogTrigger
+              aria-label={t("createdevice")}
+              className="h-8 w-8 bg-[#3A5DD9] hover:bg-[#2a4bc6] flex items-center justify-center rounded-sm"
+            >
               <TbDeviceDesktopPlus className="text-xl text-white" />
             </DialogTrigger>
             <CreateDevice />
